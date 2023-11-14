@@ -18,7 +18,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
 | environments.
 |
 */
-$config['base_url'] = 'http://localhost/tokofauzi/';
+// $config['base_url'] = 'http://localhost/tokofauzi/';
+$config['base_url'] = 'http://wtpsdemo.my.id/';
 // $config['base_url'] = 'http://192.168.1.95/tokofauzi/';
 
 /*
