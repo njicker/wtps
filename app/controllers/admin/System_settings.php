@@ -644,8 +644,8 @@ class system_settings extends MY_Controller
                 $config['upload_path']   = $this->upload_path . 'logos/';
                 $config['allowed_types'] = $this->image_types;
                 $config['max_size']      = $this->allowed_file_size;
-                $config['max_width']     = 300;
-                $config['max_height']    = 80;
+                $config['max_width']     = 1000;
+                $config['max_height']    = 1000;
                 $config['overwrite']     = false;
                 $config['max_filename']  = 25;
                 //$config['encrypt_name'] = TRUE;
