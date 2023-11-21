@@ -379,28 +379,28 @@
                                     <li id="products_index">
                                         <a class="submenu" href="<?= admin_url('products'); ?>">
                                             <i class="fa fa-barcode"></i>
-                                            <span class="text"> <?= lang('list_products'); ?></span>
+                                            <span class="text"> <?= lang('products'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="products_add">
+                                    <!-- <li id="products_add">
                                         <a class="submenu" href="<?= admin_url('products/add'); ?>">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('add_product'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="products_import_csv">
+                                    </li> -->
+                                    <!-- <li id="products_import_csv">
                                         <a class="submenu" href="<?= admin_url('products/import_csv'); ?>">
                                             <i class="fa fa-file-text"></i>
                                             <span class="text"> <?= lang('import_products'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="products_print_barcodes">
                                         <a class="submenu" href="<?= admin_url('products/print_barcodes'); ?>">
                                             <i class="fa fa-tags"></i>
                                             <span class="text"> <?= lang('print_barcode_label'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="products_quantity_adjustments">
+                                    <!-- <li id="products_quantity_adjustments">
                                         <a class="submenu" href="<?= admin_url('products/quantity_adjustments'); ?>">
                                             <i class="fa fa-filter"></i>
                                             <span class="text"> <?= lang('quantity_adjustments'); ?></span>
@@ -423,7 +423,7 @@
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('count_stock'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
 
@@ -437,20 +437,20 @@
                                     <li id="purchases_index">
                                         <a class="submenu" href="<?= admin_url('purchases'); ?>">
                                             <i class="fa fa-star"></i>
-                                            <span class="text"> <?= lang('list_purchases'); ?></span>
+                                            <span class="text"> <?= lang('purchases'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="purchases_add">
+                                    <!-- <li id="purchases_add">
                                         <a class="submenu" href="<?= admin_url('purchases/add'); ?>">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('add_purchase'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="purchases_purchase_by_csv">
+                                    </li> -->
+                                    <!-- <li id="purchases_purchase_by_csv">
                                         <a class="submenu" href="<?= admin_url('purchases/purchase_by_csv'); ?>">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('add_purchase_by_csv'); ?></span>
-                                        </a>
+                                        </a> -->
                                     </li>
                                     <li id="purchases_expenses">
                                         <a class="submenu" href="<?= admin_url('purchases/expenses'); ?>">
@@ -458,10 +458,26 @@
                                             <span class="text"> <?= lang('list_expenses'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="purchases_add_expense">
+                                    <!-- <li id="purchases_add_expense">
                                         <a class="submenu" href="<?= admin_url('purchases/add_expense'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('add_expense'); ?></span>
+                                        </a> -->
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="mm_production">
+                                <a class="dropmenu" href="#">
+                                    <i class="fa fa-industry"></i>
+                                    <span class="text"> Produksi </span>
+                                    <span class="chevron closed"></span>
+                                </a>
+                                <ul>
+                                    <li id="production_index">
+                                        <a class="submenu" href="<?= admin_url('production'); ?>">
+                                            <i class="fa fa-industry"></i>
+                                            <span class="text"> Produksi</span>
                                         </a>
                                     </li>
                                 </ul>
@@ -587,7 +603,7 @@
                             <li class="mm_auth mm_customers mm_suppliers mm_billers">
                                 <a class="dropmenu" href="#">
                                 <i class="fa fa-users"></i>
-                                <span class="text"> <?= lang('people'); ?> </span>
+                                <span class="text"> Master Data </span>
                                 <span class="chevron closed"></span>
                                 </a>
                                 <ul>
@@ -595,46 +611,46 @@
                                 ?>
                                     <li id="auth_users">
                                         <a class="submenu" href="<?= admin_url('users'); ?>">
-                                            <i class="fa fa-users"></i><span class="text"> <?= lang('list_users'); ?></span>
+                                            <i class="fa fa-users"></i><span class="text"> Karyawan</span>
                                         </a>
                                     </li>
-                                    <li id="auth_create_user">
+                                    <!-- <li id="auth_create_user">
                                         <a class="submenu" href="<?= admin_url('users/create_user'); ?>">
                                             <i class="fa fa-user-plus"></i><span class="text"> <?= lang('new_user'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="billers_index">
                                         <a class="submenu" href="<?= admin_url('billers'); ?>">
-                                            <i class="fa fa-users"></i><span class="text"> <?= lang('list_billers'); ?></span>
+                                            <i class="fa fa-users"></i><span class="text"> Bill To</span>
                                         </a>
                                     </li>
-                                    <li id="billers_index">
+                                    <!-- <li id="billers_index">
                                         <a class="submenu" href="<?= admin_url('billers/add'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_biller'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
                             } ?>
                                     <li id="customers_index">
                                         <a class="submenu" href="<?= admin_url('customers'); ?>">
-                                            <i class="fa fa-users"></i><span class="text"> <?= lang('list_customers'); ?></span>
+                                            <i class="fa fa-users"></i><span class="text"> Pelanggan</span>
                                         </a>
                                     </li>
-                                    <li id="customers_index">
+                                    <!-- <li id="customers_index">
                                         <a class="submenu" href="<?= admin_url('customers/add'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_customer'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="suppliers_index">
                                         <a class="submenu" href="<?= admin_url('suppliers'); ?>">
-                                            <i class="fa fa-users"></i><span class="text"> <?= lang('list_suppliers'); ?></span>
+                                            <i class="fa fa-users"></i><span class="text"> Supplier</span>
                                         </a>
                                     </li>
-                                    <li id="suppliers_index">
+                                    <!-- <li id="suppliers_index">
                                         <a class="submenu" href="<?= admin_url('suppliers/add'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_supplier'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
                             <li class="mm_notifications">

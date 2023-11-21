@@ -297,8 +297,10 @@
                             <div class="form-group">
                                 <?= lang('status', 'postatus'); ?>
                                 <?php
-                                $post = ['received' => lang('received'), 'pending' => lang('pending'), 'ordered' => lang('ordered')];
-                                echo form_dropdown('status', $post, ($_POST['status'] ?? ''), 'id="postatus" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('status') . '" required="required" style="width:100%;" ');
+                                $post = ['ordered' => lang('ordered'), 'received' => lang('received'), 'pending' => 'Pending'];
+                                // echo form_dropdown('statusXXX', $post, ($_POST['status'] ?? 'ordered'), 'id="postatus" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('status') . '" style="width:100%;" disabled');
+                                echo form_input('status', ($_POST['status'] ?? 'ordered'), 'class="form-control input-tip" required="required" style="display:none;"');
+                                echo form_input('statusXXX', ($_POST['status'] ? $post[$_POST['status']] : 'Open Order'), 'class="form-control input-tip" required="required" readonly');
                                 ?>
                             </div>
                         </div>

@@ -360,7 +360,7 @@ class system_settings extends MY_Controller
         $this->load->helper('security');
         $this->form_validation->set_rules('code', lang('code'), 'trim|is_unique[warehouses.code]|required');
         $this->form_validation->set_rules('name', lang('name'), 'required');
-        $this->form_validation->set_rules('address', lang('address'), 'required');
+        // $this->form_validation->set_rules('address', lang('address'), 'required');
         $this->form_validation->set_rules('userfile', lang('map_image'), 'xss_clean');
 
         if ($this->form_validation->run() == true) {

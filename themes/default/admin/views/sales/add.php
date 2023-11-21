@@ -261,7 +261,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('reference_no', 'slref'); ?>
-                                <?php echo form_input('reference_no', ($_POST['reference_no'] ?? $slnumber), 'class="form-control input-tip" id="slref"'); ?>
+                                <?php echo form_input('reference_no', ($_POST['reference_no'] ?? '[No Urut]/SO/WTPS/[Bulan]/[Tahun]'), 'class="form-control input-tip" id="slref" required="required" readonly'); ?>
                             </div>
                         </div>
                         <?php if ($Owner || $Admin || !$this->session->userdata('biller_id')) {
@@ -297,7 +297,7 @@
                                 <div class="panel-body" style="padding: 5px;">
                                     <?php if ($Owner || $Admin || !$this->session->userdata('warehouse_id')) {
                     ?>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4" style="display: none;">
                                             <div class="form-group">
                                                 <?= lang('warehouse', 'slwarehouse'); ?>
                                                 <?php
@@ -305,7 +305,7 @@
                     foreach ($warehouses as $warehouse) {
                         $wh[$warehouse->id] = $warehouse->name;
                     }
-                    echo form_dropdown('warehouse', $wh, ($_POST['warehouse'] ?? $Settings->default_warehouse), 'id="slwarehouse" class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" required="required" style="width:100%;" '); ?>
+                    echo form_dropdown('warehouse', $wh, ($_POST['warehouse'] ?? $Settings->default_warehouse), 'id="slwarehouse" class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;" '); ?>
                                             </div>
                                         </div>
                                     <?php
@@ -395,7 +395,7 @@
                                             <th class="col-md-4"><?= lang('product') . ' (' . lang('code') . ' - ' . lang('name') . ')'; ?></th>
                                             <?php
                                             if ($Settings->product_serial) {
-                                                echo '<th class="col-md-2">' . lang('serial_no') . '</th>';
+                                                echo '<th class="col-md-2">Batch Produksi</th>';
                                             }
                                             ?>
                                             <th class="col-md-1"><?= lang('net_unit_price'); ?></th>

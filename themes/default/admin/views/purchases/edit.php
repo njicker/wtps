@@ -6,10 +6,10 @@
         audio_success = new Audio('<?= $assets ?>sounds/sound2.mp3'),
         audio_error = new Audio('<?= $assets ?>sounds/sound3.mp3');
     $(window).bind("load", function() {
-        <?= ($inv->status == 'received' || $inv->status == 'partial') ? '$(".rec_con").show();' : '$(".rec_con").hide();'; ?>
+        <?= ($mode == 'received' || $mode == 'partial') ? '$(".rec_con").show(); $(".rquantity").prop("readonly", true);' : '$(".rec_con").hide();'; ?>
     });
     $(document).ready(function () {
-        <?= ($inv->status == 'received' || $inv->status == 'partial') ? '$(".rec_con").show();' : '$(".rec_con").hide();'; ?>
+        <?= ($mode == 'received' || $mode == 'partial') ? '$(".rec_con").show(); $(".rquantity").prop("readonly", true);' : '$(".rec_con").hide();'; ?>
         $('#postatus').change(function(){
             var st = $(this).val();
             if (st == 'received' || st == 'partial') {
@@ -175,7 +175,7 @@
 
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-edit"></i><?= lang('edit_purchase'); ?></h2>
+        <h2 class="blue"><i class="fa-fw fa fa-edit"></i><?= $title; ?></h2>
     </div>
     <div class="box-content">
         <div class="row">
@@ -204,7 +204,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('reference_no', 'poref'); ?>
-                                <?php echo form_input('reference_no', ($_POST['reference_no'] ?? $purchase->reference_no), 'class="form-control input-tip" id="poref" required="required"'); ?>
+                                <?php echo form_input('reference_no', ($_POST['reference_no'] ?? $purchase->reference_no), 'class="form-control input-tip" id="poref" required="required" readonly'); ?>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -223,8 +223,14 @@
                             <div class="form-group">
                                 <?= lang('status', 'postatus'); ?>
                                 <?php
+                                $status = $mode;
+                                if($mode == "edit"){
+                                    $status = $purchase->status;
+                                }
                                 $post = ['received' => lang('received'), 'partial' => lang('partial'), 'pending' => lang('pending'), 'ordered' => lang('ordered')];
-                                echo form_dropdown('status', $post, ($_POST['status'] ?? $purchase->status), 'id="postatus" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('status') . '" required="required" style="width:100%;" ');
+                                // echo form_dropdown('status', $post, ($_POST['status'] ?? $purchase->status), 'id="postatus" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('status') . '" required="required" style="width:100%;" ');
+                                echo form_input('status', $status, 'class="form-control input-tip" required="required" style="display:none;"');
+                                echo form_input('statusXXX', $post[$status], 'class="form-control input-tip" required="required" readonly');
                                 ?>
                             </div>
                         </div>
@@ -264,8 +270,8 @@
                             </div>
                             <div class="clearfix"></div>
                         </div>
-
-                        <div class="col-md-12" id="sticker">
+                        
+                        <div class="col-md-12" id="sticker" <?php if($mode != "edit"){ echo 'style="display:none;"'; } ?>>
                             <div class="well well-sm">
                                 <div class="form-group" style="margin-bottom:0;">
                                     <div class="input-group wide-tip">
@@ -326,7 +332,7 @@
                         <div class="clearfix"></div>
                         <input type="hidden" name="total_items" value="" id="total_items" required="required"/>
 
-                        <div class="col-md-12">
+                        <div class="col-md-12" <?php if($mode != "edit"){ echo 'style="display:none;"'; } ?>>
                             <div class="form-group">
                                 <input type="checkbox" class="checkbox" id="extras" value=""/>
                                 <label for="extras" class="padding05"><?= lang('more_options') ?></label>

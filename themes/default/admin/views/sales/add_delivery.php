@@ -23,12 +23,12 @@
         } ?>
                     <div class="form-group">
                         <?= lang('do_reference_no', 'do_reference_no'); ?>
-                        <?= form_input('do_reference_no', (isset($_POST['do_reference_no']) ? $_POST['do_reference_no'] : $do_reference_no), 'class="form-control tip" id="do_reference_no"'); ?>
+                        <?= form_input('do_reference_no', (isset($_POST['do_reference_no']) ? $_POST['do_reference_no'] : $do_reference_no), 'class="form-control tip" id="do_reference_no" readonly'); ?>
                     </div>
 
                     <div class="form-group">
                         <?= lang('sale_reference_no', 'sale_reference_no'); ?>
-                        <?= form_input('sale_reference_no', (isset($_POST['sale_reference_no']) ? $_POST['sale_reference_no'] : $inv->reference_no), 'class="form-control tip" id="sale_reference_no" required="required"'); ?>
+                        <?= form_input('sale_reference_no', (isset($_POST['sale_reference_no']) ? $_POST['sale_reference_no'] : $inv->reference_no), 'class="form-control tip" id="sale_reference_no" required="required" readonly'); ?>
                     </div>
                     <input type="hidden" value="<?php echo $inv->id; ?>" name="sale_id"/>
 
@@ -56,7 +56,7 @@
                     <div class="form-group">
                         <?= lang('status', 'status'); ?>
                         <?php
-                        $opts = ['packing' => lang('packing'), 'delivering' => lang('delivering'), 'delivered' => lang('delivered')];
+                        $opts = ['delivering' => lang('delivering'), 'delivered' => lang('delivered')];
                         ?>
                         <?= form_dropdown('status', $opts, '', 'class="form-control" id="status" required="required" style="width:100%;"'); ?>
                     </div>
@@ -80,6 +80,57 @@
                         <?= lang('note', 'note'); ?>
                         <?php echo form_textarea('note', (isset($_POST['note']) ? $_POST['note'] : ''), 'class="form-control" id="note"'); ?>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Produk (Code - Nama)</th>
+                                <th style="width: 100px;">Qty</th>
+                                <th>UOM</th>
+                                <th>Batch Produksi</th>
+                                <th>Gudang</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach($inv_detail as $dtl){
+                            ?>
+                            <tr>
+                                <td><?=$dtl->product_code?> - <?=$dtl->product_name?></td>
+                                <td>
+                                    <?= form_input('product_id[]', $dtl->product_id, 'class="form-control" style="display:none;" required="required"'); ?>
+                                    <?= form_input('qty[]', number_format($dtl->quantity, 0), 'class="form-control"'); ?>
+                                </td>
+                                <td><?=$dtl->product_unit_code?></td>
+                                <td>
+                                    <?= form_input('serial_no[]', $dtl->serial_no, 'class="form-control" required="required"'); ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    foreach ($warehouse as $warehouse) {
+                                        $wh[$warehouse->id] = $warehouse->name;
+                                    }
+                                    echo form_dropdown('warehouse_id[]', $wh, $dtl->warehouse_id, 'class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;" '); 
+                                    ?>
+                                </td>
+                                <td>
+                                    <button class="btn btn-success" onclick="tambahBatch(this)">
+                                        <span class="fa fa-plus"></span>
+                                    </button>
+                                    <button class="btn btn-danger" onclick="hapusBatch(this)">
+                                        <span class="fa fa-close"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

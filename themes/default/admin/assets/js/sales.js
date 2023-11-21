@@ -1360,7 +1360,7 @@ function loadItems() {
             count += parseFloat(item_qty);
             an++;
 
-            if (item_type == 'standard' && item.options !== false) {
+            if ((item_type == 'standard' || item_type == 'combo') && item.options !== false) {
                 $.each(item.options, function () {
                     if (this.id == item_option && base_quantity > this.quantity) {
                         $('#row_' + row_no).addClass('danger');
@@ -1369,28 +1369,29 @@ function loadItems() {
                         }
                     }
                 });
-            } else if (item_type == 'standard' && base_quantity > item_aqty) {
+            } else if ((item_type == 'standard' || item_type == 'combo') && base_quantity > item_aqty) {
                 $('#row_' + row_no).addClass('danger');
                 if (site.settings.overselling != 1) {
                     $('#add_sale, #edit_sale').attr('disabled', true);
                 }
-            } else if (item_type == 'combo') {
-                if (combo_items === false) {
-                    $('#row_' + row_no).addClass('danger');
-                    if (site.settings.overselling != 1) {
-                        $('#add_sale, #edit_sale').attr('disabled', true);
-                    }
-                } else {
-                    $.each(combo_items, function () {
-                        if (parseFloat(this.quantity) < parseFloat(this.qty) * base_quantity && this.type == 'standard') {
-                            $('#row_' + row_no).addClass('danger');
-                            if (site.settings.overselling != 1) {
-                                $('#add_sale, #edit_sale').attr('disabled', true);
-                            }
-                        }
-                    });
-                }
-            }
+            } 
+            // else if (item_type == 'combo') {
+            //     if (combo_items === false) {
+            //         $('#row_' + row_no).addClass('danger');
+            //         if (site.settings.overselling != 1) {
+            //             $('#add_sale, #edit_sale').attr('disabled', true);
+            //         }
+            //     } else {
+            //         $.each(combo_items, function () {
+            //             if (parseFloat(this.quantity) < parseFloat(this.qty) * base_quantity && this.type == 'standard') {
+            //                 $('#row_' + row_no).addClass('danger');
+            //                 if (site.settings.overselling != 1) {
+            //                     $('#add_sale, #edit_sale').attr('disabled', true);
+            //                 }
+            //             }
+            //         });
+            //     }
+            // }
         });
 
         var col = 2;
@@ -1519,4 +1520,29 @@ if (typeof Storage === 'undefined') {
             return message;
         }
     });
+}
+
+function tambahBatch(elm){
+    let table = $(elm).closest("table");
+    let tr = $(elm).closest("tr").clone();
+    $(table).find("tbody").append(tr);
+}
+
+function hapusBatch(elm){
+    let table = $(elm).closest("table");
+    let product_id = $(elm).closest("tr").find("input[name='product_id[]']").val();
+    let cnt = 0;
+    $(table).find("tbody tr").each(function(){
+        let prd = $(this).find("input[name='product_id[]']").val();
+        if(prd == product_id){
+            cnt++;
+        }
+    });
+
+    if(cnt <= 1){
+        bootbox.alert('Produk tidak bisa dihapus');
+        return false;
+    }
+
+    $(elm).closest("tr").remove();
 }

@@ -19,6 +19,7 @@ class Sales extends MY_Controller
         $this->lang->admin_load('sales', $this->Settings->user_language);
         $this->load->library('form_validation');
         $this->load->admin_model('sales_model');
+        $this->load->helper('reference_helper');
         $this->digital_upload_path = 'files/';
         $this->upload_path         = 'assets/uploads/';
         $this->thumbs_path         = 'assets/uploads/thumbs/';
@@ -42,7 +43,12 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('payment_status', lang('payment_status'), 'required');
 
         if ($this->form_validation->run() == true) {
-            $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('so');
+            // $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('so');
+            $no_urut = $this->sales_model->getCountForReff(date("Y"));
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $reference = generate_ref($no_urut, 'SO');
             if ($this->Owner || $this->Admin) {
                 $date = $this->sma->fld(trim($this->input->post('date')));
             } else {
@@ -433,6 +439,8 @@ class Sales extends MY_Controller
                 $this->data['inv']             = $sale;
                 $this->data['do_reference_no'] = ''; //$this->site->getReference('do');
                 $this->data['modal_js']        = $this->site->modal_js();
+                $this->data['inv_detail']      = $this->sales_model->getSaleItemBySaleID($sale->id);
+                $this->data['warehouse']       = $this->site->getAllWarehouses();
 
                 $this->load->view($this->theme . 'sales/add_delivery', $this->data);
             }

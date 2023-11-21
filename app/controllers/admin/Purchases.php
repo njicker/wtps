@@ -537,6 +537,10 @@ class Purchases extends MY_Controller
     public function edit($id = null)
     {
         $this->sma->checkPermissions();
+        $mode = $this->input->get('mode');
+        if(!isset($mode) || $mode == ""){
+            $mode = "edit";
+        }
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -803,8 +807,12 @@ class Purchases extends MY_Controller
             $this->session->set_userdata('user_csrf', $value);
             $this->session->set_userdata('remove_pols', 1);
             $this->data['csrf'] = $this->session->userdata('user_csrf');
-            $bc                 = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('purchases'), 'page' => lang('purchases')], ['link' => '#', 'page' => lang('edit_purchase')]];
-            $meta               = ['page_title' => lang('edit_purchase'), 'bc' => $bc];
+
+            $arr_mode = array('edit' => lang('edit_purchase'), 'received' => 'Terima Barang');
+            $bc                 = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('purchases'), 'page' => lang('purchases')], ['link' => '#', 'page' => $arr_mode[$mode]]];
+            $meta               = ['page_title' => $arr_mode[$mode], 'bc' => $bc];
+            $this->data['title'] = $arr_mode[$mode];
+            $this->data['mode'] = $mode;
             $this->page_construct('purchases/edit', $meta, $this->data);
         }
     }
@@ -1203,9 +1211,10 @@ class Purchases extends MY_Controller
         $add_payment_link = anchor('admin/purchases/add_payment/$1', '<i class="fa fa-money"></i> ' . lang('add_payment'), 'data-toggle="modal" data-target="#myModal"');
         $email_link       = anchor('admin/purchases/email/$1', '<i class="fa fa-envelope"></i> ' . lang('email_purchase'), 'data-toggle="modal" data-target="#myModal"');
         $edit_link        = anchor('admin/purchases/edit/$1', '<i class="fa fa-edit"></i> ' . lang('edit_purchase'));
+        $received_link    = anchor('admin/purchases/edit/$1?mode=received', '<i class="fa fa-check"></i> ' . 'Terima Barang');
+        $return_link      = anchor('admin/purchases/return_purchase/$1', '<i class="fa fa-angle-double-left"></i> ' . lang('return_purchase'));
         $pdf_link         = anchor('admin/purchases/pdf/$1', '<i class="fa fa-file-pdf-o"></i> ' . lang('download_pdf'));
         $print_barcode    = anchor('admin/products/print_barcodes/?purchase=$1', '<i class="fa fa-print"></i> ' . lang('print_barcodes'));
-        $return_link      = anchor('admin/purchases/return_purchase/$1', '<i class="fa fa-angle-double-left"></i> ' . lang('return_purchase'));
         $delete_link      = "<a href='#' class='po' title='<b>" . $this->lang->line('delete_purchase') . "</b>' data-content=\"<p>"
         . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('purchases/delete/$1') . "'>"
         . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i> "
@@ -1218,10 +1227,11 @@ class Purchases extends MY_Controller
             <li>' . $payments_link . '</li>
             <li>' . $add_payment_link . '</li>
             <li>' . $edit_link . '</li>
+            <li>' . $received_link . '</li>
+            <li>' . $return_link . '</li>
             <li>' . $pdf_link . '</li>
             <li>' . $email_link . '</li>
             <li>' . $print_barcode . '</li>
-            <li>' . $return_link . '</li>
             <li>' . $delete_link . '</li>
         </ul>
     </div></div>';
@@ -1898,7 +1908,7 @@ class Purchases extends MY_Controller
 
     /* --------------------------------------------------------------------------- */
 
-    public function suggestions()
+    public function suggestions($type = "standard")
     {
         $term        = $this->input->get('term', true);
         $supplier_id = $this->input->get('supplier_id', true);
@@ -1914,7 +1924,7 @@ class Purchases extends MY_Controller
         $qty       = $analyzed['quantity'] ?? null;
         $bprice    = $analyzed['price']    ?? null;
 
-        $rows = $this->purchases_model->getProductNames($sr);
+        $rows = $this->purchases_model->getProductNames($sr, 5, $type);
         if ($rows) {
             $r = 0;
             foreach ($rows as $row) {
@@ -1962,15 +1972,26 @@ class Purchases extends MY_Controller
                 unset($row->details, $row->product_details, $row->price, $row->file, $row->supplier1price, $row->supplier2price, $row->supplier3price, $row->supplier4price, $row->supplier5price, $row->supplier1_part_no, $row->supplier2_part_no, $row->supplier3_part_no, $row->supplier4_part_no, $row->supplier5_part_no);
                 $row->qty = $qty ? $qty : ($bprice ? $bprice / $row->cost : 1);
 
-                $units    = $this->site->getUnitsByBUID($row->base_unit);
+                $units    = $this->site->getUnitByID($row->base_unit);
                 $tax_rate = $this->site->getTaxRateByID($row->tax_rate);
 
-                if ($row->purchase_unit) {
-                    foreach ($units as $unit) {
-                        if ($unit->id == $row->purchase_unit) {
-                            $row->real_unit_cost = $this->site->convertToUnit($unit, $row->cost);
-                        }
-                    }
+                // if ($row->purchase_unit) {
+                    // foreach ($units_all as $unit) {
+                        // if ($unit->id == $row->purchase_unit) {
+                            // $row->real_unit_cost = $this->site->convertToUnit($unit, $row->cost);
+                            // $units = $unit;
+                            // $base_unit = $this->site->getUnitByID($units->base_unit);
+                            // if($base_unit){
+                            //     $units->base_unit_code = $base_unit->code;
+                            //     $units->base_unit_name = $base_unit->name;
+                            // }
+                        // }
+                    // }
+                // }
+                $base_unit = $this->site->getUnitByID($units->base_unit);
+                if($base_unit){
+                    $units->base_unit_code = $base_unit->code;
+                    $units->base_unit_name = $base_unit->name;
                 }
 
                 $pr[] = ['id' => sha1($c . $r), 'item_id' => $row->id, 'label' => $row->name . ' (' . $row->code . ')',

@@ -579,15 +579,16 @@ $(document).ready(function () {
                 return;
             }
             (unit = formatDecimal(row.children().children('.runit').val())),
-                $.each(poitems[item_id].units, function () {
-                    if (this.id == unit) {
-                        qty_received = formatDecimal(unitToBaseQty(new_received, this), 4);
-                    }
-                });
+                // $.each(poitems[item_id].units, function () {
+                //     if (this.id == unit) {
+                //         qty_received = formatDecimal(unitToBaseQty(new_received, this), 4);
+                //     }
+                // });
             poitems[item_id].row.unit_received = new_received;
-            poitems[item_id].row.received = qty_received;
+            poitems[item_id].row.received = new_received;
             localStorage.setItem('poitems', JSON.stringify(poitems));
             loadItems();
+            $(".rquantity").prop("readonly", true)
         });
 
     /* --------------------------

@@ -149,7 +149,7 @@ if (!empty($variants)) {
                             ?>
                         </div>
                     </div>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('product_unit', 'unit'); ?>
                         <?php
                         $pu[''] = lang('select') . ' ' . lang('unit');
@@ -159,7 +159,7 @@ if (!empty($variants)) {
                         ?>
                         <?= form_dropdown('unit', $pu, set_value('unit', $product->unit), 'class="form-control tip" required="required" id="unit" style="width:100%;"'); ?>
                     </div>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('default_sale_unit', 'default_sale_unit'); ?>
                         <?php
                         $uopts[''] = lang('select') . ' ' . lang('unit');
@@ -169,7 +169,7 @@ if (!empty($variants)) {
                         ?>
                         <?= form_dropdown('default_sale_unit', $uopts, $product->sale_unit, 'class="form-control" id="default_sale_unit" style="width:100%;"'); ?>
                     </div>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('default_purchase_unit', 'default_purchase_unit'); ?>
                         <?= form_dropdown('default_purchase_unit', $uopts, $product->purchase_unit, 'class="form-control" id="default_purchase_unit" style="width:100%;"'); ?>
                     </div>
@@ -585,11 +585,11 @@ if (!empty($variants)) {
             var t = $(this).val();
             if (t !== 'standard') {
                 $('.standard').slideUp();
-                $('#unit').attr('disabled', true);
+                // $('#unit').attr('disabled', true);
                 $('#cost').attr('disabled', true);
             } else {
                 $('.standard').slideDown();
-                $('#unit').attr('disabled', false);
+                // $('#unit').attr('disabled', false);
                 $('#cost').attr('disabled', false);
             }
             if (t !== 'digital') {
@@ -815,11 +815,11 @@ if (!empty($variants)) {
         var t = "<?=$product->type?>";
         if (t !== 'standard') {
             $('.standard').slideUp();
-            $('#unit').attr('disabled', true);
+            // $('#unit').attr('disabled', true);
             $('#cost').attr('disabled', true);
         } else {
             $('.standard').slideDown();
-            $('#unit').attr('disabled', false);
+            // $('#unit').attr('disabled', false);
             $('#cost').attr('disabled', false);
         }
         if (t !== 'digital') {

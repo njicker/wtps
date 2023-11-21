@@ -19,7 +19,7 @@
                 <label class="control-label" for="name"><?php echo $this->lang->line('name'); ?></label>
                 <?php echo form_input('name', '', 'class="form-control" id="name" required="required"'); ?>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label class="control-label" for="price_group"><?php echo $this->lang->line('price_group'); ?></label>
                 <?php
                 $pgs[''] = lang('select') . ' ' . lang('price_group');
@@ -29,19 +29,19 @@
                 echo form_dropdown('price_group', $pgs, $Settings->price_group, 'class="form-control tip select" id="price_group" style="width:100%;"');
                 ?>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label class="control-label" for="phone"><?php echo $this->lang->line('phone'); ?></label>
                 <?php echo form_input('phone', '', 'class="form-control" id="phone"'); ?>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label class="control-label" for="email"><?php echo $this->lang->line('email'); ?></label>
                 <?php echo form_input('email', '', 'class="form-control" id="email"'); ?>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label class="control-label" for="address"><?php echo $this->lang->line('address'); ?></label>
-                <?php echo form_textarea('address', '', 'class="form-control" id="address" required="required"'); ?>
+                <?php echo form_textarea('address', '', 'class="form-control" id="address"'); ?>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <?= lang('warehouse_map', 'image') ?>
                 <input id="image" type="file" data-browse-label="<?= lang('browse'); ?>" name="userfile" data-show-upload="false" data-show-preview="false"
                        class="form-control file">

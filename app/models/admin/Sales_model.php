@@ -12,8 +12,15 @@ class Sales_model extends CI_Model
     public function addDelivery($data = [])
     {
         if ($this->db->insert('deliveries', $data)) {
-            if ($this->site->getReference('do') == $data['do_reference_no']) {
-                $this->site->updateReference('do');
+            // if ($this->site->getReference('do') == $data['do_reference_no']) {
+            //     $this->site->updateReference('do');
+            // }
+            $items = $this->getSaleItemBySaleID($data["sale_id"]);
+            // dari pengiriman
+            if(!empty($items)){
+                $cost = $this->site->costing($items);
+                $this->site->syncPurchaseItems($cost);
+                $this->site->syncQuantity($data["sale_id"]);
             }
             return true;
         }
@@ -67,10 +74,11 @@ class Sales_model extends CI_Model
 
     public function addSale($data = [], $items = [], $payment = [], $si_return = [])
     {
-        if (empty($si_return)) {
-            $cost = $this->site->costing($items);
-            // $this->sma->print_arrays($cost);
-        }
+        // untuk pengiriman
+        // if (empty($si_return)) {
+        //     $cost = $this->site->costing($items);
+        //     // $this->sma->print_arrays($cost);
+        // }
 
         $this->db->trans_start();
         if ($this->db->insert('sales', $data)) {
@@ -106,22 +114,23 @@ class Sales_model extends CI_Model
                 }
             }
 
-            if ($data['sale_status'] == 'completed') {
-                $this->site->syncPurchaseItems($cost);
-            }
+            // untuk pengiriman
+            // if ($data['sale_status'] == 'completed') {
+            //     $this->site->syncPurchaseItems($cost);
+            // }
 
             if (!empty($si_return)) {
-                foreach ($si_return as $return_item) {
-                    $product = $this->site->getProductByID($return_item['product_id']);
-                    if ($product->type == 'combo') {
-                        $combo_items = $this->site->getProductComboItems($return_item['product_id'], $return_item['warehouse_id']);
-                        foreach ($combo_items as $combo_item) {
-                            $this->UpdateCostingAndPurchaseItem($return_item, $combo_item->id, ($return_item['quantity'] * $combo_item->qty));
-                        }
-                    } elseif ($product->type != 'service') {
-                        $this->UpdateCostingAndPurchaseItem($return_item, $return_item['product_id'], $return_item['quantity']);
-                    }
-                }
+                // foreach ($si_return as $return_item) {
+                    // $product = $this->site->getProductByID($return_item['product_id']);
+                    // if ($product->type == 'combo') {
+                    //     $combo_items = $this->site->getProductComboItems($return_item['product_id'], $return_item['warehouse_id']);
+                    //     foreach ($combo_items as $combo_item) {
+                    //         $this->UpdateCostingAndPurchaseItem($return_item, $combo_item->id, ($return_item['quantity'] * $combo_item->qty));
+                    //     }
+                    // } elseif ($product->type != 'service') {
+                    //     $this->UpdateCostingAndPurchaseItem($return_item, $return_item['product_id'], $return_item['quantity']);
+                    // }
+                // }
                 $this->db->update('sales', ['return_sale_ref' => $data['return_sale_ref'], 'surcharge' => $data['surcharge'], 'return_sale_total' => $data['grand_total'], 'return_id' => $sale_id], ['id' => $data['sale_id']]);
             }
 
@@ -147,7 +156,8 @@ class Sales_model extends CI_Model
                 $this->site->syncSalePayments($sale_id);
             }
 
-            $this->site->syncQuantity($sale_id);
+            // untuk pengiriman
+            // $this->site->syncQuantity($sale_id);
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by']);
         }
         $this->db->trans_complete();
@@ -591,6 +601,18 @@ class Sales_model extends CI_Model
         return false;
     }
 
+    public function getSaleItemBySaleID($sale_id)
+    {
+        $q = $this->db->get_where('sale_items', ['sale_id' => $sale_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
     public function getSkrillSettings()
     {
         $q = $this->db->get_where('skrill', ['id' => 1]);
@@ -899,5 +921,11 @@ class Sales_model extends CI_Model
             return true;
         }
         return false;
+    }
+
+    public function getCountForReff($year)
+    {
+        $q = $this->db->get_where('sales', ['year(`date`)' => $year]);
+        return $q->num_rows();
     }
 }

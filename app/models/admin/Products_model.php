@@ -458,6 +458,22 @@ class Products_model extends CI_Model
         return false;
     }
 
+    public function getProductByCategory($type, $wc)
+    {
+        $this->db->like('code', $wc);
+        $this->db->like('name', $wc);
+        $this->db->where('type', $type);
+        $q = $this->db->get("products");
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+
+            return $data;
+        }
+        return false;
+    }
+
     public function getProductDetail($id)
     {
         $this->db->select($this->db->dbprefix('products') . '.*, ' . $this->db->dbprefix('tax_rates') . '.name as tax_rate_name, ' . $this->db->dbprefix('tax_rates') . '.code as tax_rate_code, c.code as category_code, sc.code as subcategory_code', false)
@@ -1173,5 +1189,271 @@ class Products_model extends CI_Model
     {
         $q = $this->db->get_where('products', ['type' => $type]);
         return $q->num_rows();
+    }
+
+    public function getCountProduction($reff)
+    {
+        $this->db->like("reff_doc", $reff, 'after');
+        $q = $this->db->get("production");
+        return $q->num_rows();
+    }
+
+    public function getListProductionHeader($param)
+    {
+        $this->db->where($param);
+        $q = $this->db->get("production");
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return null;
+    }
+
+    public function getProductionHeader($param)
+    {
+        $this->db->where($param);
+        $q = $this->db->get("production");
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return null;
+    }
+
+    public function getProductionDetail($param)
+    {
+        $this->db->select("production_items.*, products.name");
+        $this->db->from("production_items");
+        $this->db->join("products", "production_items.product_id = products.id");
+        $this->db->where($param);
+        $q = $this->db->get();
+        // var_dump($q);exit;
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function addProduction($header, $detail){
+        $err = false;
+        foreach($detail as $dtl){
+            if(!$this->site->syncProductionRaw($dtl, true)){
+                $this->session->set_flashdata('error', 'Stock '.$dtl['product_code'].' tidak mencukupi');
+                $err = true;
+                break;
+            }
+        }
+        if(!$err){
+            if($this->db->insert('production', $header)){
+                // if($this->db->insert('production_items', $detail)){
+                    foreach($detail as $dtl){
+                        if($this->db->insert('production_items', $dtl)){
+                            if(!$this->site->syncProductionRaw($dtl, false)){
+                                $err = true;
+                                break;
+                            }
+                        }
+                        else {
+                            $err = false;
+                            break;
+                        }
+                    }
+                    
+                    if($err){
+                        $this->db->where("reff_doc", $header['reff_doc']);
+                        $this->db->delete("production");
+
+                        $this->db->where("reff_doc", $header['reff_doc']);
+                        $this->db->delete("production_items");
+                        return false;
+                    }
+                    else {
+                        $total_cost = 0;
+                        $prm["reff_doc"] = $header["reff_doc"];
+                        $hsl_dtl = $this->getProductionDetail($prm);
+                        foreach($hsl_dtl as $dtl){
+                            $total_cost += $dtl->product_total_cost;
+                        }
+                        $this->db->update("production", ['total_cost' => $total_cost], ["reff_doc" => $header["reff_doc"]]);
+                        return true;
+                    }
+                // }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function finishProduction($header, $detail){
+        $err = false;
+        // update header
+        if($this->db->update('production', ['status_doc' => $header['status_doc']], ['id' => $header["id"]])){
+            // calculate cost
+            $total_cost = 0;
+            $param["reff_doc"] = $header["reff_doc"];
+            $raw = $this->getProductionDetail($param);
+            foreach($raw as $raw){
+                $total_cost += $raw->product_total_cost;
+            }
+            // var_dump($total_cost);exit;
+            // insert header purchase_items
+            $pur_header = [
+                "reference_no" => $header["reff_doc"],
+                "date" => date("Y-m-d H:i:s"),
+                "supplier_id" => "999",
+                "supplier" => "own",
+                "warehouse_id" => "999",
+                "total" => $total_cost,
+                "order_tax_id" => 1,
+                "grand_total" => $total_cost,
+                "paid" => $total_cost,
+                "status" => "received",
+                "payment_status" => "paid",
+                "created_by" => $this->session->userdata('user_id'),
+                "payment_term" => "0",
+            ];
+
+            if($this->db->insert('purchases', $pur_header)){
+                $pur_id = $this->db->insert_id();
+
+                // insert purchase items
+                $upd = 0;
+                foreach($detail as $dtl){
+                    // insert detail
+                    $dtl["product_unit_cost"] = $total_cost;
+                    $dtl["product_total_cost"] = $total_cost;
+
+                    $produk = $this->getProductByID($dtl["product_id"]);
+                    $pur_dtl = [
+                        "purchase_id" => $pur_id,
+                        "product_id" => $dtl["product_id"],
+                        "product_code" => $dtl["product_code"],
+                        "product_name" => $produk->name,
+                        "net_unit_cost" => $dtl["product_unit_cost"],
+                        "unit_cost" => $dtl["product_unit_cost"],
+                        "real_unit_cost" => $dtl["product_unit_cost"],
+                        "base_unit_cost" => $dtl["product_unit_cost"],
+                        "quantity" => $dtl["qty"],
+                        "quantity_balance" => $dtl["qty"],
+                        "quantity_received" => $dtl["qty"],
+                        "unit_quantity" => $dtl["qty"],
+                        "warehouse_id" => $dtl["warehouse_id"],
+                        "tax_rate_id" => "1",
+                        "subtotal" => $dtl["product_total_cost"],
+                        "date" => date("Y-m-d"),
+                        "status" => "received",
+                        "product_unit_id" => $dtl["unit_id"],
+                        "product_unit_code" => $dtl["unit_code"],
+                    ];
+                    if($this->db->insert('purchase_items', $pur_dtl)){
+                        $dtl_id = $this->db->insert_id();
+                        $dtl["purchase_id"] = $dtl_id;
+                        if($this->db->insert("production_items", $dtl)){
+                            if($this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id'])){
+                                $upd++;
+                            }
+                        }
+                    }
+                }
+
+                // var_dump($upd);exit;
+                if($upd != count($detail)){
+                    $err = true;
+                }
+                else {
+                    return true;
+                }
+            }
+            else {
+                $err = true;
+            }
+            
+            if($err){
+                $this->db->update('production', ['status_doc' => "On Production"], ['id' => $header["id"]]);
+
+                $this->db->where("reff_doc", $header['reff_doc']);
+                $this->db->where("type_item", "goods");
+                $this->db->delete("production_items");
+
+                if(isset($pur_id)){
+                    $this->db->where("id", $pur_id);
+                    $this->db->delete("purchases");
+
+                    $this->db->where("purchase_id", $pur_id);
+                    $this->db->delete("purchase_items");
+                }
+
+                foreach($detail as $dtl){
+                    $this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id']);
+                }
+            }
+
+            return false;
+        }
+
+        return false;
+    }
+
+    public function rejectProduction($header, $detail){
+        $err = false;
+        // update header
+        if($this->db->update('production', ['status_doc' => $header['status_doc'], 'note' => $header['note']], ['id' => $header["id"]])){
+            foreach($detail as $dtl){
+                $purchase = array();
+                $arr = explode(",", $dtl->purchase_id);
+                for($i = 0; $i < count($arr); $i++){
+                    $purchase[] = $this->site->getPurchaseItemsByID($arr[$i]);
+                }
+                // var_dump($dtl);
+                // var_dump($purchase);exit;
+                $sisa = $dtl->qty;
+                $diff_unit = false;
+                foreach($purchase as $pur){
+                    // if($pur->quantity_balance < $pur->quantity){
+                        // $pur_sisa = $pur->quantity - $pur->quantity_balance;
+                        $unit = $this->site->getUnitByID($pur->product_unit_id);
+                        if($pur->product_unit_id != $dtl->unit_id){
+                            $diff_unit = true;
+                            $sisa = $this->site->convertToBase($unit, $sisa);
+                        }
+                        else {
+                            if($diff_unit){
+                                $sisa = $this->site->convertToUnit($unit, $sisa);
+                                $diff_unit = false;
+                            }
+                        }
+                        // if($pur_sisa >= $sisa){
+                            $pur->quantity_balance += $sisa;
+                            $sisa = 0;
+                        // }
+                        // else {
+                        //     $pur->quantity += $pur_sisa;
+                        //     $sisa = $sisa - $pur_sisa;
+                        // }
+                        $this->db->update('purchase_items', ['quantity_balance' => $pur->quantity_balance], ['id' => $pur->id]);
+                    // }
+                    if($sisa == 0){
+                        break;
+                    }
+                }
+                $this->site->syncProductQty($dtl->product_id, $dtl->warehouse_id);
+            }
+            
+            return true;
+        }
+        return false;
+    }
+
+    public function getUser($param){
+        $this->db->where($param);
+        $q = $this->db->get("users");
+        if($q->num_rows() > 0){
+            return $q->row();
+        }
+        return false;
     }
 }
