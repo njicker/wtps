@@ -187,20 +187,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('reference_no', 'ref'); ?>
-                                <?php echo form_input('reference_no', (isset($_POST['reference_no']) ? $_POST['reference_no'] : $rnumber), 'class="form-control input-tip" id="ref"'); ?>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <?= lang('to_warehouse', 'to_warehouse'); ?>
-                                <?php
-                                $wh[''] = '';
-                                foreach ($warehouses as $warehouse) {
-                                    $wh[$warehouse->id] = $warehouse->name;
-                                }
-                                echo form_dropdown('to_warehouse', $wh, (isset($_POST['to_warehouse']) ? $_POST['to_warehouse'] : ''), 'id="to_warehouse" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('to_warehouse') . '" required="required" style="width:100%;" ');
-                                ?>
+                                <?php echo form_input('reference_no', (isset($_POST['reference_no']) ? $_POST['reference_no'] : $rnumber), 'class="form-control input-tip" id="ref" readonly'); ?>
                             </div>
                         </div>
 
@@ -208,7 +195,7 @@
                             <div class="form-group">
                                 <?= lang('status', 'tostatus'); ?>
                                 <?php
-                                $post = ['completed' => lang('completed'), 'pending' => lang('pending'), 'sent' => lang('sent')];
+                                $post = ['completed' => lang('completed')];
                                 echo form_dropdown('status', $post, (isset($_POST['status']) ? $_POST['status'] : ''), 'id="tostatus" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('status') . '" required="required" style="width:100%;" ');
                                 ?>
                             </div>
@@ -216,7 +203,7 @@
 
                         <div class="col-md-4">
                             <div class="form-group" style="margin-bottom:5px;">
-                                <?= lang('shipping', 'toshipping'); ?>
+                                <label>Biaya Pengiriman</label>
                                 <?php echo form_input('shipping', '', 'class="form-control input-tip" id="toshipping"'); ?>
                             </div>
                         </div>
@@ -240,7 +227,19 @@
                                             <?= lang('from_warehouse', 'from_warehouse'); ?>
 
                                             <?php
+                                            $wh[''] = '';
+                                            foreach ($warehouses as $warehouse) {
+                                                $wh[$warehouse->id] = $warehouse->name;
+                                            }
                                             echo form_dropdown('from_warehouse', $wh, (isset($_POST['from_warehouse']) ? $_POST['from_warehouse'] : ''), 'id="from_warehouse" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('from_warehouse') . '" required="required" style="width:100%;" '); ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <?= lang('to_warehouse', 'to_warehouse'); ?>
+                                            <?php
+                                            echo form_dropdown('to_warehouse', $wh, (isset($_POST['to_warehouse']) ? $_POST['to_warehouse'] : ''), 'id="to_warehouse" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('to_warehouse') . '" required="required" style="width:100%;" ');
+                                            ?>
                                         </div>
                                     </div>
                                 </div>
@@ -282,6 +281,7 @@
                                         <thead>
                                         <tr>
                                             <th class="col-md-4"><?= lang('product') . ' (' . lang('code') . ' - ' . lang('name') . ')'; ?></th>
+                                            <th class="col-md-2">Batch Product</th>
                                             <?php
                                             if ($Settings->product_expiry) {
                                                 echo '<th class="col-md-2">' . $this->lang->line('expiry_date') . '</th>';

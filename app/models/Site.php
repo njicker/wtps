@@ -25,7 +25,7 @@ class Site extends CI_Model
             $avg_net_unit_cost = ($con - $ctax['amount']);
         }
 
-        if ($pis = $this->getPurchasedItems($product_id, $warehouse_id, $option_id)) {
+        if ($pis = $this->getPurchasedItems($product_id, $warehouse_id, $option_id, false, $product_batch)) {
             $cost_row    = [];
             $quantity    = $item_quantity;
             $balance_qty = $quantity;
@@ -54,8 +54,8 @@ class Site extends CI_Model
             $this->session->set_flashdata('error', sprintf(lang('quantity_out_of_stock_for_%s'), $product_name));
             redirect($_SERVER['HTTP_REFERER']);
         } elseif ($quantity != 0) {
-            $cost[] = ['date' => date('Y-m-d'), 'product_id' => $product_id, 'sale_item_id' => 'sale_items.id', 'purchase_item_id' => null, 'quantity' => $quantity, 'purchase_net_unit_cost' => $avg_net_unit_cost, 'purchase_unit_cost' => $avg_unit_cost, 'sale_net_unit_price' => $net_unit_price, 'sale_unit_price' => $unit_price, 'quantity_balance' => (0 - $quantity), 'overselling' => 1, 'inventory' => 1];
-            $cost[] = ['pi_overselling' => 1, 'product_id' => $product_id, 'quantity_balance' => (0 - $quantity), 'warehouse_id' => $warehouse_id, 'option_id' => $option_id];
+            $cost[] = ['date' => date('Y-m-d'), 'product_id' => $product_id, 'sale_item_id' => 'sale_items.id', 'purchase_item_id' => null, 'quantity' => $quantity, 'purchase_net_unit_cost' => $avg_net_unit_cost, 'purchase_unit_cost' => $avg_unit_cost, 'sale_net_unit_price' => $net_unit_price, 'sale_unit_price' => $unit_price, 'quantity_balance' => (0 - $quantity), 'overselling' => 1, 'inventory' => 1, 'product_batch' => $product_batch];
+            $cost[] = ['pi_overselling' => 1, 'product_id' => $product_id, 'quantity_balance' => (0 - $quantity), 'warehouse_id' => $warehouse_id, 'option_id' => $option_id, 'product_batch' => $product_batch];
         }
         return $cost;
     }
@@ -63,6 +63,10 @@ class Site extends CI_Model
     public function calculateCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id, $item_quantity)
     {
         $pis           = $this->getPurchasedItems($product_id, $warehouse_id, $option_id);
+        // var_dump($pis);exit;
+        // if(!$pis){
+        //     $this->session->set_flashdata('error', 'Empty purchase, batch: ' . $product_batch);
+        // }
         $real_item_qty = $quantity;
         $quantity      = $item_quantity;
         $balance_qty   = $quantity;
@@ -85,10 +89,10 @@ class Site extends CI_Model
                 break;
             }
         }
-        if ($quantity > 0) {
-            $this->session->set_flashdata('error', sprintf(lang('quantity_out_of_stock_for_%s'), (isset($pi->product_name) ? $pi->product_name : $product_name)));
-            redirect($_SERVER['HTTP_REFERER']);
-        }
+        // if ($quantity > 0) {
+        //     $this->session->set_flashdata('error', sprintf(lang('quantity_out_of_stock_for_%s'), (isset($pi->product_name) ? $pi->product_name : $product_name)));
+        //     redirect($_SERVER['HTTP_REFERER']);
+        // }
         return $cost;
     }
 
@@ -420,6 +424,18 @@ class Site extends CI_Model
         return false;
     }
 
+    public function getAllDeliveryItems($delivery_id)
+    {
+        $q = $this->db->get_where('delivery_item', ['delivery_id' => $delivery_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
     public function getAllTaxRates()
     {
         $q = $this->db->get('tax_rates');
@@ -630,6 +646,9 @@ class Site extends CI_Model
         $orderby = empty($this->Settings->accounting_method) ? 'asc' : 'desc';
         $this->db->order_by('date', $orderby);
         $this->db->order_by('purchase_id', $orderby);
+        if (isset($clause['product_batch'])) {
+            $this->db->where('product_batch', $clause['product_batch']);
+        }
         if (!isset($clause['option_id']) || empty($clause['option_id'])) {
             $this->db->group_start()->where('option_id', null)->or_where('option_id', 0)->group_end();
         }
@@ -640,12 +659,15 @@ class Site extends CI_Model
         return false;
     }
 
-    public function getPurchasedItems($product_id, $warehouse_id, $option_id = null, $nonPurchased = false)
+    public function getPurchasedItems($product_id, $warehouse_id, $option_id = null, $nonPurchased = false, $product_batch = null)
     {
         $orderby = empty($this->Settings->accounting_method) ? 'asc' : 'desc';
         // $this->db->select('id, purchase_id, quantity, quantity_balance, net_unit_cost, unit_cost, item_tax, base_unit_cost');
         $this->db->select('*');
         $this->db->where('product_id', $product_id)->where('warehouse_id', $warehouse_id)->where('quantity_balance !=', 0);
+        if($product_batch != null){
+            $this->db->where('product_batch', $product_batch);
+        }
         if (!isset($option_id) || empty($option_id)) {
             $this->db->group_start()->where('option_id', null)->or_where('option_id', 0)->group_end();
         } else {
@@ -909,21 +931,25 @@ class Site extends CI_Model
         return false;
     }
 
-    public function getWarehouseProduct($warehouse_id, $product_id)
+    public function getWarehouseProduct($warehouse_id, $product_id, $product_batch = "")
     {
-        $q = $this->db->get_where('warehouses_products', ['product_id' => $product_id, 'warehouse_id' => $warehouse_id], 1);
+        $q = $this->db->get_where('warehouses_products', ['product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'product_batch' => $product_batch], 1);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
         return false;
     }
 
-    public function getWarehouseProducts($product_id, $warehouse_id = null)
+    public function getWarehouseProducts($product_id, $warehouse_id = null, $product_batch = null)
     {
         if ($warehouse_id) {
             $this->db->where('warehouse_id', $warehouse_id);
         }
-        $q = $this->db->get_where('warehouses_products', ['product_id' => $product_id]);
+        if ($product_batch) {
+            $this->db->where('product_batch', $product_batch);
+        }
+        $this->db->where('product_id', $product_id);
+        $q = $this->db->get('warehouses_products');
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;
@@ -954,7 +980,7 @@ class Site extends CI_Model
         if (!isset($item['option_id']) || empty($item['option_id']) || $item['option_id'] == 'null') {
             $item['option_id'] = null;
         }
-
+        
         if ($this->Settings->accounting_method != 2 && !$this->Settings->overselling) {
             if ($this->getProductByID($item['product_id'])) {
                 if ($item['product_type'] == 'standard' || $item['product_type'] == 'combo') {
@@ -1094,22 +1120,30 @@ class Site extends CI_Model
         return false;
     }
 
-    public function syncProductQty($product_id, $warehouse_id)
+    public function syncProductQty($product_id, $warehouse_id, $product_batch = "")
     {
         $balance_qty    = $this->getBalanceQuantity($product_id);
-        $wh_balance_qty = $this->getBalanceQuantity($product_id, $warehouse_id);
+        $wh_balance_qty = $this->getBalanceQuantity($product_id, $warehouse_id, $product_batch);
         if ($this->db->update('products', ['quantity' => $balance_qty], ['id' => $product_id])) {
-            if ($this->getWarehouseProducts($product_id, $warehouse_id)) {
-                $this->db->update('warehouses_products', ['quantity' => $wh_balance_qty], ['product_id' => $product_id, 'warehouse_id' => $warehouse_id]);
+            if(!isset($product_batch)){
+                $product_batch = "";
+            }
+            if ($this->getWarehouseProducts($product_id, $warehouse_id, $product_batch)) {
+                // $this->session->set_flashdata('message', 'Update product_batch '.$product_batch);
+                $this->db->update('warehouses_products', ['quantity' => $wh_balance_qty], ['product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'product_batch' => $product_batch]);
             } else {
                 if (!$wh_balance_qty) {
                     $wh_balance_qty = 0;
                 }
                 $product = $this->site->getProductByID($product_id);
                 if ($product) {
-                    $this->db->insert('warehouses_products', ['quantity' => $wh_balance_qty, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'avg_cost' => $product->cost]);
+                    $cost = $product->cost;
+                    if($cost == null){
+                        $cost = $product->price;
+                    }
+                    $this->db->insert('warehouses_products', ['quantity' => $wh_balance_qty, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'avg_cost' => $cost, 'product_batch' => $product_batch]);
                 } else {
-                    $this->db->insert('warehouses_products', ['quantity' => $wh_balance_qty, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id]);
+                    $this->db->insert('warehouses_products', ['quantity' => $wh_balance_qty, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'product_batch' => $product_batch]);
                 }
             }
             // Insert to storage
@@ -1129,7 +1163,7 @@ class Site extends CI_Model
                     if (isset($item['pi_overselling'])) {
                         unset($item['pi_overselling']);
                         $option_id = (isset($item['option_id']) && !empty($item['option_id'])) ? $item['option_id'] : null;
-                        $clause    = ['purchase_id' => null, 'transfer_id' => null, 'product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'option_id' => $option_id];
+                        $clause    = ['purchase_id' => null, 'transfer_id' => null, 'product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'option_id' => $option_id, 'product_batch' => $item['product_batch']];
                         if ($pi = $this->getPurchasedItem($clause)) {
                             $quantity_balance = $pi->quantity_balance + $item['quantity_balance'];
                             $this->db->update('purchase_items', ['quantity_balance' => $quantity_balance], ['id' => $pi->id]);
@@ -1177,7 +1211,7 @@ class Site extends CI_Model
         return false;
     }
 
-    public function syncQuantity($sale_id = null, $purchase_id = null, $oitems = null, $product_id = null)
+    public function syncQuantity($sale_id = null, $purchase_id = null, $oitems = null, $product_id = null, $delivery_id = null)
     {
         if ($sale_id) {
             $sale_items = $this->getAllSaleItems($sale_id);
@@ -1201,7 +1235,7 @@ class Site extends CI_Model
         } elseif ($purchase_id) {
             $purchase_items = $this->getAllPurchaseItems($purchase_id);
             foreach ($purchase_items as $item) {
-                $this->syncProductQty($item->product_id, $item->warehouse_id);
+                $this->syncProductQty($item->product_id, $item->warehouse_id, $item->product_batch);
                 $this->checkOverSold($item->product_id, $item->warehouse_id);
                 if (isset($item->option_id) && !empty($item->option_id)) {
                     $this->syncVariantQty($item->option_id, $item->warehouse_id, $item->product_id);
@@ -1234,7 +1268,36 @@ class Site extends CI_Model
         } elseif ($product_id) {
             $warehouses = $this->getAllWarehouses();
             foreach ($warehouses as $warehouse) {
-                $this->syncProductQty($product_id, $warehouse->id);
+                // $dtl = $this->getWarehouseProducts($product_id, $warehouse->id);
+                // foreach($dtl as $dt){
+                    $this->syncProductQty($product_id, $warehouse->id);
+                    $this->checkOverSold($product_id, $warehouse->id);
+                    if ($product_variants = $this->getProductVariants($product_id)) {
+                        foreach ($product_variants as $pv) {
+                            $this->syncVariantQty($pv->id, $warehouse->id, $product_id);
+                            $this->checkOverSold($product_id, $warehouse->id, $pv->id);
+                        }
+                    }
+                // }
+            }
+        }
+        elseif ($delivery_id){
+            $delivery_item = $this->getAllDeliveryItems($delivery_id);
+            foreach ($delivery_item as $item) {
+                $this->syncProductQty($item->product_id, $item->warehouse_id, $item->product_batch);
+                // if (isset($item->option_id) && !empty($item->option_id)) {
+                //     $this->syncVariantQty($item->option_id, $item->warehouse_id, $item->product_id);
+                // }
+            }
+        }
+    }
+
+    public function syncQuantityBatch($product_id, $batch){
+        $warehouses = $this->getAllWarehouses();
+        foreach ($warehouses as $warehouse) {
+            // $dtl = $this->getWarehouseProducts($product_id, $warehouse->id);
+            // foreach($dtl as $dt){
+                $this->syncProductQty($product_id, $warehouse->id, $batch);
                 $this->checkOverSold($product_id, $warehouse->id);
                 if ($product_variants = $this->getProductVariants($product_id)) {
                     foreach ($product_variants as $pv) {
@@ -1242,7 +1305,7 @@ class Site extends CI_Model
                         $this->checkOverSold($product_id, $warehouse->id, $pv->id);
                     }
                 }
-            }
+            // }
         }
     }
 
@@ -1321,12 +1384,15 @@ class Site extends CI_Model
         return false;
     }
 
-    private function getBalanceQuantity($product_id, $warehouse_id = null)
+    private function getBalanceQuantity($product_id, $warehouse_id = null, $product_batch = null)
     {
         $this->db->select('SUM(COALESCE(quantity_balance, 0)) as stock', false);
         $this->db->where('product_id', $product_id)->where('quantity_balance !=', 0);
         if ($warehouse_id) {
             $this->db->where('warehouse_id', $warehouse_id);
+        }
+        if ($product_batch != null) {
+            $this->db->where('product_batch', $product_batch);
         }
         $this->db->group_start()->where('status', 'received')->or_where('status', 'partial')->group_end();
         $q = $this->db->get('purchase_items');
@@ -1353,9 +1419,53 @@ class Site extends CI_Model
         return 0;
     }
 
-    public function syncProductionRaw($item, $simulate){        
+    public function syncPurchaseQty($item, $simulate, $type = ""){        
         $upd = 0;
-        $purchase = $this->getPurchasedItems($item['product_id'], $item['warehouse_id']);
+        if($item['qty'] < 0){
+            $purchase_all = array();
+            $sisa = $item['qty'] * -1;
+            $qty = 0;
+            $arr = explode(",", $item['purchase_id']);
+            for($i = 0; $i < count($arr); $i++){
+                if($sisa == 0){
+                    break;
+                }
+                $purchase = $this->getPurchaseItemsByID($arr[$i]);
+                $purchase_all[] = $purchase;
+                $sisa_bal = $purchase->quantity - $purchase->quantity_balance;
+                if($sisa_bal == 0){
+                    continue;
+                }
+                if($sisa_bal >= $sisa){
+                    $qty = $purchase->quantity_balance + $sisa;
+                    $sisa = 0;
+                }
+                else {
+                    $sisa -= $sisa_bal;
+                    $qty = $purchase->quantity_balance + $sisa_bal;
+                }
+                if(!$simulate){
+                    $upd += $this->db->update('purchase_items', ['quantity_balance' => $qty], ['id' => $purchase->id]);
+                }
+            }
+            if($sisa == 0){
+                if(!$simulate){
+                    return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
+                }
+                return true;
+            }
+            else {
+                if(!$simulate){
+                    foreach($purchase_all as $pur){
+                        $this->db->update('purchase_items', ['quantity_balance' => $pur->quantity_balance], ['id' => $pur->id]);
+                    }
+                }
+            }
+            return false;
+        }else{
+            $purchase = $this->getPurchasedItems($item['product_id'], $item['warehouse_id'], null, false, $item["product_batch"]);
+        }
+
         if(!$purchase){
             if(!$simulate){
                 $this->session->set_flashdata('error', 'Stock '.$item['product_code'].' tidak ada digudang');
@@ -1369,6 +1479,9 @@ class Site extends CI_Model
         $total_cost = 0;
         $diff_unit = false;
         foreach($purchase as $pur){
+            if($sisa == 0){
+                break;
+            }
             $unit = null;
             if($pur->quantity_balance > 0){
                 $net_unit_cost = $pur->net_unit_cost;
@@ -1422,11 +1535,13 @@ class Site extends CI_Model
         }
 
         if(!$simulate){
-            $net_cost = $cost / count($purchase_arr);
-            $purchase_id = implode(",", $purchase_arr);
-            $add = ['purchase_id' => $purchase_id, 'product_unit_cost' => $net_cost, 'product_total_cost' => $total_cost];
-            $upd2 += $this->db->update('production_items', $add, ['reff_doc' => $item['reff_doc'], 'product_id' => $item['product_id']]);
-            return $this->syncProductQty($item['product_id'], $item['warehouse_id']);
+            if($type == "production"){
+                $net_cost = $cost / count($purchase_arr);
+                $purchase_id = implode(",", $purchase_arr);
+                $add = ['purchase_id' => $purchase_id, 'product_unit_cost' => $net_cost, 'product_total_cost' => $total_cost];
+                $upd2 += $this->db->update('production_items', $add, ['reff_doc' => $item['reff_doc'], 'product_id' => $item['product_id']]);
+            }
+            return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
         }
 
         return false;

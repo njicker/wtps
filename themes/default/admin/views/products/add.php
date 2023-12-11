@@ -178,7 +178,7 @@ if (!empty($variants)) {
                         <?= lang('default_purchase_unit', 'default_purchase_unit'); ?>
                         <?= form_dropdown('default_purchase_unit', $uopts, ($product ? $product->purchase_unit : ''), 'class="form-control" id="default_purchase_unit" style="width:100%;"'); ?>
                     </div>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('product_cost', 'cost') ?>
                         <?= form_input('cost', ($_POST['cost'] ?? ($product ? $this->sma->formatDecimal($product->cost) : '')), 'class="form-control tip" id="cost" required="required"') ?>
                     </div>
@@ -570,13 +570,13 @@ if (!empty($variants)) {
             if (t !== 'standard') {
                 $('.standard').slideUp();
                 // $('#unit').attr('disabled', true);
-                $('#cost').attr('disabled', true);
+                // $('#cost').attr('disabled', true);
                 $('#track_quantity').iCheck('uncheck');
             } else {
                 $('.standard').slideDown();
                 $('#track_quantity').iCheck('check');
                 // $('#unit').attr('disabled', false);
-                $('#cost').attr('disabled', false);
+                // $('#cost').attr('disabled', false);
             }
             if (t !== 'digital') {
                 $('.digital').slideUp();
@@ -603,13 +603,13 @@ if (!empty($variants)) {
         if (t !== 'standard') {
             $('.standard').slideUp();
             // $('#unit').attr('disabled', true);
-            $('#cost').attr('disabled', true);
+            // $('#cost').attr('disabled', true);
             $('#track_quantity').iCheck('uncheck');
         } else {
             $('.standard').slideDown();
             $('#track_quantity').iCheck('check');
             // $('#unit').attr('disabled', false);
-            $('#cost').attr('disabled', false);
+            // $('#cost').attr('disabled', false);
         }
         if (t !== 'digital') {
             $('.digital').slideUp();
@@ -857,7 +857,7 @@ if (!empty($variants)) {
         } else {
             $('.standard').slideDown();
             $('#track_quantity').iCheck('check');
-            $('#cost').removeAttr('required');
+            $('#cost').attr('required', 'required');
             $('form[data-toggle="validator"]').bootstrapValidator('removeField', 'cost');
         }
         if (t !== 'digital') {

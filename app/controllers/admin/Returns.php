@@ -19,6 +19,8 @@ class Returns extends MY_Controller
         $this->lang->admin_load('returns', $this->Settings->user_language);
         $this->load->library('form_validation');
         $this->load->admin_model('returns_model');
+        $this->load->admin_model('sales_model');
+        $this->load->helper('reference_helper');
         $this->digital_upload_path = 'files/';
         $this->upload_path         = 'assets/uploads/';
         $this->thumbs_path         = 'assets/uploads/thumbs/';
@@ -31,26 +33,60 @@ class Returns extends MY_Controller
     public function add()
     {
         $this->sma->checkPermissions();
-        $this->form_validation->set_message('is_natural_no_zero', lang('no_zero_required'));
-        $this->form_validation->set_rules('customer', lang('customer'), 'required');
-        $this->form_validation->set_rules('biller', lang('biller'), 'required');
+        $this->form_validation->set_rules('no_delivery', '<label>No Delivery</label>', 'required');
 
         if ($this->form_validation->run() == true) {
-            $date             = ($this->Owner || $this->Admin) ? $this->sma->fld(trim($this->input->post('date'))) : date('Y-m-d H:i:s');
-            $reference        = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('re');
+            $no_delivery = $this->input->post('no_delivery');
+            admin_redirect('returns/addprocess?no_doc=' . $no_delivery);
+        } else {
+            $this->data['error']      = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            $this->data['billers']    = $this->site->getAllCompanies('biller');
+            $this->data['warehouses'] = $this->site->getAllWarehouses();
+            $this->data['tax_rates']  = $this->site->getAllTaxRates();
+            $this->data['units']      = $this->site->getAllBaseUnits();
+            $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('returns'), 'page' => lang('returns')], ['link' => '#', 'page' => lang('add_return')]];
+            $meta                     = ['page_title' => lang('add_return'), 'bc' => $bc];
+            $this->page_construct('returns/add', $meta, $this->data);
+        }
+    }
+
+    public function addprocess()
+    {
+        $this->sma->checkPermissions();
+        $this->form_validation->set_message('is_natural_no_zero', lang('no_zero_required'));
+        $this->form_validation->set_rules('customer', lang('customer'), 'required');
+        // $this->form_validation->set_rules('biller', lang('biller'), 'required');
+
+        $err = false;
+        $msg_err = "";
+        if ($this->form_validation->run() == true) {
+            $date             = ($this->Owner || $this->Admin) ? $this->input->post('date') : date('Y-m-d H:i:s');
+            // $reference        = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('re');
+            // Generate Reference
+            // Get No Urut
+            $no_urut = $this->returns_model->getCountForReff(date("Y"));
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $reference = generate_ref($no_urut, 'RET');
+
             $warehouse_id     = $this->input->post('warehouse');
             $customer_id      = $this->input->post('customer');
+            // var_dump($customer_id);exit;
             $biller_id        = $this->input->post('biller');
             $total_items      = $this->input->post('total_items');
             $customer_details = $this->site->getCompanyByID($customer_id);
+            // var_dump($customer_details);exit;
             $customer         = !empty($customer_details->company) && $customer_details->company != '-' ? $customer_details->company : $customer_details->name;
             $biller_details   = $this->site->getCompanyByID($biller_id);
             $biller           = !empty($biller_details->company) && $biller_details->company != '-' ? $biller_details->company : $biller_details->name;
             $note             = $this->sma->clear_tags($this->input->post('note'));
             $staff_note       = $this->sma->clear_tags($this->input->post('staff_note'));
             $shipping         = $this->input->post('shipping') ? $this->input->post('shipping') : 0;
+            $delv_id          = $this->input->post('delv_id');
 
             $total            = 0;
+            $total_qty        = 0;
             $product_tax      = 0;
             $product_discount = 0;
             $gst_data         = [];
@@ -63,14 +99,28 @@ class Returns extends MY_Controller
                 $item_name          = $_POST['product_name'][$r];
                 $item_option        = isset($_POST['product_option'][$r]) && $_POST['product_option'][$r] != 'false' && $_POST['product_option'][$r] != 'null' ? $_POST['product_option'][$r] : null;
                 $real_unit_price    = $this->sma->formatDecimal($_POST['real_unit_price'][$r]);
-                $unit_price         = $this->sma->formatDecimal($_POST['unit_price'][$r]);
-                $item_unit_quantity = $_POST['quantity'][$r];
+                $unit_price         = $this->sma->formatDecimal($_POST['real_unit_price'][$r]);
+                $item_unit_quantity = $_POST['quantity'][$r] == "" ? 0 : $_POST['quantity'][$r];
                 $item_serial        = $_POST['serial'][$r]           ?? '';
                 $item_tax_rate      = $_POST['product_tax'][$r]      ?? null;
                 $item_discount      = $_POST['product_discount'][$r] ?? null;
                 $item_unit          = $_POST['product_unit'][$r];
-                $item_quantity      = $_POST['product_base_quantity'][$r];
+                $item_quantity      = $item_unit_quantity;
+                $item_batch         = $_POST['product_batch'][$r];
+                $item_delv         = $_POST['qty_delv'][$r];
 
+                if($item_unit_quantity > $item_delv){
+                    $err = true;
+                    $msg_err =  'Quantity retur tidak boleh melebihi delivery ('.$item_code.' - '.$item_name.' ['.$item_batch.'])';
+                    break;
+                }
+
+                if($item_unit_quantity <= 0){
+                    continue;
+                }
+
+                $total_qty += $item_unit_quantity;
+                // var_dump($real_unit_price);exit;
                 if (isset($item_code) && isset($real_unit_price) && isset($unit_price) && isset($item_quantity)) {
                     $product_details  = $item_type != 'manual' ? $this->site->getProductByCode($item_code) : null;
                     $pr_discount      = $this->site->calculateDiscount($item_discount, $unit_price);
@@ -122,11 +172,15 @@ class Returns extends MY_Controller
                         'subtotal'          => $this->sma->formatDecimal($subtotal),
                         'serial_no'         => $item_serial,
                         'real_unit_price'   => $real_unit_price,
+                        'product_batch'     => $item_batch,
                     ];
 
                     $products[] = ($product + $gst_data);
                     $total += $this->sma->formatDecimal(($item_net_price * $item_unit_quantity), 4);
                 }
+            }
+            if($total_qty == 0 || $err){
+                $products = array();
             }
             if (empty($products)) {
                 $this->form_validation->set_rules('product', lang('order_items'), 'required');
@@ -163,6 +217,7 @@ class Returns extends MY_Controller
                 'paid'              => 0,
                 'created_by'        => $this->session->userdata('user_id'),
                 'hash'              => hash('sha256', microtime() . mt_rand()),
+                'delv_id'           => $delv_id,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
@@ -195,14 +250,51 @@ class Returns extends MY_Controller
             $this->session->set_flashdata('message', lang('return_added'));
             admin_redirect('returns');
         } else {
+            $param['do_reference_no'] = $this->input->get('no_doc');
+            $this->data['header']     = $this->sales_model->getDeliveryByParam($param);
+            if(!$this->data['header']){
+                $this->session->set_flashdata('error', 'Delivery not found!!');
+                admin_redirect('returns/add');
+            }
+            $this->data['detail']       = $this->sales_model->getDeliveryItemByDelvID($this->data['header']->id);
+            $this->data['sale_hdr']     = $this->sales_model->getReturnByID($this->data['header']->sale_id);
+            $saleDtl = $this->sales_model->getSaleItemBySaleID($this->data['header']->sale_id);
+            $this->data['sale_dtl'] = array();
+            foreach($saleDtl as $dtl){
+                $this->data['sale_dtl'][$dtl->product_id] = $dtl;
+            }
+            $this->data['return_hist'] = $this->returns_model->getReturnByDelvId($this->data['header']->id);
+            if($this->data['return_hist']){
+                // var_dump($this->data['return_hist']);exit;
+                $this->data['return_dtl_hist'] = array();
+                foreach($this->data['return_hist'] as $hist){
+                    $dtl = $this->returns_model->getReturnItemsByReturnId($hist->id);
+                    if($dtl){
+                        // var_dump($dtl);exit;
+                        // $i = 0;
+                        foreach($dtl as $d){
+                            $this->data['return_dtl_hist'][$d->product_id."#".$d->product_batch][] = $d;
+                            // $i++;
+                        }
+                    }
+                }
+                // var_dump($this->data['return_dtl_hist']);exit;
+            }
+
             $this->data['error']      = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['billers']    = $this->site->getAllCompanies('biller');
             $this->data['warehouses'] = $this->site->getAllWarehouses();
             $this->data['tax_rates']  = $this->site->getAllTaxRates();
             $this->data['units']      = $this->site->getAllBaseUnits();
+
+            if($err){
+                // var_dump($msg_err);exit;
+                $this->session->set_flashdata('error', $msg_err);
+            }
+
             $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('returns'), 'page' => lang('returns')], ['link' => '#', 'page' => lang('add_return')]];
             $meta                     = ['page_title' => lang('add_return'), 'bc' => $bc];
-            $this->page_construct('returns/add', $meta, $this->data);
+            $this->page_construct('returns/addprocess', $meta, $this->data);
         }
     }
 

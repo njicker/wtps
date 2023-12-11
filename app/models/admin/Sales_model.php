@@ -9,19 +9,69 @@ class Sales_model extends CI_Model
         parent::__construct();
     }
 
-    public function addDelivery($data = [])
+    public function addDelivery($data = [], $dtl = [])
     {
+        // Simulate stock
+        $err = false;
+        foreach($dtl as $dtls){
+            if(!$this->site->syncPurchaseQty($dtls, true, "sales")){
+                $this->session->set_flashdata('error', 'Stock '.$dtls['product_code'].' tidak mencukupi');
+                $err = true;
+                break;
+            }
+        }
+
+        // var_dump($err);exit;
+        if($err){
+            return false;
+        }
+
         if ($this->db->insert('deliveries', $data)) {
+            $delivery_id = $this->db->insert_id();
             // if ($this->site->getReference('do') == $data['do_reference_no']) {
             //     $this->site->updateReference('do');
             // }
-            $items = $this->getSaleItemBySaleID($data["sale_id"]);
-            // dari pengiriman
-            if(!empty($items)){
-                $cost = $this->site->costing($items);
-                $this->site->syncPurchaseItems($cost);
-                $this->site->syncQuantity($data["sale_id"]);
+            $items = array();
+            foreach($dtl as $dtls){
+                $dtls['delivery_id'] = $delivery_id;
+                if(!$this->db->insert('delivery_item', $dtls)){
+                    $err = true;
+                    break;
+                }
+                else {
+                    $items[] = [
+                        "product_id" => $dtls['product_id'],
+                        "quantity" => $dtls['qty'],
+                        "product_batch" => $dtls['product_batch']
+                    ];
+                }
             }
+// var_dump($dtl);exit;
+            if(!$err){
+                // $items = $this->getSaleItemBySaleID($data["sale_id"]);
+                // dari pengiriman
+                if(!empty($items)){
+                    // $cost = $this->site->costing($items);
+                    // $this->site->syncPurchaseItems($cost);
+                    // $this->site->syncQuantity(null, null, null, null, $delivery_id);
+                    foreach($dtl as $dtl){
+                        if(!$this->site->syncPurchaseQty($dtl, false, "sales")){
+                            $err = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if($err) {
+                $this->db->where("id", $delivery_id);
+                $this->db->delete("deliveries");
+
+                $this->db->where("delivery_id", $delivery_id);
+                $this->db->delete("delivery_item");
+                return false;
+            }
+
             return true;
         }
         return false;
@@ -91,6 +141,10 @@ class Sales_model extends CI_Model
                 $this->db->insert('sale_items', $item);
                 $sale_item_id = $this->db->insert_id();
                 if ($data['sale_status'] == 'completed' && empty($si_return)) {
+                    $item['product_batch'] = $item["serial_no"];
+                    if($item["serial_no"] == ""){
+                        $item['product_batch'] = null;
+                    }
                     $item_costs = $this->site->item_costing($item);
                     foreach ($item_costs as $item_cost) {
                         if (isset($item_cost['date']) || isset($item_cost['pi_overselling'])) {
@@ -293,6 +347,38 @@ class Sales_model extends CI_Model
         return false;
     }
 
+    public function getDeliveryItemBySaleID($sale_id)
+    {
+        $data = array();
+        $q = $this->db->get_where('deliveries', ['sale_id' => $sale_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $hdr) {
+                $q2 = $this->db->get_where('delivery_item', ['delivery_id' => $hdr->id]);
+                if ($q2->num_rows() > 0) {
+                    foreach (($q2->result()) as $row) {
+                        $data[] = $row;
+                    }
+                }
+            }
+            
+            return $data;
+        }
+        return $data;
+    }
+
+    public function getDeliveryItemByDelvID($delivery_id)
+    {
+        $data = array();
+        $q = $this->db->get_where('delivery_item', ['delivery_id' => $delivery_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return $data;
+    }
+
     public function getCostingLines($sale_item_id, $product_id, $sale_id = null)
     {
         if ($sale_id) {
@@ -321,9 +407,33 @@ class Sales_model extends CI_Model
 
     public function getDeliveryBySaleID($sale_id)
     {
+        $this->db->order_by('id', 'desc');
         $q = $this->db->get_where('deliveries', ['sale_id' => $sale_id], 1);
         if ($q->num_rows() > 0) {
             return $q->row();
+        }
+        return false;
+    }
+
+    public function getDeliveryByParam($param)
+    {
+        $this->db->order_by('id', 'desc');
+        $q = $this->db->get_where('deliveries', $param, 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function getDeliveryByParamList($param)
+    {
+        $this->db->order_by('id', 'desc');
+        $q = $this->db->get_where('deliveries', $param);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
         }
         return false;
     }
@@ -926,6 +1036,12 @@ class Sales_model extends CI_Model
     public function getCountForReff($year)
     {
         $q = $this->db->get_where('sales', ['year(`date`)' => $year]);
+        return $q->num_rows();
+    }
+
+    public function getCountDeliveryForReff($year)
+    {
+        $q = $this->db->get_where('deliveries', ['year(`date`)' => $year]);
         return $q->num_rows();
     }
 }

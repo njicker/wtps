@@ -44,6 +44,10 @@
                         <td><?= lang('status'); ?></td>
                         <td><?= lang($delivery->status); ?></td>
                     </tr>
+                    <tr>
+                        <td><?= lang('no_vehicle'); ?></td>
+                        <td><?= $delivery->no_vehicle; ?></td>
+                    </tr>
                     <?php if ($delivery->note) {
         ?>
                         <tr>
@@ -63,6 +67,7 @@
                         <tr>
                             <th style="text-align:center; vertical-align:middle;"><?= lang('no'); ?></th>
                             <th style="vertical-align:middle;"><?= lang('description'); ?></th>
+                            <th style="vertical-align:middle;">Batch Produk</th>
                             <th style="text-align:center; vertical-align:middle;"><?= lang('quantity'); ?></th>
                         </tr>
                     </thead>
@@ -74,14 +79,16 @@
                         <tr>
                             <td style="text-align:center; width:40px; vertical-align:middle;"><?= $r; ?></td>
                             <td style="vertical-align:middle;">
-                                <?= $row->product_code . ' - ' . $row->product_name . ($row->variant ? ' (' . $row->variant . ')' : '');
-                                if ($row->details) {
-                                    echo '<br><strong>' . lang('product_details') . '</strong> ' .
-                                    html_entity_decode($row->details);
-                                }
+                                <?= //$row->product_code . ' - ' . $row->product_name . ($row->variant ? ' (' . $row->variant . ')' : '');
+                                // if ($row->details) {
+                                //     echo '<br><strong>' . lang('product_details') . '</strong> ' .
+                                //     html_entity_decode($row->details);
+                                // }
+                                $row->product_code . ' - ' . $row->product_desc
                                 ?>
                             </td>
-                            <td style="width: 150px; text-align:center; vertical-align:middle;"><?= $this->sma->formatQuantity($row->unit_quantity) . ' ' . $row->product_unit_code; ?></td>
+                            <td style="vertical-align:middle;"><?=$row->product_batch?></td>
+                            <td style="width: 150px; text-align:center; vertical-align:middle;"><?= $this->sma->formatQuantity($row->qty) . ' ' . $row->unit_code; ?></td>
                         </tr>
                         <?php
                         $r++;

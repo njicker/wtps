@@ -18,6 +18,7 @@ class Transfers extends MY_Controller
         $this->lang->admin_load('transfers', $this->Settings->user_language);
         $this->load->library('form_validation');
         $this->load->admin_model('transfers_model');
+        $this->load->helper('reference_helper');
         $this->digital_upload_path = 'files/';
         $this->upload_path         = 'assets/uploads/';
         $this->thumbs_path         = 'assets/uploads/thumbs/';
@@ -36,7 +37,15 @@ class Transfers extends MY_Controller
         $this->form_validation->set_rules('from_warehouse', lang('warehouse') . ' (' . lang('from') . ')', 'required|is_natural_no_zero');
 
         if ($this->form_validation->run()) {
-            $transfer_no = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('to');
+            // $transfer_no = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('to');
+            // Generate Reference
+            // Get No Urut
+            $no_urut = $this->transfers_model->getCountForReff(date("Y"));
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $transfer_no = generate_ref($no_urut, 'TR');
+
             if ($this->Owner || $this->Admin) {
                 $date = $this->sma->fld(trim($this->input->post('date')));
             } else {
@@ -61,6 +70,7 @@ class Transfers extends MY_Controller
             $i           = isset($_POST['product_code']) ? sizeof($_POST['product_code']) : 0;
             for ($r = 0; $r < $i; $r++) {
                 $item_code          = $_POST['product_code'][$r];
+                $product_batch      = $_POST['product_batch'][$r];
                 $item_net_cost      = $this->sma->formatDecimal($_POST['net_cost'][$r]);
                 $unit_cost          = $this->sma->formatDecimal($_POST['unit_cost'][$r]);
                 $real_unit_cost     = $this->sma->formatDecimal($_POST['real_unit_cost'][$r]);
@@ -71,10 +81,10 @@ class Transfers extends MY_Controller
                 $item_unit          = $_POST['product_unit'][$r];
                 $item_quantity      = $_POST['product_base_quantity'][$r];
 
-                if (isset($item_code) && isset($real_unit_cost) && isset($unit_cost) && isset($item_quantity)) {
+                if (isset($item_code) && isset($unit_cost) && isset($item_quantity)) {
                     $product_details = $this->transfers_model->getProductByCode($item_code);
                     // if (!$this->Settings->overselling) {
-                    $warehouse_quantity = $this->transfers_model->getWarehouseProduct($from_warehouse_details->id, $product_details->id, $item_option);
+                    $warehouse_quantity = $this->transfers_model->getWarehouseProduct($from_warehouse_details->id, $product_details->id, $item_option, $product_batch);
                     if ($warehouse_quantity->quantity < $item_quantity) {
                         $this->session->set_flashdata('error', lang('no_match_found') . ' (' . lang('product_name') . ' <strong>' . $product_details->name . '</strong> ' . lang('product_code') . ' <strong>' . $product_details->code . '</strong>)');
                         admin_redirect('transfers/add');
@@ -125,6 +135,7 @@ class Transfers extends MY_Controller
                         'expiry'            => $item_expiry,
                         'real_unit_cost'    => $real_unit_cost,
                         'date'              => date('Y-m-d', strtotime($date)),
+                        'product_batch'     => $product_batch,
                     ];
 
                     $products[] = ($product + $gst_data);

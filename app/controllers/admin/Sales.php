@@ -368,6 +368,7 @@ class Sales extends MY_Controller
     public function add_delivery($id = null)
     {
         $this->sma->checkPermissions();
+        $ins = "init";
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -378,12 +379,14 @@ class Sales extends MY_Controller
             $this->sma->md();
         }
 
-        if ($delivery = $this->sales_model->getDeliveryBySaleID($id)) {
+        $delivery = $this->sales_model->getDeliveryBySaleID($id);
+        if ($delivery && $delivery->is_complete == "X") {
             $this->edit_delivery($delivery->id);
         } else {
             $this->form_validation->set_rules('sale_reference_no', lang('sale_reference_no'), 'required');
             $this->form_validation->set_rules('customer', lang('customer'), 'required');
             $this->form_validation->set_rules('address', lang('address'), 'required');
+            $this->form_validation->set_rules('no_vehicle', lang('no_vehicle'), 'required');
 
             if ($this->form_validation->run() == true) {
                 if ($this->Owner || $this->Admin) {
@@ -391,10 +394,50 @@ class Sales extends MY_Controller
                 } else {
                     $date = date('Y-m-d H:i:s');
                 }
+
+                $err = false;
+                $complete = "X";
+                $inv_details = $this->sales_model->getSaleItemBySaleID($this->input->post('sale_id'));
+                $delv_exist = $this->sales_model->getDeliveryItemBySaleID($this->input->post('sale_id'));
+                for($i = 0; $i < count($inv_details); $i++){
+                    $total_qty = 0;
+                    for($k = 0; $k < count($delv_exist); $k++){
+                        if($inv_details[$i]->product_id == $delv_exist[$k]->product_id){
+                            $inv_details[$i]->quantity -= $delv_exist[$k]->qty;
+                        }
+                    }
+                    for($j = 0; $j < count($_POST['product_id']); $j++){
+                        if($inv_details[$i]->product_id == $_POST['product_id'][$j]){
+                            $total_qty += $_POST['qty'][$j];
+                        }
+                    }
+                    if($total_qty > $inv_details[$i]->quantity){
+                        $err = true;
+                        break;
+                    }
+                    if($total_qty != $inv_details[$i]->quantity){
+                        $complete = "";
+                    }
+                }
+                // var_dump($inv_details[0]->quantity);
+                // var_dump($total_qty > $inv_details[0]->quantity);
+                // var_dump($total_qty);exit;
+                if($err){
+                    $this->session->set_flashdata('error', 'Tidak boleh melebihi sisa qty');
+                    redirect($_SERVER['HTTP_REFERER']);
+                    exit;
+                }
+
+                $no_urut = $this->sales_model->getCountDeliveryForReff(date("Y"));
+                $no_urut = 10000 + $no_urut + 1;
+                $no_urut = substr($no_urut, 1, 4);
+                // Genarete reff with helper
+                $reference = generate_ref($no_urut, 'SJ');
+
                 $dlDetails = [
                     'date'              => $date,
                     'sale_id'           => $this->input->post('sale_id'),
-                    'do_reference_no'   => $this->input->post('do_reference_no') ? $this->input->post('do_reference_no') : $this->site->getReference('do'),
+                    'do_reference_no'   => $reference,
                     'sale_reference_no' => $this->input->post('sale_reference_no'),
                     'customer'          => $this->input->post('customer'),
                     'address'           => $this->input->post('address'),
@@ -403,7 +446,26 @@ class Sales extends MY_Controller
                     'received_by'       => $this->input->post('received_by'),
                     'note'              => $this->sma->clear_tags($this->input->post('note')),
                     'created_by'        => $this->session->userdata('user_id'),
+                    'no_vehicle'       => $this->input->post('no_vehicle'),
+                    'is_complete'       => $complete,
                 ];
+
+                $dtl = array();
+                for($i = 0; $i < count($_POST['product_id']); $i++){
+                    $tmp = [
+                        "seq" => ($i + 1),
+                        "product_id" => $_POST['product_id'][$i],
+                        "product_code" => $_POST['product_code'][$i],
+                        "product_desc" => $_POST['product_desc'][$i],
+                        "qty" => $_POST['qty'][$i],
+                        "unit_id" => $_POST['unit_id'][$i],
+                        "unit_code" => $_POST['unit_code'][$i],
+                        "product_batch" => $_POST['product_batch'][$i],
+                        "warehouse_id" => $_POST['warehouse_id'][$i],
+                    ];
+                    $dtl[] = $tmp;
+                }
+
                 if ($_FILES['document']['size'] > 0) {
                     $this->load->library('upload');
                     $config['upload_path']   = $this->digital_upload_path;
@@ -420,6 +482,8 @@ class Sales extends MY_Controller
                     $photo                   = $this->upload->file_name;
                     $dlDetails['attachment'] = $photo;
                 }
+
+                $ins = $this->sales_model->addDelivery($dlDetails, $dtl);
             } elseif ($this->input->post('add_delivery')) {
                 if ($sale->shop) {
                     $this->load->library('sms');
@@ -429,10 +493,14 @@ class Sales extends MY_Controller
                 redirect($_SERVER['HTTP_REFERER']);
             }
 
-            if ($this->form_validation->run() == true && $this->sales_model->addDelivery($dlDetails)) {
+            if ($this->form_validation->run() == true && $ins) {
                 $this->session->set_flashdata('message', lang('delivery_added'));
                 admin_redirect('sales/deliveries');
-            } else {
+            } 
+            else if(!$ins){
+                admin_redirect('sales');
+            }
+            else {
                 $this->data['error']           = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
                 $this->data['customer']        = $this->site->getCompanyByID($sale->customer_id);
                 $this->data['address']         = $this->site->getAddressByID($sale->address_id);
@@ -441,6 +509,7 @@ class Sales extends MY_Controller
                 $this->data['modal_js']        = $this->site->modal_js();
                 $this->data['inv_detail']      = $this->sales_model->getSaleItemBySaleID($sale->id);
                 $this->data['warehouse']       = $this->site->getAllWarehouses();
+                $this->data['delv_detail']     = $this->sales_model->getDeliveryItemBySaleID($sale->id);
 
                 $this->load->view($this->theme . 'sales/add_delivery', $this->data);
             }
@@ -1134,7 +1203,13 @@ class Sales extends MY_Controller
             $this->data['error']    = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['delivery'] = $this->sales_model->getDeliveryByID($id);
             $this->data['modal_js'] = $this->site->modal_js();
-            $this->load->view($this->theme . 'sales/edit_delivery', $this->data);
+            if($this->data['delivery']->is_complete == "X"){
+                $this->data['message'] = lang('delivery_completed');
+                $this->load->view($this->theme . 'sales/modal_message', $this->data);
+            }
+            else {
+                $this->load->view($this->theme . 'sales/edit_delivery', $this->data);
+            }
         }
     }
 
@@ -1671,6 +1746,21 @@ class Sales extends MY_Controller
         }
         $this->data['packaging'] = $packaging;
         $this->data['sale']      = $sale;
+
+        $param['sale_id'] = $id;
+        $this->data['delivery'] = $this->sales_model->getDeliveryByParamList($param);
+        if($this->data['delivery']){
+            $this->data['delivery_item'] = array();
+            foreach($this->data['delivery'] as $delv){
+                $this->data['delivery_item'][$delv->id] = $this->sales_model->getDeliveryItemByDelvID($delv->id);
+                // array_push($this->data['delivery_item'], $this->sales_model->getDeliveryItemByDelvID($delv->id));
+            }
+        }
+        $warehouse = $this->site->getAllWarehouses();
+        foreach ($warehouse as $warehouse) {
+            $wh[$warehouse->id] = $warehouse->name;
+        }
+        $this->data['warehouses'] = $wh;
 
         $this->load->view($this->theme . 'sales/packaging', $this->data);
     }
@@ -2638,10 +2728,10 @@ class Sales extends MY_Controller
         }
         $this->data['delivery']   = $deli;
         $this->data['biller']     = $this->site->getCompanyByID($sale->biller_id);
-        $this->data['rows']       = $this->sales_model->getAllInvoiceItemsWithDetails($deli->sale_id);
+        // $this->data['rows']       = $this->sales_model->getAllInvoiceItemsWithDetails($deli->sale_id);
+        $this->data['rows']       = $this->sales_model->getDeliveryItemByDelvID($deli->id);
         $this->data['user']       = $this->site->getUser($deli->created_by);
         $this->data['page_title'] = lang('delivery_order');
-
         $this->load->view($this->theme . 'sales/view_delivery', $this->data);
     }
 

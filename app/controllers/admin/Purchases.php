@@ -1917,6 +1917,10 @@ class Purchases extends MY_Controller
             die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . admin_url('welcome') . "'; }, 10);</script>");
         }
 
+        if($type == "all"){
+            $type = "";
+        }
+
         $analyzed  = $this->sma->analyze_term($term);
         $sr        = $analyzed['term'];
         $option_id = $analyzed['option_id'];

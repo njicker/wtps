@@ -307,7 +307,7 @@ $(document).ready(function (e) {
     } else {
         shipping = 0;
     }
-    $('#add_sale, #edit_sale').attr('disabled', true);
+    // $('#add_sale, #edit_sale').attr('disabled', true);
     $(document).on('change', '.rserial', function () {
         var item_id = $(this).closest('tr').attr('data-item-id');
         slitems[item_id].row.serial = $(this).val();
@@ -1172,7 +1172,7 @@ function loadItems() {
                       return [parseInt(o.order)];
                   })
                 : slitems;
-        $('#add_sale, #edit_sale').attr('disabled', false);
+        // $('#add_sale, #edit_sale').attr('disabled', false);
         $.each(sortedItems, function () {
             var item = this;
             var item_id = site.settings.item_addition == 1 ? item.item_id : item.id;
@@ -1365,14 +1365,14 @@ function loadItems() {
                     if (this.id == item_option && base_quantity > this.quantity) {
                         $('#row_' + row_no).addClass('danger');
                         if (site.settings.overselling != 1) {
-                            $('#add_sale, #edit_sale').attr('disabled', true);
+                            // $('#add_sale, #edit_sale').attr('disabled', true);
                         }
                     }
                 });
             } else if ((item_type == 'standard' || item_type == 'combo') && base_quantity > item_aqty) {
                 $('#row_' + row_no).addClass('danger');
                 if (site.settings.overselling != 1) {
-                    $('#add_sale, #edit_sale').attr('disabled', true);
+                    // $('#add_sale, #edit_sale').attr('disabled', true);
                 }
             } 
             // else if (item_type == 'combo') {
@@ -1540,7 +1540,7 @@ function hapusBatch(elm){
     });
 
     if(cnt <= 1){
-        bootbox.alert('Produk tidak bisa dihapus');
+        // bootbox.alert('Produk tidak bisa dihapus');
         return false;
     }
 

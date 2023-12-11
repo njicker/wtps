@@ -17,23 +17,79 @@ class Returns_model extends CI_Model
             if ($this->site->getReference('re') == $data['reference_no']) {
                 $this->site->updateReference('re');
             }
-            foreach ($items as $item) {
-                $item['return_id'] = $return_id;
-                $this->db->insert('return_items', $item);
-                if ($item['product_type'] == 'standard') {
-                    $clause = ['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'purchase_id' => null, 'transfer_id' => null, 'option_id' => $item['option_id']];
-                    $this->site->setPurchaseItem($clause, $item['quantity']);
-                    $this->site->syncQuantity(null, null, null, $item['product_id']);
-                } elseif ($item['product_type'] == 'combo') {
-                    $combo_items = $this->site->getProductComboItems($item['product_id']);
-                    foreach ($combo_items as $combo_item) {
-                        $clause = ['product_id' => $combo_item->id, 'purchase_id' => null, 'transfer_id' => null, 'option_id' => null];
-                        $this->site->setPurchaseItem($clause, ($combo_item->qty * $item['quantity']));
-                        $this->site->syncQuantity(null, null, null, $combo_item->id);
+
+            $pur_header = [
+                "reference_no" => $data["reference_no"],
+                "date" => date("Y-m-d H:i:s"),
+                "supplier_id" => "999",
+                "supplier" => "own",
+                "warehouse_id" => "999",
+                "total" => $data['total'],
+                "order_tax_id" => 1,
+                "grand_total" => $data['total'],
+                "paid" => $data['total'],
+                "status" => "received",
+                "payment_status" => "paid",
+                "created_by" => $this->session->userdata('user_id'),
+                "payment_term" => "0",
+            ];
+
+            if($this->db->insert('purchases', $pur_header)){
+                $pur_id = $this->db->insert_id();
+
+                foreach ($items as $dtl) {
+                    $pur_dtl = [
+                        "purchase_id" => $pur_id,
+                        "product_id" => $dtl["product_id"],
+                        "product_code" => $dtl["product_code"],
+                        "product_name" => $dtl["product_name"],
+                        "net_unit_cost" => $dtl["net_unit_price"],
+                        "unit_cost" => $dtl["unit_price"],
+                        "real_unit_cost" => $dtl["net_unit_price"],
+                        "base_unit_cost" => $dtl["net_unit_price"],
+                        "quantity" => $dtl["quantity"],
+                        "quantity_balance" => $dtl["quantity"],
+                        "quantity_received" => $dtl["quantity"],
+                        "unit_quantity" => $dtl["quantity"],
+                        "warehouse_id" => $data["warehouse_id"],
+                        "tax_rate_id" => "1",
+                        "subtotal" => $dtl["subtotal"],
+                        "date" => date("Y-m-d"),
+                        "status" => "received",
+                        "product_unit_id" => $dtl["product_unit_id"],
+                        "product_unit_code" => $dtl["product_unit_code"],
+                        "product_batch" => $dtl["product_batch"]
+                    ];
+                    if($this->db->insert('purchase_items', $pur_dtl)){
+                        $dtl['return_id'] = $return_id;
+                        $this->db->insert('return_items', $dtl);
+                        $this->site->syncQuantityBatch($dtl['product_id'], $dtl['product_batch']);
                     }
                 }
+                
             }
+
+            // foreach ($items as $item) {
+            //     $item['return_id'] = $return_id;
+            //     $this->db->insert('return_items', $item);
+            //     // if ($item['product_type'] == 'standard') {
+            //         $clause = ['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'purchase_id' => null, 'transfer_id' => null, 'option_id' => $item['option_id']];
+            //         $this->site->setPurchaseItem($clause, $item['quantity']);
+            //         // $this->site->syncQuantity(null, null, null, $item['product_id']);
+            //         $this->site->syncQuantityBatch($item['product_id'], $item['product_batch']);
+            //     // } elseif ($item['product_type'] == 'combo') {
+            //     //     $combo_items = $this->site->getProductComboItems($item['product_id']);
+            //     //     foreach ($combo_items as $combo_item) {
+            //     //         $clause = ['product_id' => $combo_item->id, 'purchase_id' => null, 'transfer_id' => null, 'option_id' => null];
+            //     //         $this->site->setPurchaseItem($clause, ($combo_item->qty * $item['quantity']));
+            //     //         $this->site->syncQuantity(null, null, null, $combo_item->id);
+            //     //     }
+            //     // }
+            // }
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by'], true);
+        }
+        else {
+            var_dump($data);exit;
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -125,6 +181,19 @@ class Returns_model extends CI_Model
         return false;
     }
 
+    public function getReturnItemsByReturnId($return_id)
+    {
+        $this->db->where("return_id", $return_id);
+        $q = $this->db->get('return_items');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
     public function resetSaleActions($id)
     {
         if ($items = $this->getReturnItems($id)) {
@@ -176,5 +245,23 @@ class Returns_model extends CI_Model
         }
 
         return false;
+    }
+
+    public function getReturnByDelvId($delv_id)
+    {
+        $q = $this->db->get_where('returns', ['delv_id' => $delv_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getCountForReff($year)
+    {
+        $q = $this->db->get_where('returns', ['year(`date`)' => $year]);
+        return $q->num_rows();
     }
 }

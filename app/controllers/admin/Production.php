@@ -169,6 +169,7 @@ class Production extends MY_Controller
             $header['status_doc'] = $this->input->post('status_doc');
 
             $detail = array();
+            $detail_raw = array();
             for($i = 0; $i < count($_POST['product_id']); $i++){
                 $unit = explode(",", $_POST['unit'][$i]);
                 $tmp = [
@@ -188,9 +189,28 @@ class Production extends MY_Controller
             if (empty($detail)) {
                 $this->form_validation->set_rules('product_id', 'Produk', 'required');
             }
+
+            // check raw
+            for($i = 0; $i < count($_POST['raw_product_id']); $i++){
+                if($_POST['raw_qty'][$i] == $_POST['raw_confirm_qty'][$i]){
+                    continue;
+                }
+                $qty = $_POST['raw_confirm_qty'][$i] - $_POST['raw_qty'][$i];
+                $tmp = [
+                    'reff_doc' => $header['reff_doc'],
+                    'product_id' => $_POST['raw_product_id'][$i],
+                    'product_code' => $_POST['raw_product_code'][$i],
+                    'qty' => $qty,
+                    'unit_id' => $_POST['raw_unit_id'][$i],
+                    'type_item' => $_POST['raw_type_item'][$i],
+                    'warehouse_id' => $_POST['raw_warehouse_id'][$i],
+                    'purchase_id' => $_POST['raw_purchase_id'][$i],
+                ];
+                $detail_raw[] = $tmp;
+            }
         }
         // check produksi jika masih on production
-        if($this->form_validation->run() == true && $this->products_model->finishProduction($header, $detail)) {
+        if($this->form_validation->run() == true && $this->products_model->finishProduction($header, $detail, $detail_raw)) {
             $this->session->set_flashdata('message', 'Produksi selesai, data berhasil diupdate');
             admin_redirect('production');
         }

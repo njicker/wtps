@@ -533,6 +533,22 @@
                                 </ul>
                             </li>
 
+                            <li class="mm_storage">
+                                <a class="dropmenu" href="#">
+                                    <i class="fa fa-building-o"></i>
+                                    <span class="text"> Gudang </span>
+                                    <span class="chevron closed"></span>
+                                </a>
+                                <ul>
+                                    <li id="storage_index">
+                                        <a class="submenu" href="<?= admin_url('storage'); ?>">
+                                            <i class="fa fa-building-o"></i>
+                                            <span class="text"> Gudang</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
                             <li class="mm_quotes">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-heart-o"></i>

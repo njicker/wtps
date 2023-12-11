@@ -1241,7 +1241,8 @@ class Products_model extends CI_Model
     public function addProduction($header, $detail){
         $err = false;
         foreach($detail as $dtl){
-            if(!$this->site->syncProductionRaw($dtl, true)){
+            $dtl["product_batch"] = null;
+            if(!$this->site->syncPurchaseQty($dtl, true, "production")){
                 $this->session->set_flashdata('error', 'Stock '.$dtl['product_code'].' tidak mencukupi');
                 $err = true;
                 break;
@@ -1252,7 +1253,8 @@ class Products_model extends CI_Model
                 // if($this->db->insert('production_items', $detail)){
                     foreach($detail as $dtl){
                         if($this->db->insert('production_items', $dtl)){
-                            if(!$this->site->syncProductionRaw($dtl, false)){
+                            $dtl["product_batch"] = null;
+                            if(!$this->site->syncPurchaseQty($dtl, false, "production")){
                                 $err = true;
                                 break;
                             }
@@ -1288,8 +1290,20 @@ class Products_model extends CI_Model
         return false;
     }
 
-    public function finishProduction($header, $detail){
+    public function finishProduction($header, $detail, $detail_raw){
         $err = false;
+        $this->db->trans_start();
+        if(count($detail_raw) > 0){
+            foreach($detail_raw as $dtl){
+                if(!$this->site->syncPurchaseQty($dtl, false, "production")){
+                    $err = true;
+                    break;
+                }
+            }
+        }
+        if($err){
+            return false;
+        }
         // update header
         if($this->db->update('production', ['status_doc' => $header['status_doc']], ['id' => $header["id"]])){
             // calculate cost
@@ -1322,10 +1336,14 @@ class Products_model extends CI_Model
 
                 // insert purchase items
                 $upd = 0;
+                $total_product = 0;
+                foreach($detail as $dtl){
+                    $total_product += $dtl['qty'];
+                }
                 foreach($detail as $dtl){
                     // insert detail
-                    $dtl["product_unit_cost"] = $total_cost;
-                    $dtl["product_total_cost"] = $total_cost;
+                    $dtl["product_unit_cost"] = $total_cost * ($dtl['qty'] / $total_product) / $dtl['qty'];
+                    $dtl["product_total_cost"] = $total_cost * ($dtl['qty'] / $total_product);
 
                     $produk = $this->getProductByID($dtl["product_id"]);
                     $pur_dtl = [
@@ -1348,12 +1366,13 @@ class Products_model extends CI_Model
                         "status" => "received",
                         "product_unit_id" => $dtl["unit_id"],
                         "product_unit_code" => $dtl["unit_code"],
+                        "product_batch" => $dtl["reff_doc"]
                     ];
                     if($this->db->insert('purchase_items', $pur_dtl)){
                         $dtl_id = $this->db->insert_id();
                         $dtl["purchase_id"] = $dtl_id;
                         if($this->db->insert("production_items", $dtl)){
-                            if($this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id'])){
+                            if($this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id'], $dtl["reff_doc"])){
                                 $upd++;
                             }
                         }
@@ -1365,6 +1384,7 @@ class Products_model extends CI_Model
                     $err = true;
                 }
                 else {
+                    $this->db->trans_complete();
                     return true;
                 }
             }
@@ -1388,7 +1408,7 @@ class Products_model extends CI_Model
                 }
 
                 foreach($detail as $dtl){
-                    $this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id']);
+                    $this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id'], $dtl["reff_doc"]);
                 }
             }
 

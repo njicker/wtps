@@ -38,6 +38,11 @@
                     </div>
 
                     <div class="form-group">
+                        <?= lang('no_vehicle', 'no_vehicle'); ?>
+                        <?php echo form_input('no_vehicle', '', 'class="form-control" id="no_vehicle" required="required" '); ?>
+                    </div>
+
+                    <div class="form-group">
                         <?= lang('address', 'address'); ?>
                         <?php
                         $av = (
@@ -88,9 +93,10 @@
                         <thead>
                             <tr>
                                 <th>Produk (Code - Nama)</th>
+                                <th style="width: 100px;">Qty Sisa</th>
                                 <th style="width: 100px;">Qty</th>
                                 <th>UOM</th>
-                                <th>Batch Produksi</th>
+                                <th style="width: 150px;">Batch Produksi</th>
                                 <th>Gudang</th>
                                 <th>Action</th>
                             </tr>
@@ -98,30 +104,45 @@
                         <tbody>
                             <?php
                             foreach($inv_detail as $dtl){
+                                $qty_sisa = $dtl->quantity;
+                                foreach($delv_detail as $delv){
+                                    if($dtl->product_id == $delv->product_id){
+                                        $qty_sisa -= $delv->qty;
+                                    }
+                                }
                             ?>
                             <tr>
                                 <td><?=$dtl->product_code?> - <?=$dtl->product_name?></td>
                                 <td>
-                                    <?= form_input('product_id[]', $dtl->product_id, 'class="form-control" style="display:none;" required="required"'); ?>
-                                    <?= form_input('qty[]', number_format($dtl->quantity, 0), 'class="form-control"'); ?>
+                                    <?= form_input('qty_order[]', number_format($qty_sisa, 0), 'class="form-control" disabled'); ?>
                                 </td>
-                                <td><?=$dtl->product_unit_code?></td>
                                 <td>
-                                    <?= form_input('serial_no[]', $dtl->serial_no, 'class="form-control" required="required"'); ?>
+                                    <?= form_input('product_id[]', $dtl->product_id, 'class="form-control" style="display:none;" required="required"'); ?>
+                                    <?= form_input('product_code[]', $dtl->product_code, 'class="form-control" style="display:none;" required="required"'); ?>
+                                    <?= form_input('product_desc[]', $dtl->product_name, 'class="form-control" style="display:none;" required="required"'); ?>
+                                    <?= form_input('qty[]', number_format($qty_sisa, 0), 'class="form-control"'); ?>
+                                </td>
+                                <td>
+                                    <?=$dtl->product_unit_code?>
+                                    <?= form_input('unit_code[]', $dtl->product_unit_code, 'class="form-control" style="display:none;"'); ?>
+                                    <?= form_input('unit_id[]', $dtl->product_unit_id, 'class="form-control" style="display:none;"'); ?>
+                                </td>
+                                <td>
+                                    <?= form_input('product_batch[]', $dtl->serial_no, 'class="form-control" required="required"'); ?>
                                 </td>
                                 <td>
                                     <?php
                                     foreach ($warehouse as $warehouse) {
                                         $wh[$warehouse->id] = $warehouse->name;
                                     }
-                                    echo form_dropdown('warehouse_id[]', $wh, $dtl->warehouse_id, 'class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;" '); 
+                                    echo form_dropdown('warehouse_id[]', $wh, $dtl->warehouse_id, 'class="form-control" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;" '); 
                                     ?>
                                 </td>
                                 <td>
-                                    <button class="btn btn-success" onclick="tambahBatch(this)">
+                                    <button class="btn btn-success btn-sm" onclick="tambahBatch(this)">
                                         <span class="fa fa-plus"></span>
                                     </button>
-                                    <button class="btn btn-danger" onclick="hapusBatch(this)">
+                                    <button class="btn btn-danger btn-sm" onclick="hapusBatch(this)">
                                         <span class="fa fa-close"></span>
                                     </button>
                                 </td>
@@ -160,5 +181,7 @@
             startView: 2,
             forceParse: 0
         }).datetimepicker('update', new Date());
+
+        $('select').select2('destroy');
     });
 </script>

@@ -31,7 +31,7 @@ class Transfers_model extends CI_Model
                 }
 
                 if ($status == 'sent' || $status == 'completed') {
-                    $this->syncTransderdItem($item['product_id'], $data['from_warehouse_id'], $item['quantity'], $item['option_id']);
+                    $this->syncTransderdItem($item['product_id'], $data['from_warehouse_id'], $item['quantity'], $item['option_id'], $item['product_batch']);
                 }
             }
         }
@@ -145,9 +145,9 @@ class Transfers_model extends CI_Model
             ->join('warehouses_products', 'warehouses_products.product_id=products.id', 'left')
             ->group_by('products.id');
         if ($this->Settings->overselling) {
-            $this->db->where("type = 'standard' AND (name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR  concat(name, ' (', code, ')') LIKE '%" . $term . "%')");
+            $this->db->where("type IN ('standard','combo') AND (name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR  concat(name, ' (', code, ')') LIKE '%" . $term . "%')");
         } else {
-            $this->db->where("type = 'standard' AND warehouses_products.warehouse_id = '" . $warehouse_id . "' AND warehouses_products.quantity > 0 AND "
+            $this->db->where("type IN ('standard','combo') AND warehouses_products.warehouse_id = '" . $warehouse_id . "' AND warehouses_products.quantity > 0 AND "
                 . "(name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR  concat(name, ' (', code, ')') LIKE '%" . $term . "%')");
         }
         $this->db->limit($limit);
@@ -226,17 +226,17 @@ class Transfers_model extends CI_Model
         return false;
     }
 
-    public function getWarehouseProduct($warehouse_id, $product_id, $variant_id)
+    public function getWarehouseProduct($warehouse_id, $product_id, $variant_id, $product_batch = "")
     {
         if ($variant_id) {
             return $this->getProductWarehouseOptionQty($variant_id, $warehouse_id);
         }
-        return $this->getWarehouseProductQuantity($warehouse_id, $product_id);
+        return $this->getWarehouseProductQuantity($warehouse_id, $product_id, $product_batch);
     }
 
-    public function getWarehouseProductQuantity($warehouse_id, $product_id)
+    public function getWarehouseProductQuantity($warehouse_id, $product_id, $product_batch)
     {
-        $q = $this->db->get_where('warehouses_products', ['warehouse_id' => $warehouse_id, 'product_id' => $product_id], 1);
+        $q = $this->db->get_where('warehouses_products', ['warehouse_id' => $warehouse_id, 'product_id' => $product_id, 'product_batch' => $product_batch], 1);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -285,9 +285,9 @@ class Transfers_model extends CI_Model
         return $ostatus;
     }
 
-    public function syncTransderdItem($product_id, $warehouse_id, $quantity, $option_id = null)
+    public function syncTransderdItem($product_id, $warehouse_id, $quantity, $option_id = null, $product_batch = "")
     {
-        if ($pis = $this->site->getPurchasedItems($product_id, $warehouse_id, $option_id)) {
+        if ($pis = $this->site->getPurchasedItems($product_id, $warehouse_id, $option_id, $product_batch)) {
             $balance_qty = $quantity;
             foreach ($pis as $pi) {
                 if ($balance_qty <= $quantity && $quantity > 0) {
@@ -309,7 +309,8 @@ class Transfers_model extends CI_Model
             $clause = ['purchase_id' => null, 'transfer_id' => null, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'option_id' => $option_id];
             $this->site->setPurchaseItem($clause, (0 - $quantity));
         }
-        $this->site->syncQuantity(null, null, null, $product_id);
+        $this->site->syncQuantityBatch($product_id, $product_batch);
+        // $this->site->syncQuantity(null, null, null, $product_id);
     }
 
     public function updateQuantity($product_id, $warehouse_id, $quantity)
@@ -395,5 +396,11 @@ class Transfers_model extends CI_Model
         }
 
         return false;
+    }
+
+    public function getCountForReff($year)
+    {
+        $q = $this->db->get_where('transfers', ['year(`date`)' => $year]);
+        return $q->num_rows();
     }
 }
