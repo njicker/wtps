@@ -245,7 +245,7 @@
                     <ul class="dropdown-menu pull-right tasks-menus" role="menu" aria-labelledby="dLabel">
                         <li>
                             <a href="<?=admin_url('sales/add')?>">
-                                <i class="fa fa-plus-circle"></i> <?=lang('add_sale')?>
+                                <i class="fa fa-plus-circle"></i> <label>Tambah Penjualan</label>
                             </a>
                         </li>
                         <li>
@@ -259,11 +259,11 @@
                             </a>
                         </li>
                         <li class="divider"></li>
-                        <li>
+                        <!-- <li>
                             <a href="#" class="bpo" title="<b><?=lang('delete_sales')?></b>" data-content="<p><?=lang('r_u_sure')?></p><button type='button' class='btn btn-danger' id='delete' data-action='delete'><?=lang('i_m_sure')?></a> <button class='btn bpo-close'><?=lang('no')?></button>" data-html="true" data-placement="left">
                                 <i class="fa fa-trash-o"></i> <?=lang('delete_sales')?>
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
                 <?php if (!empty($warehouses)) {

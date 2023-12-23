@@ -115,6 +115,35 @@ class Storage_model extends CI_Model
         $q = $this->db->get_where('damage', ['year(`created_at`)' => $year]);
         return $q->num_rows();
     }
+
+    public function getDamage($param = []){
+        $data = [];
+
+        $this->db->where($param);
+        $this->db->limit(1);
+        $q = $this->db->get("damage");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data = $row;
+            }
+        }
+        return $data;
+    }
+
+    public function getListDamageItems($param = []){
+        $data = [];
+
+        $this->db->where($param);
+        $q = $this->db->get("damage_items");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+        }
+        return $data;
+    }
 }
 
 ?>

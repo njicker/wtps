@@ -133,6 +133,7 @@ class Production extends MY_Controller
                     'unit_code' => $unit[1],
                     'type_item' => $_POST['type_item'][$i],
                     'warehouse_id' => $_POST['warehouse_id'][$i],
+                    'product_batch' => $_POST['product_batch'][$i],
                     'purchase_id' => "",
                 ];
                 $detail[] = $tmp;

@@ -303,4 +303,29 @@ class Companies_model extends CI_Model
         }
         return false;
     }
+
+    public function addCustomerPartner($data = [])
+    {
+        if ($this->db->insert('customer_partner', $data)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getCustomerPartner($id)
+    {
+        $q = $this->db->get_where('customer_partner', ['cust_id' => $id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function deleteCustomerPartner($cust_id, $partner_type)
+    {
+        if ($this->db->delete('customer_partner', ['cust_id' => $cust_id, 'partner_type' => $partner_type])){
+            return true;
+        }
+        return false;
+    }
 }

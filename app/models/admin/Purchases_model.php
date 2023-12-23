@@ -372,10 +372,13 @@ class Purchases_model extends CI_Model
         return false;
     }
 
-    public function getProductNames($term, $limit = 5, $type)
+    public function getProductNames($term, $limit = 5, $type, $cf1 = "")
     {
         if($type != ""){
             $this->db->where('type', $type);
+        }
+        if($cf1 != ""){
+            $this->db->where('cf1', $cf1);
         }
         $this->db->where("(name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR supplier1_part_no LIKE '%" . $term . "%' OR supplier2_part_no LIKE '%" . $term . "%' OR supplier3_part_no LIKE '%" . $term . "%' OR supplier4_part_no LIKE '%" . $term . "%' OR supplier5_part_no LIKE '%" . $term . "%' OR  concat(name, ' (', code, ')') LIKE '%" . $term . "%')");
         $this->db->limit($limit);

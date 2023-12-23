@@ -336,6 +336,7 @@ class Products extends MY_Controller
             $this->data['tax_rates']           = $this->site->getAllTaxRates();
             $this->data['brands']              = $this->site->getAllBrands();
             $this->data['base_units']          = $this->site->getAllBaseUnits();
+            $this->data['cf1']                 = $this->site->getListProductCF('cf1');
             $this->data['warehouses']          = $warehouses;
             $this->data['warehouses_products'] = $id ? $this->products_model->getAllWarehousesWithPQ($id) : null;
             $this->data['product']             = $id ? $this->products_model->getProductByID($id) : null;

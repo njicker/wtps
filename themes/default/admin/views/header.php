@@ -59,9 +59,9 @@
     } ?>
                 <?php if (POS) {
         ?>
-                <a href="<?= admin_url('pos') ?>" class="btn">
+                <!-- <a href="<?= admin_url('pos') ?>" class="btn">
                     <span class="fa fa-th-large"></span>
-                </a>
+                </a> -->
                 <?php
     } ?>
                 <a href="<?= admin_url('calendar') ?>" class="btn">
@@ -112,9 +112,9 @@
     } ?>
                     <?php if (POS) {
         ?>
-                    <a href="<?= admin_url('pos') ?>" class="btn">
+                    <!-- <a href="<?= admin_url('pos') ?>" class="btn">
                         <span class="fa fa-th-large"></span>
-                    </a>
+                    </a> -->
                     <?php
     } ?>
                     <?php if ($Owner) {
@@ -220,7 +220,7 @@
                            </li>
                         </ul>
                     </li>
-                    <li class="dropdown hidden-xs">
+                    <!-- <li class="dropdown hidden-xs">
                         <a class="btn tip" title="<?= lang('language') ?>" data-placement="bottom" data-toggle="dropdown"
                            href="#">
                             <img src="<?= base_url('assets/images/' . $Settings->user_language . '.png'); ?>" alt="">
@@ -247,7 +247,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li> -->
                     <?php /* if ($Owner && $Settings->update) { ?>
                     <li class="dropdown hidden-sm">
                         <a class="btn blightOrange tip" title="<?= lang('update_available') ?>"
@@ -311,11 +311,11 @@
                             } ?>
                     <?php if (POS) {
                                 ?>
-                    <li class="dropdown hidden-xs">
+                    <!-- <li class="dropdown hidden-xs">
                         <a class="btn bdarkGreen tip" title="<?= lang('pos') ?>" data-placement="bottom" href="<?= admin_url('pos') ?>">
                             <i class="fa fa-th-large"></i> <span class="padding05"><?= lang('pos') ?></span>
                         </a>
-                    </li>
+                    </li> -->
                     <?php
                             } ?>
                     <?php if ($Owner) {
@@ -333,18 +333,18 @@
                                 ?>
                     <?php if (POS) {
                                     ?>
-                    <li class="dropdown hidden-xs">
+                    <!-- <li class="dropdown hidden-xs">
                         <a class="btn bblue tip" title="<?= lang('list_open_registers') ?>" data-placement="bottom" href="<?= admin_url('pos/registers') ?>">
                             <i class="fa fa-list"></i>
                         </a>
-                    </li>
+                    </li> -->
                     <?php
                                 } ?>
-                    <li class="dropdown hidden-xs">
+                    <!-- <li class="dropdown hidden-xs">
                         <a class="btn bred tip" title="<?= lang('clear_ls') ?>" data-placement="bottom" id="clearLS" href="#">
                             <i class="fa fa-eraser"></i>
                         </a>
-                    </li>
+                    </li> -->
                     <?php
                             } ?>
                 </ul>
@@ -493,31 +493,31 @@
                                     <li id="sales_index">
                                         <a class="submenu" href="<?= admin_url('sales'); ?>">
                                             <i class="fa fa-heart"></i>
-                                            <span class="text"> <?= lang('list_sales'); ?></span>
+                                            <span class="text"> <label>Daftar Penjualan</label></span>
                                         </a>
                                     </li>
                                     <?php if (POS) {
-                                ?>
-                                    <li id="pos_sales">
+                                    ?>
+                                    <!-- <li id="pos_sales">
                                         <a class="submenu" href="<?= admin_url('pos/sales'); ?>">
                                             <i class="fa fa-heart"></i>
                                             <span class="text"> <?= lang('pos_sales'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
-                            } ?>
-                                    <li id="sales_add">
+                                    } ?>
+                                    <!-- <li id="sales_add">
                                         <a class="submenu" href="<?= admin_url('sales/add'); ?>">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('add_sale'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="sales_sale_by_csv">
+                                    </li> -->
+                                    <!-- <li id="sales_sale_by_csv">
                                         <a class="submenu" href="<?= admin_url('sales/sale_by_csv'); ?>">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('add_sale_by_csv'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="sales_deliveries">
                                         <a class="submenu" href="<?= admin_url('sales/deliveries'); ?>">
                                             <i class="fa fa-truck"></i>
@@ -543,7 +543,14 @@
                                     <li id="storage_index">
                                         <a class="submenu" href="<?= admin_url('storage'); ?>">
                                             <i class="fa fa-building-o"></i>
-                                            <span class="text"> Gudang</span>
+                                            <span class="text"> Stock Gudang</span>
+                                        </a>
+                                    </li>
+
+                                    <li id="storage_damage">
+                                        <a class="submenu" href="<?= admin_url('storage/damage'); ?>">
+                                            <i class="fa fa-trash"></i>
+                                            <span class="text"> Damage</span>
                                         </a>
                                     </li>
                                 </ul>

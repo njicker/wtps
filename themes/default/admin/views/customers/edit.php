@@ -40,11 +40,11 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group company">
-                        <?= lang('company', 'company'); ?>
+                        <label>Nama Perusahaan</label>
                         <?php echo form_input('company', $customer->company, 'class="form-control tip" id="company" required="required"'); ?>
                     </div>
                     <div class="form-group person">
-                        <?= lang('name', 'name'); ?>
+                        <label>Nama Singkat</label>
                         <?php echo form_input('name', $customer->name, 'class="form-control tip" id="name" required="required"'); ?>
                     </div>
                     <div class="form-group">
@@ -91,6 +91,16 @@
 
                 </div>
                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Bill to</label>
+                        <?php
+                        $bl[''] = 'Pilih Bill to';
+                        foreach ($billers as $biller) {
+                            $bl[$biller->id] = $biller->company && $biller->company != '-' ? $biller->company : $biller->name;
+                        }
+                        echo form_dropdown('bill_to', $bl, (isset($partner)? $partner->partner_id : ''), 'class="form-control select" id="bill_to" style="width:100%;" required="required"');
+                        ?>
+                    </div>
                     <div class="form-group">
                         <?= lang('postal_code', 'postal_code'); ?>
                         <?php echo form_input('postal_code', $customer->postal_code, 'class="form-control" id="postal_code"'); ?>

@@ -1,353 +1,109 @@
-<?php defined('BASEPATH') or exit('No direct script access allowed');
-$bgs = glob(VIEWPATH . 'default/admin/assets/images/login-bgs/*.jpg');
-foreach ($bgs as &$bg) {
-    $af = explode('assets/', $bg);
-    $bg = $assets . $af[1];
-}
-// $this->sma->print_arrays($bgs);
-?><!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title><?= $title ?></title>
-    <script type="text/javascript">if (parent.frames.length !== 0) { top.location = '<?=admin_url()?>'; }</script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="<?= $assets ?>images/icon.png"/>
-    <link href="<?= $assets ?>styles/theme.css" rel="stylesheet"/>
-    <link href="<?= $assets ?>styles/style.css" rel="stylesheet"/>
-    <link href="<?= $assets ?>styles/helpers/login.css" rel="stylesheet"/>
-    <script type="text/javascript" src="<?= $assets ?>js/jquery-2.0.3.min.js"></script>
-    <!--[if lt IE 9]>
-    <script src="<?= $assets ?>js/respond.min.js"></script>
-    <![endif]-->
+<?php defined('BASEPATH') or exit('No direct script access allowed');?>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset ="utf-8">
+        <meta name ="viewport" content ="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,900;1,700&display=swap" rel="stylesheet"> 
+        <title>Halaman Login</title>
+    </head>
+    <body>
+        <section class="vh-100 ">
+            <div class="container-fluid"style="min-height: 100vh;">
+                <div class="row">
+                    <div class="col-md-7 text-center" id="label-section">
+                    <!-- <div class="col-md-7 text-center" id="label-section" style="min-height: 100vh; background-color: cornflowerblue;"> -->
+                        <img src="<?=base_url('themes/default/admin/assets/images/logo_transparent.png')?>" class="img-logo" alt="logo">
+                        <!-- <div class="text text-bold;">Productifity.</div> -->
+                        <!-- <div class="row">
+                            <label class="logo-text">Productifity</label>
+                        </div>
+                        <div class="row">
+                            <label class="logo-subtext">Management System</label>
+                        </div> -->
+                    </div>
+                    <div class="col-md-5" style="background-color: #f8f9fa; padding-top: 40px;">
+                        <div class="container-fluid">
+                            <div class="col-md-8 offset-2 pt-5">
+                                <!-- <img src="<?=base_url('assets/uploads/logos/' . $Settings->logo2)?>" class ="rounded" alt="logo" style="padding-top:50vh"; > -->
+                                <!-- <span type ="logoTxt">Productifity</span> -->
+                                <img src="<?=base_url('themes/default/admin/assets/images/logo_wtps.png')?>" class="img-login" alt="logo">
+                                <label class="login-info mb-3">Mohon dapat login dengan akun yang sudah diberikan oleh admin</label>
+                                <?php echo admin_form_open('auth/login', 'class="login" data-toggle="validator"'); ?>
+                                    <div class="form-group mb-3">
+                                        <label for="alamatEmail" class ="form-label">Username</label>
+                                        <input type ="text" class="form-control" id="alamatEmail" name="identity">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for ="Password" class ="form-label">Silahkan masukan password anda</label>
+                                        <input type ="password" class="form-control" id="Password" name="password">
+                                    </div>
+                                    <!-- <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="remember">
+                                        <label class ="form-check-label" for="remember">Remember Me</label>
+                                    </div> -->
+                                    <div class="form-group">
+                                        <button type="sumbit" class="btn btn-primary form-control">Login</button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <a class="" href="#">Forgot Password</a>
+                                    </div>
+                                    <!-- <div class="card">
+                                        <div class="card-header">
+                                            <strong>Admin login credentials</strong>
+                                        </div>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item"><strong>Email: </strong> superadmin@productify.com</li>
+                                            <li class="list-group-item" ><strong>Password: </strong> productify2022</li>
+                                        </ul>
+                                    </div> -->
+                                <?php echo form_close(); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
     <style>
-        body {
-            min-width: 350px;
+        .login-info{
+            font-weight: 700;
         }
-        .bblue {
-            background: #fff !important;
+        body{
+            color: #777;
+            font-family: 'Roboto', sans-serif;
         }
-        .login-page .page-back {
-            display: flex;
-            align-items: center;
-            flex-direction: column;
-            justify-content: center;
-            background-size: cover !important;
-            background-position: center !important;
-            background-image: url("<?= $bgs[mt_rand(0, count($bgs) - 1)] ?>") !important;
+        #label-section{
+            color: #fafafa;
+            height: 100vh;
+            background-color: #273573;
         }
-        .contents {
-            margin: 16px;
-            border-radius: 6px;
-            padding: 32px 16px;
-            background: rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.2);
+        .logo-text{
+            font-size: 50px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 3px;
+            font-style: italic;
         }
-        .login-content, .login-page .login-form-links {
-            margin-top: 20px;
-            border-radius: 6px;
+        .logo-subtext{
+            font-size: 20px;
+            text-transform: uppercase;
+            font-weight: normal;
+            letter-spacing: 9px;
+        }
+        .img-logo{
+            width: 70%;
+            position: relative;
+            padding-top: calc(50vh - 80px);
+        }
+        .img-login{
+            width: 200px;
+            margin-bottom: 20px;
         }
     </style>
-
-</head>
-
-<body class="login-page">
-    <noscript>
-        <div class="global-site-notice noscript">
-            <div class="notice-inner">
-                <p>
-                    <strong>JavaScript seems to be disabled in your browser.</strong><br>You must have JavaScript enabled in
-                    your browser to utilize the functionality of this website.
-                </p>
-            </div>
-        </div>
-    </noscript>
-    <div class="page-back">
-        <div class="contents">
-            <div class="text-center">
-                <?php if ($Settings->logo2) {
-    echo '<img src="' . base_url('assets/uploads/logos/' . $Settings->logo2) . '" alt="' . $Settings->site_name . '" style="margin-bottom:10px;" />';
-} ?>
-            </div>
-
-            <div id="login">
-                <div class="container">
-
-                    <div class="login-form-div">
-                        <div class="login-content">
-                            <?php if ($Settings->mmode) {
-    ?>
-                                <div class="alert alert-warning">
-                                    <button data-dismiss="alert" class="close" type="button">×</button>
-                                    <?= lang('site_offline') ?>
-                                </div>
-                                <?php
-}
-                            if ($error) {
-                                ?>
-                                <div class="alert alert-danger">
-                                    <button data-dismiss="alert" class="close" type="button">×</button>
-                                    <ul class="list-group"><?= $error; ?></ul>
-                                </div>
-                                <?php
-                            }
-                            if ($message) {
-                                ?>
-                                <div class="alert alert-success">
-                                    <button data-dismiss="alert" class="close" type="button">×</button>
-                                    <ul class="list-group"><?= $message; ?></ul>
-                                </div>
-                                <?php
-                            }
-                            ?>
-                            <?php echo admin_form_open('auth/login', 'class="login" data-toggle="validator"'); ?>
-                            <div class="div-title col-sm-12">
-                                <h3 class="text-primary"><?= lang('login_to_your_account') ?></h3>
-                            </div>
-                            <div class="col-sm-12">
-                                <div class="textbox-wrap form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                                        <input type="text" value="<?= DEMO ? 'owner@tecdiary.com' : ''; ?>" required="required" class="form-control" name="identity"
-                                        placeholder="<?= lang('username') ?>"/>
-                                    </div>
-                                </div>
-                                <div class="textbox-wrap form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="fa fa-key"></i></span>
-                                        <input type="password" value="<?= DEMO ? '12345678' : ''; ?>" required="required" class="form-control " name="password"
-                                        placeholder="<?= lang('pw') ?>"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php
-                            if ($Settings->captcha) {
-                                ?>
-                                <div class="col-sm-12">
-                                    <div class="textbox-wrap form-group">
-                                        <div class="row">
-                                            <div class="col-sm-6 div-captcha-left">
-                                                <span class="captcha-image"><?php echo $image; ?></span>
-                                            </div>
-                                            <div class="col-sm-6 div-captcha-right">
-                                                <div class="input-group">
-                                                    <span class="input-group-addon">
-                                                        <a href="<?= admin_url('auth/reload_captcha'); ?>" class="reload-captcha">
-                                                            <i class="fa fa-refresh"></i>
-                                                        </a>
-                                                    </span>
-                                                    <?php echo form_input($captcha); ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php
-                            } /* echo $recaptcha_html; */
-                            ?>
-
-                            <div class="form-action col-sm-12">
-                                <div class="checkbox pull-left">
-                                    <div class="custom-checkbox">
-                                        <?php echo form_checkbox('remember', '1', false, 'id="remember"'); ?>
-                                    </div>
-                                    <span class="checkbox-text pull-left"><label for="remember"><?= lang('remember_me') ?></label></span>
-                                </div>
-                                <button type="submit" class="btn btn-success pull-right"><?= lang('login') ?> &nbsp; <i class="fa fa-sign-in"></i></button>
-                            </div>
-                            <?php echo form_close(); ?>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="login-form-links link2">
-                            <h4 class="text-danger"><?= lang('forgot_your_password') ?></h4>
-                            <span><?= lang('dont_worry') ?></span>
-                            <a href="#forgot_password" class="text-danger forgot_password_link"><?= lang('click_here') ?></a>
-                            <span><?= lang('to_rest') ?></span>
-                        </div>
-                        <?php
-                        if ($Settings->allow_reg) {
-                            ?>
-                            <div class="login-form-links link1">
-                                <h4 class="text-info"><?= lang('dont_have_account') ?></h4>
-                                <span><?= lang('no_worry') ?></span>
-                                <a href="#register" class="text-info register_link"><?= lang('click_here') ?></a>
-                                <span><?= lang('to_register') ?></span>
-                            </div>
-                            <?php
-                        }
-                        ?>
-                    </div>
-                </div>
-            </div>
-
-            <div id="forgot_password" style="display: none;">
-                <div class=" container">
-                    <div class="login-form-div">
-                        <div class="login-content">
-                            <?php
-                            if ($error) {
-                                ?>
-                                <div class="alert alert-danger">
-                                    <button data-dismiss="alert" class="close" type="button">×</button>
-                                    <ul class="list-group"><?= $error; ?></ul>
-                                </div>
-                                <?php
-                            }
-                            if ($message) {
-                                ?>
-                                <div class="alert alert-success">
-                                    <button data-dismiss="alert" class="close" type="button">×</button>
-                                    <ul class="list-group"><?= $message; ?></ul>
-                                </div>
-                                <?php
-                            }
-                            ?>
-                            <div class="div-title col-sm-12">
-                                <h3 class="text-primary"><?= lang('forgot_password') ?></h3>
-                            </div>
-                            <?php echo admin_form_open('auth/forgot_password', 'class="login" data-toggle="validator"'); ?>
-                            <div class="col-sm-12">
-                                <p>
-                                    <?= lang('type_email_to_reset'); ?>
-                                </p>
-                                <div class="textbox-wrap form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-envelope"></i></span>
-                                        <input type="email" name="forgot_email" class="form-control "
-                                        placeholder="<?= lang('email_address') ?>" required="required"/>
-                                    </div>
-                                </div>
-                                <div class="form-action">
-                                    <a class="btn btn-success pull-left login_link" href="#login">
-                                        <i class="fa fa-chevron-left"></i> <?= lang('back') ?>
-                                    </a>
-                                    <button type="submit" class="btn btn-primary pull-right">
-                                        <?= lang('submit') ?> &nbsp;&nbsp; <i class="fa fa-envelope"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <?php echo form_close(); ?>
-                            <div class="clearfix"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php
-            if ($Settings->allow_reg) {
-                ?>
-                <div id="register">
-                    <div class="container">
-                        <div class="registration-form-div reg-content">
-                            <?php echo admin_form_open('auth/register', 'class="login" data-toggle="validator"'); ?>
-                            <div class="div-title col-sm-12">
-                                <h3 class="text-primary"><?= lang('register_account_heading') ?></h3>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?= lang('first_name', 'first_name'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-user"></i></span>
-                                        <input type="text" name="first_name" class="form-control " placeholder="<?= lang('first_name') ?>" required="required"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?= lang('last_name', 'last_name'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-user"></i></span>
-                                        <input type="text" name="last_name" class="form-control " placeholder="<?= lang('last_name') ?>" required="required"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?= lang('company', 'company'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-building"></i></span>
-                                        <input type="text" name="company" class="form-control " placeholder="<?= lang('company') ?>"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?= lang('phone', 'phone'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-phone-square"></i></span>
-                                        <input type="text" name="phone" class="form-control " placeholder="<?= lang('phone') ?>" required="required"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?= lang('username', 'username'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-user"></i></span>
-                                        <input type="text" name="username" class="form-control " placeholder="<?= lang('username') ?>" required="required"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?= lang('email', 'email'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-envelope"></i></span>
-                                        <input type="email" name="email" class="form-control " placeholder="<?= lang('email_address') ?>" required="required"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?php echo lang('password', 'password1'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-key"></i></span>
-                                        <?php echo form_password('password', '', 'class="form-control tip" id="password1" required="required" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" data-bv-regexp-message="' . lang('pasword_hint') . '"'); ?>
-                                    </div>
-                                    <span class="help-block"><?= lang('pasword_hint') ?></span>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <?php echo lang('confirm_password', 'confirm_password'); ?>
-                                    <div class="input-group">
-                                        <span class="input-group-addon "><i class="fa fa-key"></i></span>
-                                        <?php echo form_password('confirm_password', '', 'class="form-control" id="confirm_password" required="required" data-bv-identical="true" data-bv-identical-field="password" data-bv-identical-message="' . lang('pw_not_same') . '"'); ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-12">
-                                <a href="#login" class="btn btn-success pull-left login_link">
-                                    <i class="fa fa-chevron-left"></i> <?= lang('back') ?>
-                                </a>
-                                <button type="submit" class="btn btn-primary pull-right">
-                                    <?= lang('register_now') ?> <i class="fa fa-user"></i>
-                                </button>
-                            </div>
-
-                            <?php echo form_close(); ?>
-                            <div class="clearfix"></div>
-                        </div>
-                    </div>
-                </div>
-                <?php
-            }
-            ?>
-        </div>
-    </div>
-    <script src="<?= $assets ?>js/jquery.js"></script>
-    <script src="<?= $assets ?>js/bootstrap.min.js"></script>
-    <script src="<?= $assets ?>js/jquery.cookie.js"></script>
-    <script src="<?= $assets ?>js/login.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            localStorage.clear();
-            var hash = window.location.hash;
-            if (hash && hash != '') {
-                $("#login").hide();
-                $(hash).show();
-            }
-        });
-    </script>
-</body>
 </html>

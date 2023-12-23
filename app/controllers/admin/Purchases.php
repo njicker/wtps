@@ -1911,6 +1911,7 @@ class Purchases extends MY_Controller
     public function suggestions($type = "standard")
     {
         $term        = $this->input->get('term', true);
+        $cf1         = $this->input->get('cf1', true);
         $supplier_id = $this->input->get('supplier_id', true);
 
         if (strlen($term) < 1 || !$term) {
@@ -1928,7 +1929,18 @@ class Purchases extends MY_Controller
         $qty       = $analyzed['quantity'] ?? null;
         $bprice    = $analyzed['price']    ?? null;
 
-        $rows = $this->purchases_model->getProductNames($sr, 5, $type);
+        $rows = $this->purchases_model->getProductNames($sr, 5, $type, "");
+        if($cf1 != ""){
+            $rows_cf = $this->purchases_model->getProductNames($sr, 5, "", $cf1);
+            if($rows_cf){
+                if($rows){
+                    $rows = array_merge($rows, $rows_cf);
+                }
+                else {
+                    $rows = $rows_cf;
+                }
+            }
+        }
         if ($rows) {
             $r = 0;
             foreach ($rows as $row) {

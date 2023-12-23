@@ -954,7 +954,7 @@ class Auth_model extends CI_Model
 
         // Users table.
         $data = [
-            'username'   => $username,
+            'username'   => strtoupper($username),
             'password'   => $password,
             'email'      => $email,
             'ip_address' => $ip_address,

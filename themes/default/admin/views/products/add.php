@@ -124,7 +124,7 @@ if (!empty($variants)) {
                         <?= lang('weight', 'weight'); ?>
                         <?= form_input('weight', set_value('weight'), 'class="form-control tip" id="weight"'); ?>
                     </div>
-                    <div class="form-group all">
+                    <div class="form-group" style="display:none;">
                         <?= lang('barcode_symbology', 'barcode_symbology') ?>
                         <?php
                         $bs = ['code25' => 'Code25', 'code39' => 'Code39', 'code128' => 'Code128', 'ean8' => 'EAN8', 'ean13' => 'EAN13', 'upca' => 'UPC-A', 'upce' => 'UPC-E'];
@@ -454,7 +454,14 @@ if (!empty($variants)) {
                         <div class="col-md-4">
                             <div class="form-group all">
                                 <?= lang('pcf1', 'cf1') ?>
-                                <?= form_input('cf1', ($_POST['cf1'] ?? ($product ? $product->cf1 : '')), 'class="form-control tip" id="cf1"') ?>
+                                <?php
+                                    $dt[''] = '';
+                                    foreach($cf1 as $cf){
+                                        $dt[$cf->code] = $cf->descr;
+                                    }
+                                    echo form_dropdown('cf1', $dt, ($_POST['cf1'] ?? ($product ? $product->cf1 : '')), 'class="form-control tip" id="cf1"');
+                                    // form_input('cf1', ($_POST['cf1'] ?? ($product ? $product->cf1 : '')), 'class="form-control tip" id="cf1"') 
+                                ?>
                             </div>
                         </div>
 

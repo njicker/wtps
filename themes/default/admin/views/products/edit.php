@@ -115,7 +115,7 @@ if (!empty($variants)) {
                         <?= lang('weight', 'weight'); ?>
                         <?= form_input('weight', set_value('weight', ($product ? $product->weight : '')), 'class="form-control tip" id="weight"'); ?>
                     </div>
-                    <div class="form-group all">
+                    <div class="form-group" style="display:none;">
                         <?= lang('barcode_symbology', 'barcode_symbology') ?>
                         <?php
                         $bs = ['code25' => 'Code25', 'code39' => 'Code39', 'code128' => 'Code128', 'ean8' => 'EAN8', 'ean13' => 'EAN13', 'upca' => 'UPC-A', 'upce' => 'UPC-E'];
@@ -173,7 +173,7 @@ if (!empty($variants)) {
                         <?= lang('default_purchase_unit', 'default_purchase_unit'); ?>
                         <?= form_dropdown('default_purchase_unit', $uopts, $product->purchase_unit, 'class="form-control" id="default_purchase_unit" style="width:100%;"'); ?>
                     </div>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('product_cost', 'cost') ?>
                         <?= form_input('cost', (isset($_POST['cost']) ? $_POST['cost'] : ($product ? $this->sma->formatDecimal($product->cost) : '')), 'class="form-control tip" id="cost" required="required"') ?>
                     </div>
@@ -586,11 +586,11 @@ if (!empty($variants)) {
             if (t !== 'standard') {
                 $('.standard').slideUp();
                 // $('#unit').attr('disabled', true);
-                $('#cost').attr('disabled', true);
+                // $('#cost').attr('disabled', true);
             } else {
                 $('.standard').slideDown();
                 // $('#unit').attr('disabled', false);
-                $('#cost').attr('disabled', false);
+                // $('#cost').attr('disabled', false);
             }
             if (t !== 'digital') {
                 $('.digital').slideUp();
@@ -816,11 +816,11 @@ if (!empty($variants)) {
         if (t !== 'standard') {
             $('.standard').slideUp();
             // $('#unit').attr('disabled', true);
-            $('#cost').attr('disabled', true);
+            // $('#cost').attr('disabled', true);
         } else {
             $('.standard').slideDown();
             // $('#unit').attr('disabled', false);
-            $('#cost').attr('disabled', false);
+            // $('#cost').attr('disabled', false);
         }
         if (t !== 'digital') {
             $('.digital').slideUp();

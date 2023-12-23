@@ -1241,7 +1241,8 @@ class Products_model extends CI_Model
     public function addProduction($header, $detail){
         $err = false;
         foreach($detail as $dtl){
-            $dtl["product_batch"] = null;
+            // $dtl["product_batch"] = null;
+            // var_dump($dtl);exit;
             if(!$this->site->syncPurchaseQty($dtl, true, "production")){
                 $this->session->set_flashdata('error', 'Stock '.$dtl['product_code'].' tidak mencukupi');
                 $err = true;
@@ -1253,7 +1254,7 @@ class Products_model extends CI_Model
                 // if($this->db->insert('production_items', $detail)){
                     foreach($detail as $dtl){
                         if($this->db->insert('production_items', $dtl)){
-                            $dtl["product_batch"] = null;
+                            // $dtl["product_batch"] = null;
                             if(!$this->site->syncPurchaseQty($dtl, false, "production")){
                                 $err = true;
                                 break;

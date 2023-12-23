@@ -15,6 +15,7 @@
                     dataType: "json",
                     data: {
                         term: request.term,
+                        cf1: 'repack',
                         supplier_id: $("#posupplier").val()
                     },
                     success: function (data) {
@@ -130,6 +131,7 @@
                                             <th>Produk (Code - Nama)</th>
                                             <th>Qty</th>
                                             <th>UOM</th>
+                                            <th>Product Batch</th>
                                             <th>Gudang</th>
                                             <th></th>
                                         </tr>

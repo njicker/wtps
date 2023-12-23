@@ -55,12 +55,23 @@ class Customers extends MY_Controller
                 'cf6'                 => $this->input->post('cf6'),
                 'gst_no'              => $this->input->post('gst_no'),
             ];
+
+            $bill_to = $this->input->post('bill_to');
         } elseif ($this->input->post('add_customer')) {
             $this->session->set_flashdata('error', validation_errors());
             admin_redirect('customers');
         }
 
         if ($this->form_validation->run() == true && $cid = $this->companies_model->addCompany($data)) {
+            if(isset($bill_to)){
+                $partner = [
+                    'cust_id' => $cid,
+                    'partner_type' => 'biller',
+                    'partner_id' => $bill_to,
+                    'created_by' => $this->session->userdata('user_id'),
+                ];
+                $this->companies_model->addCustomerPartner($partner);
+            }
             $this->session->set_flashdata('message', lang('customer_added'));
             $ref = isset($_SERVER['HTTP_REFERER']) ? explode('?', $_SERVER['HTTP_REFERER']) : null;
             admin_redirect($ref[0] . '?customer=' . $cid);
@@ -69,6 +80,7 @@ class Customers extends MY_Controller
             $this->data['modal_js']        = $this->site->modal_js();
             $this->data['customer_groups'] = $this->companies_model->getAllCustomerGroups();
             $this->data['price_groups']    = $this->companies_model->getAllPriceGroups();
+            $this->data['billers']         = $this->site->getAllCompanies('biller');
             $this->load->view($this->theme . 'customers/add', $this->data);
         }
     }
@@ -409,12 +421,24 @@ class Customers extends MY_Controller
                 'award_points'        => $this->input->post('award_points'),
                 'gst_no'              => $this->input->post('gst_no'),
             ];
+            $bill_to = $this->input->post('bill_to');
         } elseif ($this->input->post('edit_customer')) {
             $this->session->set_flashdata('error', validation_errors());
             redirect($_SERVER['HTTP_REFERER']);
         }
 
         if ($this->form_validation->run() == true && $this->companies_model->updateCompany($id, $data)) {
+            if(isset($bill_to)){
+                if($this->companies_model->deleteCustomerPartner($id, 'biller')){
+                    $partner = [
+                        'cust_id' => $id,
+                        'partner_type' => 'biller',
+                        'partner_id' => $bill_to,
+                        'created_by' => $this->session->userdata('user_id'),
+                    ];
+                    $this->companies_model->addCustomerPartner($partner);
+                }
+            }
             $this->session->set_flashdata('message', lang('customer_updated'));
             redirect($_SERVER['HTTP_REFERER']);
         } else {
@@ -423,6 +447,8 @@ class Customers extends MY_Controller
             $this->data['modal_js']        = $this->site->modal_js();
             $this->data['customer_groups'] = $this->companies_model->getAllCustomerGroups();
             $this->data['price_groups']    = $this->companies_model->getAllPriceGroups();
+            $this->data['billers']         = $this->site->getAllCompanies('biller');
+            $this->data['partner']         = $this->companies_model->getCustomerPartner($id , 'biller');
             $this->load->view($this->theme . 'customers/edit', $this->data);
         }
     }
@@ -555,7 +581,8 @@ class Customers extends MY_Controller
             ->select('id, company, name, email, phone, price_group_name, customer_group_name, vat_no, gst_no, deposit_amount, award_points')
             ->from('companies')
             ->where('group_name', 'customer')
-            ->add_column('Actions', "<div class=\"text-center\"><a class=\"tip\" title='" . lang('list_deposits') . "' href='" . admin_url('customers/deposits/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-money\"></i></a> <a class=\"tip\" title='" . lang('add_deposit') . "' href='" . admin_url('customers/add_deposit/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-plus\"></i></a> <a class=\"tip\" title='" . lang('list_addresses') . "' href='" . admin_url('customers/addresses/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-location-arrow\"></i></a> <a class=\"tip\" title='" . lang('list_users') . "' href='" . admin_url('customers/users/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-users\"></i></a> <a class=\"tip\" title='" . lang('add_user') . "' href='" . admin_url('customers/add_user/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-user-plus\"></i></a> <a class=\"tip\" title='" . lang('edit_customer') . "' href='" . admin_url('customers/edit/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>" . lang('delete_customer') . "</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('customers/delete/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'id');
+            // ->add_column('Actions', "<div class=\"text-center\"><a class=\"tip\" title='" . lang('list_deposits') . "' href='" . admin_url('customers/deposits/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-money\"></i></a> <a class=\"tip\" title='" . lang('add_deposit') . "' href='" . admin_url('customers/add_deposit/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-plus\"></i></a> <a class=\"tip\" title='" . lang('list_addresses') . "' href='" . admin_url('customers/addresses/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-location-arrow\"></i></a> <a class=\"tip\" title='" . lang('list_users') . "' href='" . admin_url('customers/users/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-users\"></i></a> <a class=\"tip\" title='" . lang('add_user') . "' href='" . admin_url('customers/add_user/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-user-plus\"></i></a> <a class=\"tip\" title='" . lang('edit_customer') . "' href='" . admin_url('customers/edit/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>" . lang('delete_customer') . "</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('customers/delete/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'id');
+            ->add_column('Actions', "<div class=\"text-center\"><a class=\"tip\" title='" . lang('edit_customer') . "' href='" . admin_url('customers/edit/$1') . "' data-toggle='modal' data-target='#myModal'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>" . lang('delete_customer') . "</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('customers/delete/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'id');
         //->unset_column('id');
         echo $this->datatables->generate();
     }

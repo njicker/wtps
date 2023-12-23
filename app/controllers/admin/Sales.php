@@ -70,6 +70,7 @@ class Sales extends MY_Controller
             $note             = $this->sma->clear_tags($this->input->post('note'));
             $staff_note       = $this->sma->clear_tags($this->input->post('staff_note'));
             $quote_id         = $this->input->post('quote_id') ? $this->input->post('quote_id') : null;
+            $salesman_id      = $this->input->post('salesman_id');
 
             $total            = 0;
             $product_tax      = 0;
@@ -193,6 +194,7 @@ class Sales extends MY_Controller
                 'paid'                => 0,
                 'created_by'          => $this->session->userdata('user_id'),
                 'hash'                => hash('sha256', microtime() . mt_rand()),
+                'salesman_id'         => $salesman_id,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
@@ -353,9 +355,11 @@ class Sales extends MY_Controller
             $this->data['error']      = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['quote_id']   = $quote_id ? $quote_id : $sale_id;
             $this->data['billers']    = $this->site->getAllCompanies('biller');
+            $this->data['partners']   = $this->site->getAllPartners('biller');
             $this->data['warehouses'] = $this->site->getAllWarehouses();
             $this->data['tax_rates']  = $this->site->getAllTaxRates();
             $this->data['units']      = $this->site->getAllBaseUnits();
+            $this->data['salesman']   = $this->site->getAllEmployee('Sales');
             //$this->data['currencies'] = $this->sales_model->getAllCurrencies();
             $this->data['slnumber']    = ''; //$this->site->getReference('so');
             $this->data['payment_ref'] = ''; //$this->site->getReference('pay');

@@ -122,6 +122,7 @@
                                             <th>Produk (Code - Nama)</th>
                                             <th>Qty</th>
                                             <th>UOM</th>
+                                            <th>Batch</th>
                                             <th>Gudang</th>
                                             <th>Unit Cost</th>
                                             <th>Total Cost</th>
@@ -135,6 +136,7 @@
                                                 $tr .= "<td>" . $dtl->product_code . " - " . $dtl->name . "</td>";
                                                 $tr .= "<td>" . $dtl->qty . "</td>";
                                                 $tr .= "<td>" . $dtl->unit_code . "</td>";
+                                                $tr .= "<td>" . $dtl->product_batch . "</td>";
                                                 $tr .= "<td>" . $warehouse[$dtl->warehouse_id] . "</td>";
                                                 $tr .= "<td>" . number_format($dtl->product_unit_cost) . "</td>";
                                                 $tr .= "<td>" . number_format($dtl->product_total_cost) . "</td>";

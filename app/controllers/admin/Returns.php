@@ -218,6 +218,7 @@ class Returns extends MY_Controller
                 'created_by'        => $this->session->userdata('user_id'),
                 'hash'              => hash('sha256', microtime() . mt_rand()),
                 'delv_id'           => $delv_id,
+                'shipping'          => $shipping,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;

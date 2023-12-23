@@ -14,7 +14,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                    <label class="control-label" for="customer_group"><?php echo $this->lang->line('customer_group'); ?></label>
+                        <label class="control-label" for="customer_group"><?php echo $this->lang->line('customer_group'); ?></label>
                         <?php
                         foreach ($customer_groups as $customer_group) {
                             $cgs[$customer_group->id] = $customer_group->name;
@@ -40,11 +40,11 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group company">
-                        <?= lang('company', 'company'); ?>
+                        <label>Nama Perusahaan</label>
                         <?php echo form_input('company', '', 'class="form-control tip" id="company" data-bv-notempty="true"'); ?>
                     </div>
                     <div class="form-group person">
-                        <?= lang('name', 'name'); ?>
+                        <label>Nama Singkat</label>
                         <?php echo form_input('name', '', 'class="form-control tip" id="name" data-bv-notempty="true"'); ?>
                     </div>
                     <div class="form-group">
@@ -89,6 +89,16 @@
 
                 </div>
                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Bill to</label>
+                        <?php
+                        $bl[''] = 'Pilih Bill to';
+                        foreach ($billers as $biller) {
+                            $bl[$biller->id] = $biller->company && $biller->company != '-' ? $biller->company : $biller->name;
+                        }
+                        echo form_dropdown('bill_to', $bl, '', 'class="form-control select" id="bill_to" style="width:100%;" required="required"');
+                        ?>
+                    </div>
                     <div class="form-group">
                         <?= lang('postal_code', 'postal_code'); ?>
                         <?php echo form_input('postal_code', '', 'class="form-control" id="postal_code"'); ?>

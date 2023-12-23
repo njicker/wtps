@@ -111,6 +111,7 @@
                                             <th>Qty</th>
                                             <th style="width:100px;">Confirm Qty</th>
                                             <th>UOM</th>
+                                            <th>Product batch</th>
                                             <th>Gudang</th>
                                             <!-- <th>Total Cost</th> -->
                                         </tr>
@@ -131,6 +132,7 @@
                                                 $tr .= "<input type='hidden' name='raw_purchase_id[]' value='" . $dtl->purchase_id . "'/>";
                                                 $tr .= "</td>";
                                                 $tr .= "<td>" . $dtl->unit_code . "</td>";
+                                                $tr .= "<td>" . $dtl->product_batch . "</td>";
                                                 $tr .= "<td>" . $warehouse[$dtl->warehouse_id] . "</td>";
                                             $tr .= "</tr>";
                                             echo $tr;

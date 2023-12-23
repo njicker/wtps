@@ -6,7 +6,7 @@ $(document).ready(function (e) {
     }
     var $customer = $('#slcustomer');
     $customer.change(function (e) {
-        localStorage.setItem('slcustomer', $(this).val());
+        // localStorage.setItem('slcustomer', $(this).val());
         //$('#slcustomer_id').val($(this).val());
     });
     if ((slcustomer = localStorage.getItem('slcustomer'))) {
@@ -20,6 +20,7 @@ $(document).ready(function (e) {
                     url: site.base_url + 'customers/getCustomer/' + $(element).val(),
                     dataType: 'json',
                     success: function (data) {
+                        console.log(data[0]);
                         callback(data[0]);
                     },
                 });
@@ -36,6 +37,7 @@ $(document).ready(function (e) {
                 },
                 results: function (data, page) {
                     if (data.results != null) {
+                        console.log(data.results);
                         return { results: data.results };
                     } else {
                         return { results: [{ id: '', text: 'No Match Found' }] };

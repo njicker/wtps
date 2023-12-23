@@ -20,6 +20,9 @@ function add_production_item(item) {
             tr += "</select>";
         tr += "</td>";
         tr += "<td>";
+            tr += "<input type='text' name='product_batch[]' class='form-control' required='required'>";
+        tr += "</td>";
+        tr += "<td>";
             tr += wh[0].outerHTML;
         tr += "</td>";
         tr += "<td>";

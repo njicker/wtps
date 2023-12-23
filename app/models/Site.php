@@ -659,13 +659,14 @@ class Site extends CI_Model
         return false;
     }
 
-    public function getPurchasedItems($product_id, $warehouse_id, $option_id = null, $nonPurchased = false, $product_batch = null)
+    public function getPurchasedItems($product_id, $warehouse_id, $option_id = null, $nonPurchased = false, $product_batch = 'XXXX')
     {
         $orderby = empty($this->Settings->accounting_method) ? 'asc' : 'desc';
         // $this->db->select('id, purchase_id, quantity, quantity_balance, net_unit_cost, unit_cost, item_tax, base_unit_cost');
         $this->db->select('*');
         $this->db->where('product_id', $product_id)->where('warehouse_id', $warehouse_id)->where('quantity_balance !=', 0);
-        if($product_batch != null){
+        if($product_batch != 'XXXX'){
+            // var_dump($product_batch);exit;
             $this->db->where('product_batch', $product_batch);
         }
         if (!isset($option_id) || empty($option_id)) {
@@ -1462,7 +1463,9 @@ class Site extends CI_Model
                 }
             }
             return false;
-        }else{
+        }
+        else
+        {
             $purchase = $this->getPurchasedItems($item['product_id'], $item['warehouse_id'], null, false, $item["product_batch"]);
         }
 
@@ -1544,6 +1547,50 @@ class Site extends CI_Model
             return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
         }
 
+        return false;
+    }
+
+    public function getAllPartners($partner_type)
+    {
+        $q = $this->db->get_where('customer_partner', ['partner_type' => $partner_type]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getAllEmployee($dept = "")
+    {
+        // $q = $this->db->get_where('units', ['base_unit' => null]);
+        if($dept != ""){
+            $this->db->where('department', $dept);
+        }
+        $q = $this->db->get('users');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getListProductCF($cf = "")
+    {
+        // $q = $this->db->get_where('units', ['base_unit' => null]);
+        if($cf != ""){
+            $this->db->where('cf_group', $cf);
+        }
+        $q = $this->db->get('product_cf');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
         return false;
     }
 }

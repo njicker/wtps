@@ -270,11 +270,9 @@
                                 <div class="form-group">
                                     <?= lang('biller', 'slbiller'); ?>
                                     <?php
-                                    $bl[''] = '';
-                    foreach ($billers as $biller) {
-                        $bl[$biller->id] = $biller->company && $biller->company != '-' ? $biller->company : $biller->name;
-                    }
-                    echo form_dropdown('biller', $bl, ($_POST['biller'] ?? $Settings->default_biller), 'id="slbiller" data-placeholder="' . lang('select') . ' ' . lang('biller') . '" required="required" class="form-control input-tip select" style="width:100%;"'); ?>
+                                        $bl[''] = '';
+                                        echo form_dropdown('biller', $bl, ($_POST['biller'] ?? $Settings->default_biller), 'id="slbiller" data-placeholder="' . lang('select') . ' ' . lang('biller') . '" required="required" class="form-control input-tip select" style="width:100%;"');
+                                    ?>
                                 </div>
                             </div>
                         <?php
@@ -288,6 +286,18 @@
 
                     echo form_input($biller_input);
                 } ?>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Salesman</label>
+                                <?php 
+                                    $sl[''] = 'Pilih Salesman';
+                                    foreach($salesman as $sales){
+                                        $sl[$sales->id] = "(".$sales->username.") ".$sales->first_name." ".$sales->last_name;
+                                    }
+                                    echo form_dropdown('salesman_id', $sl, ($_POST['salesman_id'] ?? ''), 'id="slsalesman" data-placeholder="' . lang('select') . ' Salesman" required="required" class="form-control input-tip select" style="width:100%;"');
+                                ?>
+                            </div>
+                        </div>
 
                         <div class="clearfix"></div>
                         <div class="col-md-12">
@@ -926,6 +936,13 @@
         </div>
     </div>
 </div>
+<div style="display:none;">
+<?php
+$bl = array();
+foreach ($billers as $biller) {
+    $bl[$biller->id] = $biller->company && $biller->company != '-' ? $biller->company : $biller->name;
+}
+?>
 <script type="text/javascript">
     $(document).ready(function () {
         $('#gccustomer').select2({
@@ -954,5 +971,20 @@
             $(this).parent().parent('.input-group').children('input').val(no);
             return false;
         });
+
+        var biller = JSON.parse('<?=json_encode($bl)?>');
+        var partner = JSON.parse('<?=json_encode($partners)?>');
+        console.log(partner);
+
+        $("#slcustomer").change(function(){
+            var id = $(this).val();
+            $("#slbiller").select2("val", "");
+            $("#slbiller").empty();
+            for(let p of partner){
+                if(p.cust_id == id){
+                    $("#slbiller").append("<option value='"+ p.partner_id +"'>"+ biller[p.partner_id] +"</option>");
+                }
+            }
+        })
     });
 </script>

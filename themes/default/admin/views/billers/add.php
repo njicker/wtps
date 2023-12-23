@@ -11,7 +11,7 @@
         <div class="modal-body">
             <p><?= lang('enter_info'); ?></p>
 
-            <div class="row">
+            <!-- <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= lang('logo', 'biller_logo'); ?>
@@ -27,15 +27,15 @@
                 <div class="col-md-6">
                     <div id="logo-con" class="text-center"></div>
                 </div>
-            </div>
+            </div> -->
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group company">
-                        <?= lang('company', 'company'); ?>
+                        <label>Nama Perusahaan</label>
                         <?php echo form_input('company', '', 'class="form-control tip" id="company" data-bv-notempty="true"'); ?>
                     </div>
                     <div class="form-group person">
-                        <?= lang('name', 'name'); ?>
+                        <label>Nama Singkat</label>
                         <?php echo form_input('name', '', 'class="form-control tip" id="name" data-bv-notempty="true"'); ?>
                     </div>
                     <div class="form-group">

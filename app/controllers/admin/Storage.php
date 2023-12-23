@@ -19,6 +19,7 @@ class Storage extends MY_Controller
         $this->lang->admin_load('storage', $this->Settings->user_language);
         $this->load->library('form_validation');
         $this->load->admin_model('storage_model');
+        $this->load->admin_model('products_model');
         $this->load->helper('reference_helper');
         $this->digital_upload_path = 'files/';
         $this->upload_path         = 'assets/uploads/';
@@ -36,7 +37,7 @@ class Storage extends MY_Controller
         $this->data['products'] = $this->storage_model->getListProducts();
         
         $bc                        = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('storage'), 'page' => 'Gudang']];
-        $meta                      = ['page_title' => lang('add_sale'), 'bc' => $bc];
+        $meta                      = ['page_title' => 'Stock Gudang', 'bc' => $bc];
         $this->page_construct('storage/index', $meta, $this->data);
     }
 
@@ -126,7 +127,7 @@ class Storage extends MY_Controller
         if ($this->form_validation->run() == true && $this->storage_model->addDamage($header, $detail)) {
             $this->session->set_userdata('remove_rels', 1);
             $this->session->set_flashdata('message', "Damage berhasil ditambahkan");
-            admin_redirect('storage/add_damage');
+            admin_redirect('storage/damage');
         }
         else {
             $warehouse = $this->site->getAllWarehouses();
@@ -152,6 +153,59 @@ class Storage extends MY_Controller
         $bc                 = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('storage'), 'page' => 'Gudang'], ['link' => '#', 'page' => $this->data['title']]];
         $meta               = ['page_title' => $this->data['title'], 'bc' => $bc];
         $this->page_construct('storage/damage', $meta, $this->data);
+    }
+
+    public function view_damage($id){
+        $this->sma->checkPermissions();
+
+        $this->data["title"] = "View Damage";
+        $warehouse = $this->site->getAllWarehouses();
+        foreach ($warehouse as $warehouse) {
+            $wh[$warehouse->id] = $warehouse->name;
+        }
+        // var_dump($wh);exit;
+        $this->data['warehouses'] = $wh;
+        $this->data['header'] = $this->storage_model->getDamage(["id" => $id]);
+        $this->data['detail'] = $this->storage_model->getListDamageItems(["damage_id" => $id]);
+        
+        $bc                 = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('storage'), 'page' => 'Gudang'], ['link' => '#', 'page' => $this->data['title']]];
+        $meta               = ['page_title' => $this->data['title'], 'bc' => $bc];
+        $this->page_construct('storage/view_damage', $meta, $this->data);
+    }
+
+    public function get_damage(){
+        $this->sma->checkPermissions("damage");
+        $this->load->library('datatables');
+
+        $this->datatables
+            ->select("reference, total_amount, reason, created_by, created_at, id ")
+            ->from('damage');
+        // $this->datatables->add_column('Actions', $action, 'id');
+        $data = $this->datatables->generate();
+        $decode = json_decode($data);
+        // var_dump($decode);exit;
+        $finish = array();
+        foreach($decode->aaData as $dt){
+            $usr = $this->products_model->getUser(["id" => $dt[3]]);
+            if($usr != false){
+                $dt[3] = $usr->first_name . " " . $usr->last_name;
+            }
+            $action = '<div class="text-center"><div class="btn-group text-left">'
+            . '<button type="button" class="btn btn-default btn-xs btn-primary dropdown-toggle" data-toggle="dropdown">'
+            . lang('actions') . ' <span class="caret"></span></button>
+            <ul class="dropdown-menu pull-right" role="menu">';
+
+            $link_view = anchor('admin/storage/view_damage/'.$dt[5], '<i class="fa fa-file"></i> ' . 'View Damage');
+            $action .= "<li>" . $link_view . "</li>";
+
+            $action .= '</ul>
+            </div></div>';
+            $dt[5] = $action;
+            $finish[] = $dt;
+        }
+        $decode->aaData = $finish;
+        
+        echo json_encode($decode);
     }
 }
 
