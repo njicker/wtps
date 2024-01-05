@@ -25,6 +25,10 @@ class Site extends CI_Model
             $avg_net_unit_cost = ($con - $ctax['amount']);
         }
 
+        if(!isset($product_batch)){
+            $product_batch = "";
+        }
+
         if ($pis = $this->getPurchasedItems($product_id, $warehouse_id, $option_id, false, $product_batch)) {
             $cost_row    = [];
             $quantity    = $item_quantity;
@@ -1147,10 +1151,6 @@ class Site extends CI_Model
                     $this->db->insert('warehouses_products', ['quantity' => $wh_balance_qty, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id, 'product_batch' => $product_batch]);
                 }
             }
-            // Insert to storage
-            // Get Data from session
-            $data = $this->session->userdata('data_storage');
-            // Insert to db
             return true;
         }
         return false;
@@ -1585,6 +1585,89 @@ class Site extends CI_Model
             $this->db->where('cf_group', $cf);
         }
         $q = $this->db->get('product_cf');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getAllPaymentTerms()
+    {
+        $this->db->order_by('num_day');
+        $q = $this->db->get('payment_terms');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return [];
+    }
+
+    public function submitMovementItem($data, $replace = false){
+        if($replace){
+            $this->db->update('item_movement',
+                [
+                    'flag_delete' => 'X'
+                ],
+                [
+                    'reff_type' => $data['reff_type'], 
+                    'reff_no' => $data['reff_no'],
+                    'product_id' => $data['product_id'],
+                    'product_batch' => $data['product_batch'],
+                ]
+            );
+        }
+        $this->db->insert('item_movement', $data);
+    }
+
+    public function syncInvoicePayments($id)
+    {
+        $invoice = $this->getInvoicesByID($id);
+        if ($payments = $this->getInvoicePayments($id)) {
+            $paid        = 0;
+            $grand_total = $invoice->total_amount;
+            foreach ($payments as $payment) {
+                $paid += $payment->amount;
+            }
+
+            $payment_status = $paid == 0 ? 'pending' : $invoice->status_payment;
+            if ($this->sma->formatDecimal($grand_total) == 0 || $this->sma->formatDecimal($grand_total) <= $this->sma->formatDecimal($paid)) {
+                $payment_status = 'paid';
+            } elseif (strtotime($invoice->due_date) <= strtotime("now") && !$invoice->id) {
+                $payment_status = 'due';
+            } elseif ($paid != 0) {
+                $payment_status = 'partial';
+            }
+
+            if ($this->db->update('invoices', ['total_paid' => $paid, 'status_payment' => $payment_status], ['id' => $id])) {
+                return true;
+            }
+        } else {
+            $payment_status = (strtotime($invoice->due_date) <= strtotime("now")) ? 'due' : 'pending';
+            if ($this->db->update('invoices', ['total_paid' => 0, 'status_payment' => $payment_status], ['id' => $id])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getInvoicesByID($id)
+    {
+        $q = $this->db->get_where('invoices', ['id' => $id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function getInvoicePayments($invoice_id)
+    {
+        $q = $this->db->get_where('payments', ['invoice_id' => $invoice_id]);
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;

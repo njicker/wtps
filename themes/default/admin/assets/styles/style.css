@@ -1517,7 +1517,7 @@ label { margin-top: 5px;
 .supplier_details_link td:last-child {
     cursor: default;
 }
-.purchase_link, .transfer_link, .invoice_link, .quote_link, .delivery_link, .return_link, .return_purchase_link, .receipt_link, .payment_link, .payment_link2, .invoice_link2, .purchase_link2, .expense_link2, .transfer_link2, .quote_link2, .row_status, .adjustment_link, .adjustment_link2 {
+.purchase_link, .transfer_link, .invoice_link, .invoice_link_new, .quote_link, .delivery_link, .return_link, .return_purchase_link, .receipt_link, .payment_link, .payment_link2, .invoice_link2, .purchase_link2, .expense_link2, .transfer_link2, .quote_link2, .row_status, .adjustment_link, .adjustment_link2 {
     cursor: pointer;
 }
 .purchase_link td:first-child,
@@ -1532,6 +1532,10 @@ label { margin-top: 5px;
 .invoice_link td:last-child,
 .invoice_link td:nth-last-child(2),
 .invoice_link td:nth-child(6),
+.invoice_link_new td:first-child,
+.invoice_link_new td:last-child,
+.invoice_link_new td:nth-last-child(2),
+.invoice_link_new td:nth-child(6),
 .receipt_link td:first-child,
 .receipt_link td:last-child,
 .quote_link td:first-child,

@@ -304,6 +304,7 @@ class Purchases extends MY_Controller
             $this->data['categories'] = $this->site->getAllCategories();
             $this->data['tax_rates']  = $this->site->getAllTaxRates();
             $this->data['warehouses'] = $this->site->getAllWarehouses();
+            $this->data['payment_terms']  = $this->site->getAllPaymentTerms();
             $this->data['ponumber']   = ''; //$this->site->getReference('po');
             $this->load->helper('string');
             $value = random_string('alnum', 20);
@@ -492,6 +493,21 @@ class Purchases extends MY_Controller
             $id = $this->input->get('id');
         }
 
+        $isErr = false;
+        $msg = "";
+        $pur                 = $this->purchases_model->getPurchaseByID($id);
+        if($pur->status != ""){
+            $msg = 'Tidak bisa hapus pembelian karena sudah terima barang, mohon lakukan retur pembelian';
+            $isErr = true;
+        }
+        if($pur->payment_status != "pending"){
+            $msg = 'Tidak bisa hapus pembelian karena sudah ada pembayaran, mohon hapus pembayaran terlebih dahulu';
+            $isErr = true;
+        }
+        if($isErr){
+            $this->sma->send_json(['error' => 1, 'msg' => $msg]);
+            admin_redirect('welcome');
+        }
         if ($this->purchases_model->deletePurchase($id)) {
             if ($this->input->is_ajax_request()) {
                 $this->sma->send_json(['error' => 0, 'msg' => lang('purchase_deleted')]);
@@ -589,7 +605,7 @@ class Purchases extends MY_Controller
                 $unit_cost          = $this->sma->formatDecimal($_POST['unit_cost'][$r]);
                 $real_unit_cost     = $this->sma->formatDecimal($_POST['real_unit_cost'][$r]);
                 $item_unit_quantity = $_POST['quantity'][$r];
-                $quantity_received  = $_POST['received_base_quantity'][$r];
+                $quantity_received  = $_POST['received_base_quantity'][$r] + $_POST['already_received'][$r];
                 $item_option        = isset($_POST['product_option'][$r]) && $_POST['product_option'][$r] != 'false' && $_POST['product_option'][$r] != 'undefined' ? $_POST['product_option'][$r] : null;
                 $item_tax_rate      = $_POST['product_tax'][$r]      ?? null;
                 $item_discount      = $_POST['product_discount'][$r] ?? null;
@@ -602,7 +618,7 @@ class Purchases extends MY_Controller
 
                 if ($status == 'received' || $status == 'partial') {
                     if ($quantity_received < $item_quantity) {
-                        $partial = 'partial';
+                        $status = 'partial';
                     } elseif ($quantity_received > $item_quantity) {
                         $this->session->set_flashdata('error', lang('received_more_than_ordered'));
                         redirect($_SERVER['HTTP_REFERER']);
@@ -685,7 +701,8 @@ class Purchases extends MY_Controller
                 $this->form_validation->set_rules('product', lang('order_items'), 'required');
             } else {
                 foreach ($items as $item) {
-                    $item['status'] = ($status == 'partial') ? 'received' : $status;
+                    // $item['status'] = ($status == 'partial') ? 'received' : $status;
+                    $item['status'] = $status;
                     $products[]     = $item;
                 }
                 krsort($products);
@@ -760,6 +777,11 @@ class Purchases extends MY_Controller
                     redirect($_SERVER['HTTP_REFERER']);
                 }
             }
+            $purchase_header = $this->purchases_model->getPurchaseByID($id);
+            if($purchase_header->status == "received"){
+                $this->session->set_flashdata('error', 'Pembelian tidak bisa diubah karena sudah terima barang');
+                redirect($_SERVER['HTTP_REFERER']);
+            }
             $inv_items = $this->purchases_model->getAllPurchaseItems($id);
             // krsort($inv_items);
             $c = rand(100000, 9999999);
@@ -798,7 +820,7 @@ class Purchases extends MY_Controller
             $this->data['inv_items']  = json_encode($pr);
             $this->data['id']         = $id;
             $this->data['suppliers']  = $this->site->getAllCompanies('supplier');
-            $this->data['purchase']   = $this->purchases_model->getPurchaseByID($id);
+            $this->data['purchase']   = $purchase_header;
             $this->data['categories'] = $this->site->getAllCategories();
             $this->data['tax_rates']  = $this->site->getAllTaxRates();
             $this->data['warehouses'] = $this->site->getAllWarehouses();
@@ -1248,6 +1270,7 @@ class Purchases extends MY_Controller
                 ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
                 ->from('purchases');
         }
+        $this->datatables->where('supplier_id !=', '999');
         // $this->datatables->where('status !=', 'returned');
         if (!$this->Customer && !$this->Supplier && !$this->Owner && !$this->Admin && !$this->session->userdata('view_right')) {
             $this->datatables->where('created_by', $this->session->userdata('user_id'));

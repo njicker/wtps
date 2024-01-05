@@ -1214,6 +1214,7 @@ class Products extends MY_Controller
             $this->data['product_variants']    = $this->products_model->getProductOptions($id);
             $this->data['combo_items']         = $product->type == 'combo' ? $this->products_model->getProductComboItems($product->id) : null;
             $this->data['product_options']     = $id ? $this->products_model->getProductOptionsWithWH($id) : null;
+            $this->data['cf1']                 = $this->site->getListProductCF('cf1');
             $bc                                = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('products'), 'page' => lang('products')], ['link' => '#', 'page' => lang('edit_product')]];
             $meta                              = ['page_title' => lang('edit_product'), 'bc' => $bc];
             $this->page_construct('products/edit', $meta, $this->data);

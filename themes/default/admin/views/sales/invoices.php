@@ -18,7 +18,7 @@
             "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "<?= lang('all') ?>"]],
             "iDisplayLength": <?= $Settings->rows_per_page ?>,
             'bProcessing': true, 'bServerSide': true,
-            'sAjaxSource': '<?= admin_url('sales/getDeliveries') ?>',
+            'sAjaxSource': '<?= admin_url('sales/getInvoices') ?>',
             'fnServerData': function (sSource, aoData, fnCallback) {
                 aoData.push({
                     "name": "<?= $this->security->get_csrf_token_name() ?>",
@@ -29,24 +29,20 @@
             'fnRowCallback': function (nRow, aData, iDisplayIndex) {
                 var oSettings = oTable.fnSettings();
                 nRow.id = aData[0];
-                nRow.className = "delivery_link";
+                nRow.className = "invoice_link_new";
                 return nRow;
             },
-            "aoColumns": [{"bSortable": false,"mRender": checkbox}, {"mRender": fld}, null, {sClass: 'no_so'}, null, null, {"mRender": ds}, null, {"bSortable": false,"mRender": attachment}, {"bSortable": false}]
+            "aoColumns": [{"bSortable": false,"mRender": checkbox}, {"mRender": fsd}, null, null, null, {"mRender": currencyFormat}, {"mRender": currencyFormat}, {"mRender": pay_status}, {"mRender": fsd}, {"bSortable": false}]
         }).fnSetFilteringDelay().dtFilter([
-            {column_number: 1, filter_default_label: "[<?=lang('date');?> (yyyy-mm-dd)]", filter_type: "text", data: []},
-            {column_number: 2, filter_default_label: "[<?=lang('do_reference_no');?>]", filter_type: "text", data: []},
-            {column_number: 3, filter_default_label: "[<?=lang('sale_reference_no');?>]", filter_type: "text", data: []},
-            {column_number: 4, filter_default_label: "[<?=lang('customer');?>]", filter_type: "text", data: []},
-            {column_number: 5, filter_default_label: "[<?=lang('address');?>]", filter_type: "text", data: []},
-            {column_number: 6, filter_default_label: "[<?=lang('status');?>]", filter_type: "text", data: []},
         ], "footer");
     });
 </script>
-<?= admin_form_open('sales/delivery_actions', 'id="action-form"') ?>
+<?php if ($Owner) {
+    ?><?= admin_form_open('sales/delivery_actions', 'id="action-form"') ?><?php
+} ?>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-truck"></i><?= lang('deliveries'); ?></h2>
+        <h2 class="blue"><i class="fa-fw fa fa-money"></i>Daftar Tagihan</h2>
 
         <div class="box-icon">
             <ul class="btn-tasks">
@@ -58,17 +54,12 @@
                         <li><a href="#" id="excel" data-action="export_excel"><i class="fa fa-file-excel-o"></i> <?= lang('export_to_excel') ?></a></li>
                         <li class="divider"></li>
                         <li>
-                            <a href="#" id="create_invoice" data-action="create_invoice">
-                                <i class="fa fa-money"></i> Create Invoice
-                            </a>
-                        </li>
-                        <!-- <li>
                             <a href="#" class="bpo" title="<b><?= $this->lang->line('delete_deliveries') ?></b>" 
                                 data-content="<p><?= lang('r_u_sure') ?></p><button type='button' class='btn btn-danger' id='delete' data-action='delete'><?= lang('i_m_sure') ?></a> <button class='btn bpo-close'><?= lang('no') ?></button>" 
                                 data-html="true" data-placement="left">
                                 <i class="fa fa-trash-o"></i> <?= lang('delete_deliveries') ?>
                             </a>
-                        </li> -->
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -86,31 +77,21 @@
                             <input class="checkbox checkft" type="checkbox" name="check"/>
                         </th>
                         <th><?= lang('date'); ?></th>
-                        <th><?= lang('do_reference_no'); ?></th>
-                        <th><?= lang('sale_reference_no'); ?></th>
+                        <th>No Invoice</th>
+                        <th>No SO</th>
                         <th><?= lang('customer'); ?></th>
-                        <th><?= lang('address'); ?></th>
+                        <th>Total Amount</th>
+                        <th>Total Paid</th>
                         <th><?= lang('status'); ?></th>
-                        <th>Invoice</th>
-                        <th style="min-width:30px; width: 30px; text-align: center;"><i class="fa fa-chain"></i></th>
+                        <th>Jatuh Tempo</th>
                         <th style="width:100px; text-align:center;"><?= lang('actions'); ?></th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr>
-                        <td colspan="7" class="dataTables_empty"><?= lang('loading_data'); ?></td>
+                        <td colspan="10" class="dataTables_empty"><?= lang('loading_data'); ?></td>
                     </tr>
                     </tbody>
-                    <tfoot class="dtFilter">
-                    <tr class="active">
-                        <th style="min-width:30px; width: 30px; text-align: center;">
-                            <input class="checkbox checkft" type="checkbox" name="check"/>
-                        </th>
-                        <th></th><th></th><th></th><th></th><th></th><th></th>
-                        <th style="min-width:30px; width: 30px; text-align: center;"><i class="fa fa-chain"></i></th>
-                        <th style="width:100px; text-align:center;"><?= lang('actions'); ?></th>
-                    </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>
@@ -128,36 +109,6 @@
             $('#form_action').val($(this).attr('data-action'));
             //$('#action-form').submit();
             $('#action-form-submit').click();
-        });
-
-        $(document).on('click', '#create_invoice', function(e) {
-            e.preventDefault();
-            // $('#form_action').val($(this).attr('data-action'));
-            // $('#action-form-submit').click();
-            let isNext = false;
-            let no_so = "";
-            let msg = "";
-            $("#DOData").find("tbody tr").each(function(){
-                if($(this).find("input[type='checkbox']").prop('checked')){
-                    if(no_so == ""){
-                        no_so = $(this).find(".no_so").html();
-                    }
-                    if(no_so != $(this).find(".no_so").html()){
-                        isNext = false;
-                        msg = 'No Sales Order tidak sama';
-                        return false;
-                    }
-                    isNext = true;
-                }
-            });
-
-            if(!isNext){
-                bootbox.alert(msg);
-            }
-            else {
-                $('#form_action').val($(this).attr('data-action'));
-                $('#action-form-submit').click();
-            }
         });
     });
 </script>

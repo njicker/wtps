@@ -1435,6 +1435,12 @@ $(document).ready(function () {
         $('#myModal').modal({ remote: site.base_url + 'products/view_adjustment/' + $(this).attr('id') });
         $('#myModal').modal('show');
     });
+    $('body').on('click', '.invoice_link_new td:not(:first-child, :nth-last-child(2), :nth-last-child(3), :last-child)', function () {
+        $('#myModal').modal({
+            remote: site.base_url + 'sales/modal_view_invoice/' + $(this).parent('.invoice_link_new').attr('id'),
+        });
+        $('#myModal').modal('show');
+    });
     $('#clearLS').click(function (event) {
         bootbox.confirm(lang.r_u_sure, function (result) {
             if (result == true) {

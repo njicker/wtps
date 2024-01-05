@@ -93,6 +93,7 @@ class Main extends MY_Shop_Controller
 
     public function index()
     {
+        // var_dump(SHOP);exit;
         if (!SHOP) {
             redirect('admin');
         }

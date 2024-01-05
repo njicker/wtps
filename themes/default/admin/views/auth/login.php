@@ -50,9 +50,9 @@
                                     <div class="form-group">
                                         <button type="sumbit" class="btn btn-primary form-control">Login</button>
                                     </div>
-                                    <div class="mb-3">
+                                    <!-- <div class="mb-3">
                                         <a class="" href="#">Forgot Password</a>
-                                    </div>
+                                    </div> -->
                                     <!-- <div class="card">
                                         <div class="card-header">
                                             <strong>Admin login credentials</strong>

@@ -572,10 +572,11 @@ $(document).ready(function () {
                 return;
             }
             var new_received = parseFloat($(this).val()),
+                already_received = parseFloat(row.find(".already_received").val()),
                 item_id = row.attr('data-item-id');
-            if (new_received > poitems[item_id].row.qty) {
+            if ((new_received + already_received)  > poitems[item_id].row.qty) {
                 $(this).val(old_received);
-                bootbox.alert(lang.unexpected_value);
+                bootbox.alert("Qty Penerimaan melebih order pembelian!");
                 return;
             }
             (unit = formatDecimal(row.children().children('.runit').val())),
@@ -585,7 +586,7 @@ $(document).ready(function () {
                 //     }
                 // });
             poitems[item_id].row.unit_received = new_received;
-            poitems[item_id].row.received = new_received;
+            poitems[item_id].row.new_received = new_received;
             localStorage.setItem('poitems', JSON.stringify(poitems));
             loadItems();
             $(".rquantity").prop("readonly", true)
@@ -655,6 +656,8 @@ function loadItems() {
     if (localStorage.getItem('poitems')) {
         total = 0;
         count = 1;
+        count_received = 1;
+        count_already_received = 1;
         an = 1;
         product_tax = 0;
         invoice_tax = 0;
@@ -688,8 +691,9 @@ function loadItems() {
                 item_discount = 0,
                 item_option = item.row.option,
                 item_code = item.row.code,
+                item_already_received = item.row.received,
                 item_name = item.row.name.replace(/"/g, '&#034;').replace(/'/g, '&#039;');
-            var qty_received = item.row.received >= 0 ? item.row.received : item.row.qty;
+            var qty_received = item.row.new_received;
             var item_supplier_part_no = item.row.supplier_part_no ? item.row.supplier_part_no : '';
             if (item.row.new_entry == 1) {
                 item_bqty = item_qty;
@@ -712,6 +716,7 @@ function loadItems() {
             } else if (supplier == item.row.supplier5) {
                 belong = true;
             }
+            var unit_qty_already_received = item_already_received;
             var unit_qty_received = qty_received;
             if (item.row.fup != 1 && product_unit != item.row.base_unit) {
                 $.each(item.units, function () {
@@ -819,11 +824,13 @@ function loadItems() {
                 '"></td>';
             if (po_edit) {
                 tr_html +=
+                    '<td class="rec_con"><input class="form-control text-center already_received" name="already_received[]" type="text" value="' +
+                    formatDecimal(unit_qty_already_received) +
+                    '" readonly>';
+                tr_html +=
                     '<td class="rec_con"><input name="ordered_quantity[]" type="hidden" class="oqty" value="' +
                     item_oqty +
-                    '"><input class="form-control text-center received" name="received[]" type="text" value="' +
-                    formatDecimal(unit_qty_received) +
-                    '" data-id="' +
+                    '"><input class="form-control text-center received" name="received[]" type="text" value="'+formatDecimal(unit_qty_received)+'" data-id="' +
                     row_no +
                     '" data-item="' +
                     item_id +
@@ -873,6 +880,8 @@ function loadItems() {
             newTr.prependTo('#poTable');
             total += formatDecimal((parseFloat(item_cost) + parseFloat(pr_tax_val)) * parseFloat(item_qty), 4);
             count += parseFloat(item_qty);
+            count_received += parseFloat(unit_qty_received);
+            count_already_received += parseFloat(unit_qty_already_received);
             an++;
             if (!belong) $('#row_' + row_no).addClass('warning');
         });
@@ -888,7 +897,8 @@ function loadItems() {
             formatQty(parseFloat(count) - 1) +
             '</th>';
         if (po_edit) {
-            tfoot += '<th class="rec_con"></th>';
+            tfoot += '<th class="rec_con text-center">'+ formatQty(parseFloat(count_already_received) - 1) +'</th>';
+            tfoot += '<th class="rec_con text-center">'+ formatQty(parseFloat(count_received) - 1) +'</th>';
         }
         if (site.settings.product_discount == 1) {
             tfoot += '<th class="text-right">' + formatMoney(product_discount) + '</th>';

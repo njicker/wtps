@@ -773,7 +773,7 @@ class Auth_model extends CI_Model
         $this->trigger_events('extra_where');
         $this->load->helper('email');
         $this->identity_column = valid_email($identity) ? 'email' : 'username';
-        $query                 = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login, last_ip_address, avatar, gender, group_id, warehouse_id, biller_id, company_id, view_right, edit_right, allow_discount, show_cost, show_price')
+        $query = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login, last_ip_address, avatar, gender, group_id, warehouse_id, biller_id, company_id, view_right, edit_right, allow_discount, show_cost, show_price, first_name, last_name')
             ->where($this->identity_column, $this->db->escape_str($identity))
             ->limit(1)
             ->get($this->tables['users']);
@@ -842,7 +842,7 @@ class Auth_model extends CI_Model
 
         //get the user
         $this->trigger_events('extra_where');
-        $query = $this->db->select($this->identity_column . ', id, username, email, last_login, last_ip_address, avatar, gender, group_id, warehouse_id, biller_id, company_id, view_right, allow_discount, edit_right, show_cost, show_price')
+        $query = $this->db->select($this->identity_column . ', id, username, email, last_login, last_ip_address, avatar, gender, group_id, warehouse_id, biller_id, company_id, view_right, allow_discount, edit_right, show_cost, show_price, first_name, last_name')
             ->where($this->identity_column, get_cookie('identity'))
             ->where('remember_code', get_cookie('remember_code'))
             ->limit(1)
@@ -1240,6 +1240,8 @@ class Auth_model extends CI_Model
             'company_id'     => $user->company_id,
             'show_cost'      => $user->show_cost,
             'show_price'     => $user->show_price,
+            'first_name'      => $user->first_name,
+            'last_name'     => $user->last_name,
         ];
 
         $this->session->set_userdata($session_data);

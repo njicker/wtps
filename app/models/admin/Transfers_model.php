@@ -32,6 +32,34 @@ class Transfers_model extends CI_Model
 
                 if ($status == 'sent' || $status == 'completed') {
                     $this->syncTransderdItem($item['product_id'], $data['from_warehouse_id'], $item['quantity'], $item['option_id'], $item['product_batch']);
+                    $dtl = $item;
+                    for($i = 0; $i < 2; $i++){
+                        $tf = array();
+                        if($i == 0){ // From
+                            $tf['warehouse_id'] = $data['from_warehouse_id'];
+                            $tf['movement_type'] = 'out';
+                        }
+                        else { // to
+                            $tf['warehouse_id'] = $data['to_warehouse_id'];
+                            $tf['movement_type'] = 'in';
+                        }
+                        $item_movement = [
+                            "warehouse_id" => $tf['warehouse_id'],
+                            "product_id" => $dtl['product_id'],
+                            "product_code" => $dtl['product_code'],
+                            "product_desc" => $dtl['product_name'],
+                            "quantity" => $dtl['quantity_balance'] * ($tf['movement_type'] == "in" ? 1 : -1),
+                            "unit_code" => $dtl['product_unit_code'],
+                            "movement_type" => $tf['movement_type'],
+                            "product_batch" => $dtl["product_batch"],
+                            "movement_status" => 'good',
+                            "reff_type" => 'transfer',
+                            "reff_no" => $data['transfer_no'],
+                            "stock_date" => date("Y-m-d"),
+                            "created_by" => $this->session->userdata('user_id'),
+                        ];
+                        $this->site->submitMovementItem($item_movement, false);
+                    }
                 }
             }
         }

@@ -43,6 +43,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Biaya Pengiriman</label>
+                        <?= form_input('shipping_amount', '', 'class="form-control" name="shipping_amount"'); ?>
+                    </div>
+
+                    <div class="form-group">
                         <?= lang('address', 'address'); ?>
                         <?php
                         $av = (
@@ -132,8 +137,8 @@
                                 </td>
                                 <td>
                                     <?php
-                                    foreach ($warehouse as $warehouse) {
-                                        $wh[$warehouse->id] = $warehouse->name;
+                                    foreach ($warehouse as $ws) {
+                                        $wh[$ws->id] = $ws->name;
                                     }
                                     echo form_dropdown('warehouse_id[]', $wh, $dtl->warehouse_id, 'class="form-control" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;" '); 
                                     ?>

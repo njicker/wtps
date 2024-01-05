@@ -22,9 +22,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Thank you
  */
 
-$lang['add_sale']                        = 'Tambah Pembayaran';
-$lang['edit_sale']                       = 'Edit Pembayaran';
-$lang['delete_sale']                     = 'Hapus Pembayaran';
+$lang['add_sale']                        = 'Tambah Penjualan';
+$lang['edit_sale']                       = 'Ubah Penjualan';
+$lang['delete_sale']                     = 'Hapus Penjualan';
 $lang['delete_sales']                    = 'Hapus Penjualan';
 $lang['sale_added']                      = 'Pembayaran sukses ditambah';
 $lang['sale_updated']                    = 'Pembayaran sukses diubah';
@@ -32,7 +32,7 @@ $lang['sale_deleted']                    = 'Pembayaran sukses dihapus';
 $lang['sales_deleted']                   = 'Penjualan sukses Hapus';
 $lang['incorrect_gift_card']             = 'Nomor Gift card salah atau kadaluwarsa.';
 $lang['gift_card_not_for_customer']      = 'Gift card bukan untuk pelanggan ini.';
-$lang['view_payments']                   = 'Lihat Pembayaran - pembayaran';
+$lang['view_payments']                   = 'Lihat Pembayaran';
 $lang['add_payment']                     = 'Tambah Pembayaran';
 $lang['add_delivery']                    = 'Tambah Pengiriman';
 $lang['email_sale']                      = 'Email Pembayaran';

@@ -67,6 +67,9 @@
 <div class="box">
     <div class="box-header">
         <h2 class="blue"><i class="fa-fw fa fa-file"></i><?= $title ?></h2>
+        <button type="button" class="btn btn-default no-print pull-right" style="margin-right:15px;" onclick="window.print();">
+            <i class="fa fa-print"></i> Print            
+        </button>
     </div>
     <div class="box-content">
         <div class="row">
@@ -79,7 +82,7 @@
                 echo admin_form_open_multipart('products/finish_production', $attrib);
                 ?>
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-sm-5 col-xs-5">
                         <div class="form-group">
                             <div class="form-group all">
                                 <?= lang('batch_production', 'batch_production'); ?>
@@ -94,7 +97,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-sm-5 col-xs-5">
                         <div class="form-group">
                             <div class="form-group all">
                                 <?= lang('status', 'status'); ?>
@@ -166,6 +169,7 @@
                                             <th>Gudang</th>
                                             <th>Unit Cost</th>
                                             <th>Total Cost</th>
+                                            <th>Expired Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -179,6 +183,7 @@
                                                 $tr .= "<td>" . $warehouse[$dtl->warehouse_id] . "</td>";
                                                 $tr .= "<td>" . number_format($dtl->product_unit_cost) . "</td>";
                                                 $tr .= "<td>" . number_format($dtl->product_total_cost) . "</td>";
+                                                $tr .= "<td>" . date("d-M-Y", strtotime($dtl->expired_date)) . "</td>";
                                             $tr .= "</tr>";
                                             echo $tr;
                                         }

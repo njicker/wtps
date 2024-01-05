@@ -183,6 +183,7 @@ class Production extends MY_Controller
                     'type_item' => $_POST['type_item'][$i],
                     'warehouse_id' => $_POST['warehouse_id'][$i],
                     'purchase_id' => "",
+                    'expired_date' => date("Y-m-d", strtotime("+1 year")),
                 ];
                 $detail[] = $tmp;
             }

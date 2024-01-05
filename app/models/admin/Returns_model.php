@@ -64,6 +64,22 @@ class Returns_model extends CI_Model
                         $dtl['return_id'] = $return_id;
                         $this->db->insert('return_items', $dtl);
                         $this->site->syncQuantityBatch($dtl['product_id'], $dtl['product_batch']);
+                        $item_movement = [
+                            "warehouse_id" => $dtl['warehouse_id'],
+                            "product_id" => $dtl['product_id'],
+                            "product_code" => $dtl['product_code'],
+                            "product_desc" => $dtl['product_name'],
+                            "quantity" => $dtl['quantity'],
+                            "unit_code" => $dtl['product_unit_code'],
+                            "movement_type" => 'in',
+                            "product_batch" => $dtl["product_batch"],
+                            "movement_status" => 'bad',
+                            "reff_type" => 'return_delivery',
+                            "reff_no" => $data['reference_no'],
+                            "stock_date" => date("Y-m-d"),
+                            "created_by" => $this->session->userdata('user_id'),
+                        ];
+                        $this->site->submitMovementItem($item_movement, false);
                     }
                 }
                 
@@ -89,7 +105,7 @@ class Returns_model extends CI_Model
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by'], true);
         }
         else {
-            var_dump($data);exit;
+            return false;
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {

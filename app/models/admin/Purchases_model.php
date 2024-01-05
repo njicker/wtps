@@ -58,6 +58,7 @@ class Purchases_model extends CI_Model
             if ($this->site->getReference('rep') == $data['return_purchase_ref']) {
                 $this->site->updateReference('rep');
             }
+            $item_movement = array();
             foreach ($items as $item) {
                 $item['purchase_id'] = $purchase_id;
                 $item['option_id']   = !empty($item['option_id']) && is_numeric($item['option_id']) ? $item['option_id'] : null;
@@ -69,6 +70,22 @@ class Purchases_model extends CI_Model
                     }
                 }
                 if ($data['status'] == 'received' || $data['status'] == 'returned') {
+                    $item_movement = [
+                        "warehouse_id" => $item['warehouse_id'],
+                        "product_id" => $item['product_id'],
+                        "product_code" => $item['product_code'],
+                        "product_desc" => $item['product_name'],
+                        "quantity" => $item['quantity_balance'] * ($data['status'] == 'returned' ? -1 : 1),
+                        "unit_code" => $item['product_unit_code'],
+                        "movement_type" => $data['status'] == 'returned' ? 'out' : 'in',
+                        "product_batch" => '',
+                        "movement_status" => 'good',
+                        "reff_type" => 'purchase',
+                        "reff_no" => $data['reference_no'],
+                        "stock_date" => date("Y-m-d"),
+                        "created_by" => $this->session->userdata('user_id'),
+                    ];
+                    $this->site->submitMovementItem($item_movement, false);
                     $this->updateAVCO(['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'quantity' => $item['quantity'], 'cost' => $item['base_unit_cost'] ?? $item['real_unit_cost']]);
                 }
             }
@@ -606,6 +623,22 @@ class Purchases_model extends CI_Model
                 $this->db->insert('purchase_items', $item);
                 if ($data['status'] == 'received' || $data['status'] == 'partial') {
                     $this->updateAVCO(['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'quantity' => $item['quantity'], 'cost' => $item['real_unit_cost']]);
+                    $item_movement = [
+                        "warehouse_id" => $item['warehouse_id'],
+                        "product_id" => $item['product_id'],
+                        "product_code" => $item['product_code'],
+                        "product_desc" => $item['product_name'],
+                        "quantity" => $item['quantity_balance'] * ($data['status'] == 'returned' ? -1 : 1),
+                        "unit_code" => $item['product_unit_code'],
+                        "movement_type" => $data['status'] == 'returned' ? 'out' : 'in',
+                        "product_batch" => '',
+                        "movement_status" => 'good',
+                        "reff_type" => 'purchase',
+                        "reff_no" => $data['reference_no'],
+                        "stock_date" => date("Y-m-d"),
+                        "created_by" => $this->session->userdata('user_id'),
+                    ];
+                    $this->site->submitMovementItem($item_movement, true);
                 }
             }
             $this->site->syncQuantity(null, null, $oitems);

@@ -1240,6 +1240,7 @@ class Products_model extends CI_Model
 
     public function addProduction($header, $detail){
         $err = false;
+        $this->db->trans_start();
         foreach($detail as $dtl){
             // $dtl["product_batch"] = null;
             // var_dump($dtl);exit;
@@ -1259,6 +1260,22 @@ class Products_model extends CI_Model
                                 $err = true;
                                 break;
                             }
+                            $item_movement = [
+                                "warehouse_id" => $dtl['warehouse_id'],
+                                "product_id" => $dtl['product_id'],
+                                "product_code" => $dtl['product_code'],
+                                "product_desc" => '',
+                                "quantity" => $dtl['qty'] * ($dtl['type_item'] == 'raw' ? -1 : 1),
+                                "unit_code" => $dtl['unit_code'],
+                                "movement_type" => $dtl['type_item'] == 'raw' ? 'out' : 'in',
+                                "product_batch" => '',
+                                "movement_status" => 'good',
+                                "reff_type" => 'production',
+                                "reff_no" => $dtl['reff_doc'],
+                                "stock_date" => date("Y-m-d"),
+                                "created_by" => $this->session->userdata('user_id'),
+                            ];
+                            $this->site->submitMovementItem($item_movement, false);
                         }
                         else {
                             $err = false;
@@ -1266,15 +1283,15 @@ class Products_model extends CI_Model
                         }
                     }
                     
-                    if($err){
-                        $this->db->where("reff_doc", $header['reff_doc']);
-                        $this->db->delete("production");
+                    // if($err){
+                    //     $this->db->where("reff_doc", $header['reff_doc']);
+                    //     $this->db->delete("production");
 
-                        $this->db->where("reff_doc", $header['reff_doc']);
-                        $this->db->delete("production_items");
-                        return false;
-                    }
-                    else {
+                    //     $this->db->where("reff_doc", $header['reff_doc']);
+                    //     $this->db->delete("production_items");
+                    //     return false;
+                    // }
+                    // else {
                         $total_cost = 0;
                         $prm["reff_doc"] = $header["reff_doc"];
                         $hsl_dtl = $this->getProductionDetail($prm);
@@ -1282,8 +1299,14 @@ class Products_model extends CI_Model
                             $total_cost += $dtl->product_total_cost;
                         }
                         $this->db->update("production", ['total_cost' => $total_cost], ["reff_doc" => $header["reff_doc"]]);
-                        return true;
-                    }
+                        
+                        $this->db->trans_complete();
+                        if ($this->db->trans_status() === false) {
+                            log_message('error', 'An errors has been occurred while adding the sale (Add:Purchases_model.php)');
+                        } else {
+                            return true;
+                        }
+                    // }
                 // }
             }
             return false;
@@ -1375,6 +1398,22 @@ class Products_model extends CI_Model
                         if($this->db->insert("production_items", $dtl)){
                             if($this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id'], $dtl["reff_doc"])){
                                 $upd++;
+                                $item_movement = [
+                                    "warehouse_id" => $dtl['warehouse_id'],
+                                    "product_id" => $dtl['product_id'],
+                                    "product_code" => $dtl['product_code'],
+                                    "product_desc" => '',
+                                    "quantity" => $dtl['qty'] * ($dtl['type_item'] == 'raw' ? -1 : 1),
+                                    "unit_code" => $dtl['unit_code'],
+                                    "movement_type" => $dtl['type_item'] == 'raw' ? 'out' : 'in',
+                                    "product_batch" => ($dtl['type_item'] == 'raw' ? $dtl["product_batch"] : $dtl["reff_doc"]),
+                                    "movement_status" => 'good',
+                                    "reff_type" => 'production',
+                                    "reff_no" => $dtl['reff_doc'],
+                                    "stock_date" => date("Y-m-d"),
+                                    "created_by" => $this->session->userdata('user_id'),
+                                ];
+                                $this->site->submitMovementItem($item_movement, true);
                             }
                         }
                     }

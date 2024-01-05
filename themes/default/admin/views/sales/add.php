@@ -463,13 +463,13 @@
                         <?php
                                             } ?>
 
-                        <div class="col-md-4">
+                        <!-- <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('shipping', 'slshipping'); ?>
                                 <?php echo form_input('shipping', '', 'class="form-control input-tip" id="slshipping"'); ?>
 
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="col-md-4">
                             <div class="form-group">
@@ -489,25 +489,18 @@
                         </div>
                         <div class="col-sm-4">
                             <div class="form-group">
-                                <?= lang('payment_term', 'slpayment_term'); ?>
-                                <?php echo form_input('payment_term', '', 'class="form-control tip" data-trigger="focus" data-placement="top" title="' . lang('payment_term_tip') . '" id="slpayment_term"'); ?>
-
-                            </div>
-                        </div>
-                        <?php if ($Owner || $Admin || $GP['sales-payments']) {
-                                    ?>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <?= lang('payment_status', 'slpayment_status'); ?>
-                                <?php $pst = ['pending' => lang('pending'), 'due' => lang('due'), 'partial' => lang('partial'), 'paid' => lang('paid')];
-                                    echo form_dropdown('payment_status', $pst, '', 'class="form-control input-tip" required="required" id="slpayment_status"'); ?>
-
+                                <label>Terms of Payment (TOP)</label>
+                                <?php
+                                    $py[''] = "";
+                                    foreach($payment_terms as $pay){
+                                        $py[$pay->num_day] = $pay->description;
+                                    }
+                                    echo form_dropdown('payment_term', $py, '', 'id="slpayment_term" class="form-control input-tip select" style="width:100%;"');
+                                ?>
                             </div>
                         </div>
                         <?php
-                                } else {
-                                    echo form_hidden('payment_status', 'pending');
-                                }
+                            echo form_hidden('payment_status', 'pending');
                         ?>
                         <div class="clearfix"></div>
 
@@ -642,7 +635,7 @@
                         </div>
                         <div class="col-md-12">
                             <div
-                                class="fprom-group"><?php echo form_submit('add_sale', lang('submit'), 'id="add_sale" class="btn btn-primary" style="padding: 6px 15px; margin:15px 0;"'); ?>
+                                class="from-group"><?php echo form_submit('add_sale', lang('submit'), 'id="add_sale" class="btn btn-primary" style="padding: 6px 15px; margin:15px 0;"'); ?>
                                 <button type="button" class="btn btn-danger" id="reset"><?= lang('reset') ?></div>
                         </div>
                     </div>

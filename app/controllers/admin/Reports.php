@@ -358,6 +358,7 @@ class Reports extends MY_Controller
                 ->select("date, reference_no, CONCAT({$this->db->dbprefix('warehouses')}.name, ' (', {$this->db->dbprefix('warehouses')}.code, ')') as warehouse, supplier, igst, cgst, sgst, product_tax, order_tax, grand_total, paid")
                 ->from('purchases')
                 ->join('warehouses', 'warehouses.id=purchases.warehouse_id', 'left')
+                ->where('supplier_id !=', '999')
                 ->order_by('purchases.date desc');
 
             if ($supplier) {
@@ -447,7 +448,8 @@ class Reports extends MY_Controller
             $this->datatables
                 ->select("DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, status, CONCAT({$this->db->dbprefix('warehouses')}.name, ' (', {$this->db->dbprefix('warehouses')}.code, ')') as warehouse, supplier, " . ($this->Settings->indian_gst ? 'igst, cgst, sgst,' : '') . " product_tax, order_tax, grand_total, {$this->db->dbprefix('purchases')}.id as id", false)
                 ->from('purchases')
-                ->join('warehouses', 'warehouses.id=purchases.warehouse_id', 'left');
+                ->join('warehouses', 'warehouses.id=purchases.warehouse_id', 'left')
+                ->where('supplier_id !=', '999');
             if ($supplier) {
                 $this->datatables->where('supplier_id', $supplier);
             }

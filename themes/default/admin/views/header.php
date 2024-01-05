@@ -81,7 +81,15 @@
                             <img alt="" src="<?= $this->session->userdata('avatar') ? base_url() . 'assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : base_url('assets/images/' . $this->session->userdata('gender') . '.png'); ?>" class="mini_avatar img-rounded">
 
                             <div class="user">
-                                <span><?= lang('welcome') ?> <?= $this->session->userdata('username'); ?></span>
+                                <span>
+                                    <?php
+                                        $name = $this->session->userdata('first_name'); 
+                                        if($this->session->userdata('last_name') != ""){
+                                            $name .= " " . $this->session->userdata('last_name');
+                                        }
+                                        echo $name;
+                                    ?>
+                                </span>
                             </div>
                         </a>
                         <ul class="dropdown-menu pull-right">
@@ -485,15 +493,15 @@
 
                             <li class="mm_sales <?= strtolower($this->router->fetch_method()) == 'sales' ? 'mm_pos' : '' ?>">
                                 <a class="dropmenu" href="#">
-                                    <i class="fa fa-heart"></i>
+                                    <i class="fa fa-shopping-cart"></i>
                                     <span class="text"> <?= lang('sales'); ?>
                                     </span> <span class="chevron closed"></span>
                                 </a>
                                 <ul>
                                     <li id="sales_index">
                                         <a class="submenu" href="<?= admin_url('sales'); ?>">
-                                            <i class="fa fa-heart"></i>
-                                            <span class="text"> <label>Daftar Penjualan</label></span>
+                                            <i class="fa fa-shopping-cart"></i>
+                                            <span class="text"> Daftar Penjualan</span>
                                         </a>
                                     </li>
                                     <?php if (POS) {
@@ -524,12 +532,18 @@
                                             <span class="text"> <?= lang('deliveries'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="sales_gift_cards">
+                                    <li id="sales_invoices">
+                                        <a class="submenu" href="<?= admin_url('sales/invoices'); ?>">
+                                            <i class="fa fa-money"></i>
+                                            <span class="text"> Daftar Tagihan</span>
+                                        </a>
+                                    </li>
+                                    <!-- <li id="sales_gift_cards">
                                         <a class="submenu" href="<?= admin_url('sales/gift_cards'); ?>">
                                             <i class="fa fa-gift"></i>
                                             <span class="text"> <?= lang('list_gift_cards'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
 
@@ -625,9 +639,24 @@
 
                             <li class="mm_auth mm_customers mm_suppliers mm_billers">
                                 <a class="dropmenu" href="#">
-                                <i class="fa fa-users"></i>
-                                <span class="text"> Master Data </span>
-                                <span class="chevron closed"></span>
+                                    <i class="fa fa-money"></i>
+                                    <span class="text"> Jurnal Umum </span>
+                                    <span class="chevron closed"></span>
+                                </a>
+                                <ul>
+                                    <li id="auth_users">
+                                        <a class="submenu" href="<?= admin_url('users'); ?>">
+                                            <i class="fa fa-money"></i><span class="text"> Jurnal Umum</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li class="mm_auth mm_customers mm_suppliers mm_billers">
+                                <a class="dropmenu" href="#">
+                                    <i class="fa fa-users"></i>
+                                    <span class="text"> Master Data </span>
+                                    <span class="chevron closed"></span>
                                 </a>
                                 <ul>
                                     <?php if ($Owner) {

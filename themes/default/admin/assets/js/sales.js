@@ -1,4 +1,7 @@
 $(document).ready(function (e) {
+    // if(allow_discount == undefined){
+    //     allow_discount = 1;
+    // }
     $('body a, body button').attr('tabindex', -1);
     check_add_item_val();
     if (site.settings.set_focus != 1) {

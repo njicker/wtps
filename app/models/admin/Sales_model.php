@@ -12,6 +12,7 @@ class Sales_model extends CI_Model
     public function addDelivery($data = [], $dtl = [])
     {
         // Simulate stock
+        $this->db->trans_start();
         $err = false;
         foreach($dtl as $dtls){
             if(!$this->site->syncPurchaseQty($dtls, true, "sales")){
@@ -46,6 +47,7 @@ class Sales_model extends CI_Model
                     ];
                 }
             }
+            // var_dump($err);exit;
 // var_dump($dtl);exit;
             if(!$err){
                 // $items = $this->getSaleItemBySaleID($data["sale_id"]);
@@ -59,20 +61,38 @@ class Sales_model extends CI_Model
                             $err = true;
                             break;
                         }
+                        $item_movement = [
+                            "warehouse_id" => $dtl['warehouse_id'],
+                            "product_id" => $dtl['product_id'],
+                            "product_code" => $dtl['product_code'],
+                            "product_desc" => $dtl['product_desc'],
+                            "quantity" => $dtl['qty'] * -1,
+                            "unit_code" => $dtl['unit_code'],
+                            "movement_type" => 'out',
+                            "product_batch" => $dtl["product_batch"],
+                            "movement_status" => 'good',
+                            "reff_type" => 'delivery',
+                            "reff_no" => $data['do_reference_no'],
+                            "stock_date" => date("Y-m-d"),
+                            "created_by" => $this->session->userdata('user_id'),
+                        ];
+                        $this->site->submitMovementItem($item_movement, false);
                     }
                 }
             }
 
             if($err) {
-                $this->db->where("id", $delivery_id);
-                $this->db->delete("deliveries");
+                // $this->db->where("id", $delivery_id);
+                // $this->db->delete("deliveries");
 
-                $this->db->where("delivery_id", $delivery_id);
-                $this->db->delete("delivery_item");
+                // $this->db->where("delivery_id", $delivery_id);
+                // $this->db->delete("delivery_item");
                 return false;
             }
-
-            return true;
+            else {
+                $this->db->trans_complete();
+                return true;
+            }
         }
         return false;
     }
@@ -459,6 +479,18 @@ class Sales_model extends CI_Model
         }
     }
 
+    public function getInvoicePaymentsByInvoiceID($invoice_id)
+    {
+        $this->db->order_by('id', 'asc');
+        $q = $this->db->get_where('payments', ['invoice_id' => $invoice_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+    }
+
     public function getItemByID($id)
     {
         $q = $this->db->get_where('sale_items', ['id' => $id], 1);
@@ -786,25 +818,25 @@ class Sales_model extends CI_Model
             }
 
             if ($sale->sale_status == 'completed') {
-                if ($costings = $this->getSaleCosting($id)) {
-                    foreach ($costings as $costing) {
-                        $purchase_items = $this->getPurchaseItems($costing->purchase_id);
-                        foreach ($purchase_items as $row) {
-                            if ($row->product_id == $costing->product_id && $row->option_id == $costing->option_id) {
-                                $pi = $row;
-                            }
-                        }
-                        if ($pi) {
-                            $this->site->setPurchaseItem(['id' => $pi->id, 'product_id' => $pi->product_id, 'option_id' => $pi->option_id], $costing->quantity);
-                        } else {
-                            $pi = $this->site->getPurchasedItem(['product_id' => $costing->product_id, 'option_id' => $costing->option_id ? $costing->option_id : null, 'purchase_id' => null, 'transfer_id' => null, 'warehouse_id' => $sale->warehouse_id]);
-                            $this->site->setPurchaseItem(['id' => $pi->id, 'product_id' => $pi->product_id, 'option_id' => $pi->option_id], $costing->quantity);
-                        }
-                    }
-                    $this->db->delete('costing', ['id' => $costing->id]);
-                }
+                // if ($costings = $this->getSaleCosting($id)) {
+                //     foreach ($costings as $costing) {
+                //         $purchase_items = $this->getPurchaseItems($costing->purchase_id);
+                //         foreach ($purchase_items as $row) {
+                //             if ($row->product_id == $costing->product_id && $row->option_id == $costing->option_id) {
+                //                 $pi = $row;
+                //             }
+                //         }
+                //         if ($pi) {
+                //             $this->site->setPurchaseItem(['id' => $pi->id, 'product_id' => $pi->product_id, 'option_id' => $pi->option_id], $costing->quantity);
+                //         } else {
+                //             $pi = $this->site->getPurchasedItem(['product_id' => $costing->product_id, 'option_id' => $costing->option_id ? $costing->option_id : null, 'purchase_id' => null, 'transfer_id' => null, 'warehouse_id' => $sale->warehouse_id]);
+                //             $this->site->setPurchaseItem(['id' => $pi->id, 'product_id' => $pi->product_id, 'option_id' => $pi->option_id], $costing->quantity);
+                //         }
+                //     }
+                //     $this->db->delete('costing', ['id' => $costing->id]);
+                // }
                 $items = $this->getAllInvoiceItems($id);
-                $this->site->syncQuantity(null, null, $items);
+                // $this->site->syncQuantity(null, null, $items);
                 $this->sma->update_award_points($sale->grand_total, $sale->customer_id, $sale->created_by, true);
                 return $items;
             }
@@ -1043,5 +1075,149 @@ class Sales_model extends CI_Model
     {
         $q = $this->db->get_where('deliveries', ['year(`date`)' => $year]);
         return $q->num_rows();
+    }
+
+    public function getListDeliveryInvoice($param)
+    {
+        $this->db->select("deliveries.*, sales.payment_term");
+        $this->db->from("deliveries");
+        $this->db->join('sales', 'deliveries.sale_id=sales.id');
+        $this->db->where_in('deliveries.id', $param);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getListDeliveryDetail($param)
+    {
+        $this->db->where_in('delivery_id', $param);
+        $q = $this->db->get('delivery_item');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getListDeliveryInvoiceByInvID($param)
+    {
+        $this->db->select("deliveries.*, sales.payment_term");
+        $this->db->from("deliveries");
+        $this->db->join('sales', 'deliveries.sale_id=sales.id');
+        $this->db->where('deliveries.invoice_id', $param);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function addInvoice($data, $delv_id){
+        $this->db->trans_start();
+        if($this->db->insert('invoices', $data)){
+            $invoice_id = $this->db->insert_id();
+            foreach($delv_id as $id){
+                $this->db->update('deliveries', ['invoice_id' => $invoice_id], ['id' => $id]);
+            }
+
+            $this->db->trans_complete();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public function getCountInvoiceForReff($year)
+    {
+        $q = $this->db->get_where('invoices', ['year(`doc_date`)' => $year]);
+        return $q->num_rows();
+    }
+
+    public function getInvoicesByID($id)
+    {
+        $q = $this->db->get_where('invoices', ['id' => $id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function addPaymentInvoice($data = [], $customer_id = null)
+    {
+        if ($this->db->insert('payments', $data)) {
+            if ($this->site->getReference('pay') == $data['reference_no']) {
+                $this->site->updateReference('pay');
+            }
+            $this->site->syncInvoicePayments($data['invoice_id']);
+            if ($data['paid_by'] == 'gift_card') {
+                $gc = $this->site->getGiftCardByNO($data['cc_no']);
+                $this->db->update('gift_cards', ['balance' => ($gc->balance - $data['amount'])], ['card_no' => $data['cc_no']]);
+            } elseif ($customer_id && $data['paid_by'] == 'deposit') {
+                $customer = $this->site->getCompanyByID($customer_id);
+                $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount - $data['amount'])], ['id' => $customer_id]);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function deletePaymentInvoice($id)
+    {
+        $opay = $this->getPaymentByID($id);
+        $this->site->log('Payment', ['model' => $opay]);
+        if ($this->db->delete('payments', ['id' => $id])) {
+            $this->site->syncInvoicePayments($opay->invoice_id);
+            if ($opay->paid_by == 'gift_card') {
+                $gc = $this->site->getGiftCardByNO($opay->cc_no);
+                $this->db->update('gift_cards', ['balance' => ($gc->balance + $opay->amount)], ['card_no' => $opay->cc_no]);
+            } elseif ($opay->paid_by == 'deposit') {
+                $sale     = $this->getInvoiceByID($opay->sale_id);
+                $customer = $this->site->getCompanyByID($sale->customer_id);
+                $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount + $opay->amount)], ['id' => $customer->id]);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function getAllInvoiceDeliveryItems($delivery_id)
+    {
+        // $this->db->select('delivery_item.*, tax_rates.code as tax_code, tax_rates.name as tax_name, tax_rates.rate as tax_rate, products.image, products.details as details, product_variants.name as variant, products.hsn_code as hsn_code, products.second_name as second_name, products.unit as base_unit_id, units.code as base_unit_code')
+        $this->db->select('delivery_item.*, products.image, products.details as details, products.hsn_code as hsn_code, products.second_name as second_name, products.unit as base_unit_id, units.code as base_unit_code, deliveries.do_reference_no as delv_no')
+            ->join('products', 'products.id=delivery_item.product_id', 'left')
+            ->join('deliveries', 'deliveries.id = delivery_item.delivery_id', 'left')
+            // ->join('product_variants', 'product_variants.id=sale_items.option_id', 'left')
+            // ->join('tax_rates', 'tax_rates.id=sale_items.tax_rate_id', 'left')
+            ->join('units', 'units.id=products.unit', 'left');
+            // ->order_by('id', 'asc');
+        $this->db->where('delivery_id', $delivery_id);
+        $q = $this->db->get('delivery_item');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getTaxRateByID($id)
+    {
+        $q = $this->db->get_where('tax_rates', ['id' => $id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
     }
 }

@@ -20,13 +20,16 @@
 } ?>
             <div class="clearfix"></div>
             <div class="row padding10">
+                <button type="button" class="btn btn-xs btn-default no-print pull-right" style="margin-right:15px;" onclick="window.print();">
+                    <i class="fa fa-print"></i> <?= lang('print'); ?>
+                </button>
                 <div class="col-xs-5">
                     <?php echo $this->lang->line('to'); ?>:<br/>
                     <h2 class=""><?= $customer->company ? $customer->company : $customer->name; ?></h2>
                     <?= $customer->company ? '' : 'Attn: ' . $customer->name ?>
                     <?php
                     echo $customer->address . '<br />' . $customer->city . ' ' . $customer->postal_code . ' ' . $customer->state . '<br />' . $customer->country;
-                    echo '<p>';
+                    // echo '<p>';
                     if ($customer->cf1 != '-' && $customer->cf1 != '') {
                         echo '<br>' . lang('ccf1') . ': ' . $customer->cf1;
                     }
@@ -45,7 +48,8 @@
                     if ($customer->cf6 != '-' && $customer->cf6 != '') {
                         echo '<br>' . lang('ccf6') . ': ' . $customer->cf6;
                     }
-                    echo '</p>';
+                    // echo '</p>';
+                    echo "<br/>";
                     echo lang('tel') . ': ' . $customer->phone . '<br />' . lang('email') . ': ' . $customer->email;
                     ?>
 
@@ -56,7 +60,7 @@
                     <?= $biller->company ? '' : 'Attn: ' . $biller->name ?>
                     <?php
                     echo $biller->address . '<br />' . $biller->city . ' ' . $biller->postal_code . ' ' . $biller->state . '<br />' . $biller->country;
-                    echo '<p>';
+                    // echo '<p>';
                     if ($biller->cf1 != '-' && $biller->cf1 != '') {
                         echo '<br>' . lang('bcf1') . ': ' . $biller->cf1;
                     }
@@ -75,7 +79,8 @@
                     if ($biller->cf6 != '-' && $biller->cf6 != '') {
                         echo '<br>' . lang('bcf6') . ': ' . $biller->cf6;
                     }
-                    echo '</p>';
+                    // echo '</p>';
+                    echo "<br/>";
                     echo lang('tel') . ': ' . $biller->phone . '<br />' . lang('email') . ': ' . $biller->email;
                     ?>
                     <div class="clearfix"></div>
@@ -88,6 +93,7 @@
                     <p style="font-weight:bold;"><?= lang('date'); ?>: <?= $this->sma->hrsd($payment->date); ?></p>
                     <p style="font-weight:bold;"><?= lang('sale') . ' ' . lang('ref'); ?>: <?= $inv->reference_no; ?></p>
                     <p style="font-weight:bold;"><?= lang('payment_reference'); ?>: <?= $payment->reference_no; ?></p>
+                    <?php if($invoices){ ?><p style="font-weight:bold;"><label>No. Invoice</label>: <?= $invoices->reff_doc; ?></p> <?php } ?>
                 </div>
             </div>
             <div class="well">
@@ -102,8 +108,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><strong><?= lang('paid_by'); ?></strong></td>
-                        <td class="text-right"><strong class="text-right"><?php echo lang($payment->paid_by);
+                        <td><strong>Metode Pembayaran</strong></td>
+                        <td class="text-right"><strong class="text-right"><?php echo $payment->paid_by == "other" ? "BCA" : lang($payment->paid_by);
                                 if ($payment->paid_by == 'gift_card' || $payment->paid_by == 'CC' || $payment->paid_by == 'ppp' || $payment->paid_by == 'stripe' || $payment->paid_by == 'authorize') {
                                     echo ' (' . substr($payment->cc_no, -4) . ')';
                                 } elseif ($payment->paid_by == 'Cheque') {
@@ -136,7 +142,7 @@
                     <?php
                                 } ?>
                     <tr>
-                        <td colspan="2"><?= html_entity_decode($payment->note); ?></td>
+                        <td colspan="2">Note: <?= html_entity_decode($payment->note); ?></td>
                     </tr>
                     </tbody>
                 </table>

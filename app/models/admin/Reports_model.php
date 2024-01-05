@@ -301,6 +301,7 @@ class Reports_model extends CI_Model
         if ($end_date) {
             $this->db->where('date <=', $end_date);
         }
+        $this->db->where('supplier_id !=', '999');
         $q = $this->db->get('purchases');
         if ($q->num_rows() > 0) {
             return $q->row();

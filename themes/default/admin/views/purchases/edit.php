@@ -304,6 +304,7 @@
                                             ?>
                                             <th class="col-md-1"><?= lang('net_unit_cost'); ?></th>
                                             <th class="col-md-1"><?= lang('quantity'); ?></th>
+                                            <th class="col-md-1 rec_con">Sudah Terima</th>
                                             <th class="col-md-1 rec_con"><?= lang('received'); ?></th>
                                             <?php
                                             if ($Settings->product_discount) {
