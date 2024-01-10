@@ -824,6 +824,7 @@ class Purchases extends MY_Controller
             $this->data['categories'] = $this->site->getAllCategories();
             $this->data['tax_rates']  = $this->site->getAllTaxRates();
             $this->data['warehouses'] = $this->site->getAllWarehouses();
+            $this->data['payment_terms']  = $this->site->getAllPaymentTerms();
             $this->load->helper('string');
             $value = random_string('alnum', 20);
             $this->session->set_userdata('user_csrf', $value);

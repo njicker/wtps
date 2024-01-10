@@ -637,7 +637,7 @@
                                 </ul>
                             </li>
 
-                            <li class="mm_auth mm_customers mm_suppliers mm_billers">
+                            <li class="mm_accounting">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-money"></i>
                                     <span class="text"> Jurnal Umum </span>

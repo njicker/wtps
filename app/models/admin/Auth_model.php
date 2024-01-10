@@ -769,7 +769,7 @@ class Auth_model extends CI_Model
             $this->set_error('login_unsuccessful');
             return false;
         }
-
+        
         $this->trigger_events('extra_where');
         $this->load->helper('email');
         $this->identity_column = valid_email($identity) ? 'email' : 'username';
@@ -778,15 +778,16 @@ class Auth_model extends CI_Model
             ->limit(1)
             ->get($this->tables['users']);
 
-        if ($this->is_time_locked_out($identity)) {
-            //Hash something anyway, just to take up time
-            $this->hash_password($password);
+        // if ($this->is_time_locked_out($identity)) {
+        //     // echo "log";exit;
+        //     //Hash something anyway, just to take up time
+        //     $this->hash_password($password);
 
-            $this->trigger_events('post_login_unsuccessful');
-            $this->set_error('login_timeout');
+        //     $this->trigger_events('post_login_unsuccessful');
+        //     $this->set_error('login_timeout');
 
-            return false;
-        }
+        //     return false;
+        // }
 
         if ($query->num_rows() === 1) {
             $user = $query->row();
@@ -822,7 +823,7 @@ class Auth_model extends CI_Model
         //Hash something anyway, just to take up time
         $this->hash_password($password);
 
-        $this->increase_login_attempts($identity);
+        // $this->increase_login_attempts($identity);
 
         $this->trigger_events('post_login_unsuccessful');
         $this->set_error('login_unsuccessful');
@@ -1519,5 +1520,17 @@ class Auth_model extends CI_Model
         array_push($this->_ion_where, $where);
 
         return $this;
+    }
+
+    public function getEmailById($id){
+        $rtn = "";
+        $this->db->where('id', $id);
+        $query = $this->db->get('users');
+        if($query->num_rows() > 0){
+            foreach ($query->result() as $row) {
+                $rtn = $row->email;
+            }
+        }
+        return $rtn;
     }
 }

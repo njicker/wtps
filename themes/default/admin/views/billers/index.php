@@ -34,7 +34,7 @@
 } ?>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-users"></i><?= lang('billers'); ?></h2>
+        <h2 class="blue"><i class="fa-fw fa fa-users"></i>Master Bill to</h2>
 
         <div class="box-icon">
             <ul class="btn-tasks">

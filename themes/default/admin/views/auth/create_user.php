@@ -57,10 +57,10 @@
                                 ?>
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" style="display: none">
                                 <?php echo lang('company', 'company'); ?>
                                 <div class="controls">
-                                    <?php echo form_input('company', 'PT. WTPS', 'class="form-control" id="company"'); ?>
+                                    <?php echo form_input('company', $Settings->site_name, 'class="form-control" id="company"'); ?>
                                 </div>
                             </div>
 
@@ -236,12 +236,12 @@
     $(document).ready(function () {
         $('.no').slideUp();
         $('#group').change(function (event) {
-            var group = $(this).val();
-            if (group == 1 || group == 2) {
+            // var group = $(this).val();
+            // if (group == 1 || group == 2) {
                 $('.no').slideUp();
-            } else {
-                $('.no').slideDown();
-            }
+            // } else {
+            //     $('.no').slideDown();
+            // }
         });
     });
 </script>

@@ -3082,8 +3082,8 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('userfile', lang('attachment'), 'xss_clean');
         if ($this->form_validation->run() == true) {
             if ($this->input->post('paid_by') == 'deposit') {
-                $sale        = $this->sales_model->getInvoiceByID($this->input->post('sale_id'));
-                $customer_id = $sale->customer_id;
+                $invoice = $this->sales_model->getInvoicesByID($this->input->post('invoice_id'));
+                $customer_id = $invoice->customer_id;
                 $amount      = $this->input->post('amount-paid') - $payment->amount;
                 if (!$this->site->check_customer_deposit($customer_id, $amount)) {
                     $this->session->set_flashdata('error', lang('amount_greater_than_deposit'));
@@ -3099,7 +3099,7 @@ class Sales extends MY_Controller
             }
             $payment = [
                 'date'         => $date,
-                'sale_id'      => $this->input->post('sale_id'),
+                'invoice_id'   => $this->input->post('invoice_id'),
                 'reference_no' => $this->input->post('reference_no'),
                 'amount'       => $this->input->post('amount-paid'),
                 'paid_by'      => $this->input->post('paid_by'),
@@ -3136,14 +3136,14 @@ class Sales extends MY_Controller
             redirect($_SERVER['HTTP_REFERER']);
         }
 
-        if ($this->form_validation->run() == true && $this->sales_model->updatePayment($id, $payment, $customer_id)) {
+        if ($this->form_validation->run() == true && $this->sales_model->updatePaymentInvoice($id, $payment, $customer_id)) {
             $this->session->set_flashdata('message', lang('payment_updated'));
-            admin_redirect('sales');
+            admin_redirect('sales/invoices');
         } else {
             $this->data['error']    = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['payment']  = $payment;
             $this->data['modal_js'] = $this->site->modal_js();
-            $this->load->view($this->theme . 'sales/edit_payment', $this->data);
+            $this->load->view($this->theme . 'sales/edit_payment_invoice', $this->data);
         }
     }
 }

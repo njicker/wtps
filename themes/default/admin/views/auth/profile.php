@@ -222,15 +222,19 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <?php echo admin_form_open('auth/change_password', 'id="change-password-form"'); ?>
+                                <?php $allowChange = true; if($id != $user_login){
+                                    $allowChange = false;
+                                }
+                                ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="col-md-5">
-                                            <div class="form-group">
+                                            <div class="form-group" <?php if(!$allowChange){ echo "style='display:none;'";} ?>>
                                                 <?php echo lang('old_password', 'curr_password'); ?> <br/>
                                                 <?php echo form_password('old_password', '', 'class="form-control" id="curr_password" required="required"'); ?>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group" <?php if(!$allowChange){ echo "style='display:none;'";} ?>>
                                                 <label
                                                     for="new_password"><?php echo sprintf(lang('new_password'), $min_password_length); ?></label>
                                                 <br/>
@@ -238,13 +242,19 @@
                                                 <span class="help-block"><?= lang('pasword_hint') ?></span>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group" <?php if(!$allowChange){ echo "style='display:none;'";} ?>>
                                                 <?php echo lang('confirm_password', 'new_password_confirm'); ?> <br/>
                                                 <?php echo form_password('new_password_confirm', '', 'class="form-control" id="new_password_confirm" required="required" data-bv-identical="true" data-bv-identical-field="new_password" data-bv-identical-message="' . lang('pw_not_same') . '"'); ?>
 
                                             </div>
                                             <?php echo form_input($user_id); ?>
-                                            <p><?php echo form_submit('change_password', lang('change_password'), 'class="btn btn-primary"'); ?></p>
+                                            <?php echo form_hidden('mode', 'change_password'); ?>
+                                            <p>
+                                                <?php echo form_submit('change_password', lang('change_password'), 'class="btn btn-primary" '. (!$allowChange ? 'style="display:none;"' : '')); ?>
+                                                <button class="btn btn-danger" type="button" onclick="resetPassword()">
+                                                    Reset Password
+                                                </button>
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -306,6 +316,14 @@
                 submitButtons: 'input[type="submit"]'
             });
         });
+        
+        function resetPassword(){
+            $("input[name='mode']").val('reset_password');
+            $("#curr_password").val("@Reset123456");
+            $("#new_password").val("@Reset123456");
+            $("#new_password_confirm").val("@Reset123456");
+            $("#change-password-form").find('[name="change_password"]').click();
+        }
     </script>
     <?php if ($Owner && $id != $this->session->userdata('user_id')) {
                                                         ?>
@@ -327,5 +345,5 @@
             }
         });
     </script>
-<?php
-                                                    } ?>
+    <?php
+    } ?>

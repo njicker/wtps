@@ -104,11 +104,17 @@ class Auth extends MY_Controller
                 redirect($_SERVER['HTTP_REFERER']);
             }
 
-            $identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
+            // $identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
+            $identity = $this->ion_auth->getEmailById($this->input->post('user_id'));
+            // var_dump($identity);exit;
+            if($this->input->post('mode') == "reset_password"){
+                $change = $this->ion_auth->reset_password($identity, $this->input->post('new_password'));
+            }
+            else {
+                $change = $this->ion_auth->change_password($identity, $this->input->post('old_password'), $this->input->post('new_password'));
+            }
 
-            $change = $this->ion_auth->change_password($identity, $this->input->post('old_password'), $this->input->post('new_password'));
-
-            if ($change) {
+            if ($change) {  
                 $this->session->set_flashdata('message', $this->ion_auth->messages());
                 $this->logout();
             } else {
@@ -400,7 +406,7 @@ class Auth extends MY_Controller
 
         $this->load->library('datatables');
         $this->datatables
-            ->select($this->db->dbprefix('users') . '.id as id, first_name, last_name, email, company, award_points, ' . $this->db->dbprefix('groups') . '.name, active')
+            ->select($this->db->dbprefix('users') . '.id as id, username, first_name, last_name, email, department, ' . $this->db->dbprefix('groups') . '.name, active')
             ->from('users')
             ->join('groups', 'users.group_id=groups.id', 'left')
             ->group_by('users.id')
@@ -458,6 +464,7 @@ class Auth extends MY_Controller
                 $referrer = ($this->session->userdata('requested_page') && $this->session->userdata('requested_page') != 'admin') ? $this->session->userdata('requested_page') : 'welcome';
                 admin_redirect($referrer);
             } else {
+                // var_dump($this->ion_auth->errors());exit;
                 $this->session->set_flashdata('error', $this->ion_auth->errors());
                 admin_redirect('login');
             }
@@ -590,6 +597,7 @@ class Auth extends MY_Controller
         ];
 
         $this->data['id'] = $id;
+        $this->data['user_login'] = $this->session->userdata('user_id');
 
         $bc   = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('auth/users'), 'page' => lang('users')], ['link' => '#', 'page' => lang('profile')]];
         $meta = ['page_title' => lang('profile'), 'bc' => $bc];

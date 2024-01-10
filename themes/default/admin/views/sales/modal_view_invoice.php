@@ -377,7 +377,7 @@
             </div>
             <?php if (!$Supplier || !$Customer) {
                             ?>
-                <div class="buttons">
+                <!-- <div class="buttons">
                     <div class="btn-group btn-group-justified">
                         <div class="btn-group">
                             <a href="<?= admin_url('sales/add_payment/' . $inv->id) ?>" class="tip btn btn-primary" title="<?= lang('add_payment') ?>" data-toggle="modal" data-target="#myModal2">
@@ -422,7 +422,7 @@
                         <?php
                             } ?>
                     </div>
-                </div>
+                </div> -->
             <?php
                         } ?>
         </div>

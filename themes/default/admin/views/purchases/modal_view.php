@@ -10,10 +10,10 @@
             </button>
             <?php if ($logo) {
     ?>
-                <div class="text-center" style="margin-bottom:20px;">
+                <!-- <div class="text-center" style="margin-bottom:20px;">
                     <img src="<?= base_url() . 'assets/uploads/logos/' . $Settings->logo; ?>"
                          alt="<?= $Settings->site_name; ?>">
-                </div>
+                </div> -->
             <?php
 } ?>
             <div class="well well-sm">
@@ -34,10 +34,10 @@
                         <?= lang('payment_status'); ?>: <?= lang($inv->payment_status); ?>
                     </p>
                     </div>
-                    <div class="col-xs-7 text-right order_barcodes">
+                    <!-- <div class="col-xs-7 text-right order_barcodes">
                         <img src="<?= admin_url('misc/barcode/' . $this->sma->base64url_encode($inv->reference_no) . '/code128/74/0/1'); ?>" alt="<?= $inv->reference_no; ?>" class="bcimg" />
                         <?= $this->sma->qrcode('link', urlencode(admin_url('purchases/view/' . $inv->id)), 2); ?>
-                    </div>
+                    </div> -->
                     <div class="clearfix"></div>
                 </div>
                 <div class="clearfix"></div>
@@ -327,7 +327,7 @@
                         ?>
                 </div>
 
-                <div class="col-xs-5 pull-right">
+                <!-- <div class="col-xs-5 pull-right">
                     <div class="well well-sm">
                         <p>
                             <?= lang('created_by'); ?>: <?= $created_by->first_name . ' ' . $created_by->last_name; ?> <br>
@@ -342,7 +342,7 @@
                         <?php
                         } ?>
                     </div>
-                </div>
+                </div> -->
             </div>
             <?php if (!$Supplier || !$Customer) {
                             ?>

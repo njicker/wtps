@@ -10,6 +10,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,900;1,700&display=swap" rel="stylesheet"> 
+        <script src="<?= $assets ?>js/jquery.js"></script>
         <title>Halaman Login</title>
     </head>
     <body>
@@ -30,9 +31,14 @@
                     <div class="col-md-5" style="background-color: #f8f9fa; padding-top: 40px;">
                         <div class="container-fluid">
                             <div class="col-md-8 offset-2 pt-5">
-                                <!-- <img src="<?=base_url('assets/uploads/logos/' . $Settings->logo2)?>" class ="rounded" alt="logo" style="padding-top:50vh"; > -->
-                                <!-- <span type ="logoTxt">Productifity</span> -->
                                 <img src="<?=base_url('themes/default/admin/assets/images/logo_wtps.png')?>" class="img-login" alt="logo">
+                                <?php if($error){ ?>
+                                    <div class="alert alert-danger">
+                                        <!-- <button data-dismiss="alert" class="close" type="button">×</button> -->
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="float:right;" onclick="$(this).closest('div').remove()"></button>
+                                        <ul class="list-group"><?=$error?></ul>
+                                    </div>
+                                <?php } ?>
                                 <label class="login-info mb-3">Mohon dapat login dengan akun yang sudah diberikan oleh admin</label>
                                 <?php echo admin_form_open('auth/login', 'class="login" data-toggle="validator"'); ?>
                                     <div class="form-group mb-3">

@@ -1220,4 +1220,32 @@ class Sales_model extends CI_Model
         }
         return false;
     }
+
+    public function updatePaymentInvoice($id, $data = [], $customer_id = null)
+    {
+        $opay = $this->getPaymentByID($id);
+        if ($this->db->update('payments', $data, ['id' => $id])) {
+            $this->site->syncInvoicePayments($data['invoice_id']);
+            if ($opay->paid_by == 'gift_card') {
+                $gc = $this->site->getGiftCardByNO($opay->cc_no);
+                $this->db->update('gift_cards', ['balance' => ($gc->balance + $opay->amount)], ['card_no' => $opay->cc_no]);
+            } elseif ($opay->paid_by == 'deposit') {
+                if (!$customer_id) {
+                    $invoice        = $this->getInvoicesByID($opay->sale_id);
+                    $customer_id = $invoice->customer_id;
+                }
+                $customer = $this->site->getCompanyByID($customer_id);
+                $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount + $opay->amount)], ['id' => $customer->id]);
+            }
+            if ($data['paid_by'] == 'gift_card') {
+                $gc = $this->site->getGiftCardByNO($data['cc_no']);
+                $this->db->update('gift_cards', ['balance' => ($gc->balance - $data['amount'])], ['card_no' => $data['cc_no']]);
+            } elseif ($customer_id && $data['paid_by'] == 'deposit') {
+                $customer = $this->site->getCompanyByID($customer_id);
+                $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount - $data['amount'])], ['id' => $customer_id]);
+            }
+            return true;
+        }
+        return false;
+    }
 }

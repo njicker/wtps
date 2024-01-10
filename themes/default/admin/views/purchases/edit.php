@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <script type="text/javascript">
     var count = 1, an = 1, po_edit = true, product_variant = 0, DT = <?= $Settings->default_tax_rate ?>, DC = '<?=$default_currency->code?>', shipping = 0,
-        product_tax = 0, invoice_tax = 0, total_discount = 0, total = 0,
+        product_tax = 0, invoice_tax = 0, total_discount = 0, total = 0, mode = '<?=$mode?>',
         tax_rates = <?php echo json_encode($tax_rates); ?>, poitems = {},
         audio_success = new Audio('<?= $assets ?>sounds/sound2.mp3'),
         audio_error = new Audio('<?= $assets ?>sounds/sound3.mp3');
@@ -371,8 +371,14 @@
 
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <?= lang('payment_term', 'popayment_term'); ?>
-                                        <?php echo form_input('payment_term', '', 'class="form-control tip" data-trigger="focus" data-placement="top" title="' . lang('payment_term_tip') . '" id="popayment_term"'); ?>
+                                        <label>Terms of Payment (TOP)</label>
+                                        <?php
+                                            $py[''] = "";
+                                            foreach($payment_terms as $pay){
+                                                $py[$pay->num_day] = $pay->description;
+                                            }
+                                            echo form_dropdown('payment_term', $py, '', 'id="popayment_term" class="form-control input-tip select" style="width:100%;"');
+                                        ?>
                                     </div>
                                 </div>
                             </div>

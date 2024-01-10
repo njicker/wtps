@@ -81,11 +81,12 @@
                             <th style="min-width:30px; width: 30px; text-align: center;">
                                 <input class="checkbox checkth" type="checkbox" name="check"/>
                             </th>
+                            <th class="col-xs-2">NIK</th>
                             <th class="col-xs-2"><?php echo lang('first_name'); ?></th>
                             <th class="col-xs-2"><?php echo lang('last_name'); ?></th>
                             <th class="col-xs-2"><?php echo lang('email_address'); ?></th>
-                            <th class="col-xs-2"><?php echo lang('company'); ?></th>
-                            <th class="col-xs-1"><?php echo lang('award_points'); ?></th>
+                            <!-- <th class="col-xs-2"><?php echo lang('company'); ?></th> -->
+                            <th class="col-xs-1">Department</th>
                             <th class="col-xs-1"><?php echo lang('group'); ?></th>
                             <th style="width:100px;"><?php echo lang('status'); ?></th>
                             <th style="width:80px;"><?php echo lang('actions'); ?></th>

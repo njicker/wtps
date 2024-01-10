@@ -20,9 +20,9 @@
                 $type   = pathinfo($path, PATHINFO_EXTENSION);
                 $data   = file_get_contents($path);
                 $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data); ?>
-                <div class="text-center" style="margin-bottom:20px;">
+                <!-- <div class="text-center" style="margin-bottom:20px;">
                     <img src="<?= $base64; ?>" alt="<?=$Settings->site_name; ?>">
-                </div>
+                </div> -->
             <?php
             } ?>
             <div class="well well-sm">
@@ -44,7 +44,7 @@
                             <?= lang('payment_status'); ?>: <?= lang($inv->payment_status); ?>
                         </p>
                     </div>
-                    <div class="col-xs-6 pull-right text-right order_barcodes">
+                    <!-- <div class="col-xs-6 pull-right text-right order_barcodes">
                         <?php
                         $path   = admin_url('misc/barcode/' . $this->sma->base64url_encode($inv->reference_no) . '/code128/74/0/1');
                         $type   = $Settings->barcode_img ? 'png' : 'svg+xml';
@@ -53,7 +53,7 @@
                         ?>
                         <img src="<?= $base64; ?>" alt="<?= $inv->reference_no; ?>" class="bcimg" />
                         <?php /*echo $this->sma->qrcode('link', urlencode(admin_url('purchases/view/' . $inv->id)), 2);*/ ?>
-                    </div>
+                    </div> -->
                     <div class="clearfix"></div>
                 </div>
                 <div class="clearfix"></div>

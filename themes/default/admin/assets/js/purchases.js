@@ -47,7 +47,8 @@ $(document).ready(function () {
         localStorage.setItem('popayment_term', $(this).val());
     });
     if ((popayment_term = localStorage.getItem('popayment_term'))) {
-        $('#popayment_term').val(popayment_term);
+        // $('#popayment_term').val(popayment_term);
+        $('#popayment_term').select2("val", popayment_term);
     }
 
     // If there is any item in localStorage
@@ -822,7 +823,7 @@ function loadItems() {
                 '"><input name="product_base_quantity[]" type="hidden" class="rbase_quantity" value="' +
                 base_quantity +
                 '"></td>';
-            if (po_edit) {
+            if (po_edit && (mode == 'received' || mode == 'partial')) {
                 tr_html +=
                     '<td class="rec_con"><input class="form-control text-center already_received" name="already_received[]" type="text" value="' +
                     formatDecimal(unit_qty_already_received) +
@@ -896,7 +897,7 @@ function loadItems() {
             '">Total</th><th class="text-center">' +
             formatQty(parseFloat(count) - 1) +
             '</th>';
-        if (po_edit) {
+        if (po_edit && (mode == 'received' || mode == 'partial')) {
             tfoot += '<th class="rec_con text-center">'+ formatQty(parseFloat(count_already_received) - 1) +'</th>';
             tfoot += '<th class="rec_con text-center">'+ formatQty(parseFloat(count_received) - 1) +'</th>';
         }
