@@ -345,8 +345,8 @@ class Sma
         // <option value="other"' . ($paid_by && $paid_by == 'other' ? ' selected="selected"' : '') . '>' . lang('other') . '</option>';
 
         $opts .= '
-        <option value="cash"' . ($paid_by && $paid_by == 'cash' ? ' selected="selected"' : '') . '>' . lang('cash') . '</option>
-        <option value="other"' . ($paid_by && $paid_by == 'other' ? ' selected="selected"' : '') . '>BCA</option>';
+        <option value="Cash"' . ($paid_by && $paid_by == 'cash' ? ' selected="selected"' : '') . '>' . lang('cash') . '</option>
+        <option value="Transfer"' . ($paid_by && $paid_by == 'other' ? ' selected="selected"' : '') . '>Transfer</option>';
         // if (!$purchase) {
         //     $opts .= '<option value="deposit"' . ($paid_by && $paid_by == 'deposit' ? ' selected="selected"' : '') . '>' . lang('deposit') . '</option>';
         // }

@@ -18,12 +18,50 @@
     $type   = pathinfo($path, PATHINFO_EXTENSION);
     $data   = file_get_contents($path);
     $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data); ?>
-                <div class="text-center" style="margin-bottom:20px;">
+                <!-- <div class="text-center" style="margin-bottom:20px;">
                     <img src="<?= $base64; ?>" alt="<?= $biller->company && $biller->company != '-' ? $biller->company : $biller->name; ?>">
-                </div>
+                </div> -->
             <?php
 }
             ?>
+            <div class="padding10">
+                <!-- <div class="col-xs-5">
+                    <span style="font-weight:bold;"><?= lang('warehouse'); ?></span>:<br>
+                    <span class="bold"><?= $Settings->site_name; ?></span><br>
+                    <?= $warehouse->name ?>
+
+                    <?php
+                        echo $warehouse->address . '<br>';
+                        echo($warehouse->phone ? lang('tel') . ': ' . $warehouse->phone . '<br>' : '') . ($warehouse->email ? lang('email') . ': ' . $warehouse->email : '');
+                    ?>
+                    <div class="clearfix"></div>
+                </div> -->
+                <div class="col-xs-5">
+                    <div class="bold">
+                        <?= lang('date'); ?>: <?= $this->sma->hrld($inv->date); ?><br>
+                        <?= lang('ref'); ?>: <?= $inv->reference_no; ?><br>
+                        <?= lang('payment_status'); ?>: <?= lang($inv->payment_status); ?>
+                        <?= $inv->payment_method ? '<br>' . lang('payment_method') . ': ' . lang($inv->payment_method) : ''; ?>
+                        <?php if ($inv->payment_status != 'paid' && $inv->due_date) {
+                        echo '<br>' . lang('due_date') . ': ' . $this->sma->hrsd($inv->due_date);
+                    } ?>
+                        <?php if (!empty($inv->return_sale_ref)) {
+                        echo lang('return_ref') . ': ' . $inv->return_sale_ref . '<br>';
+                    } ?>
+                        <div class="order_barcodes barcode">
+                            <?php
+                            $path   = admin_url('misc/barcode/' . $this->sma->base64url_encode($inv->reference_no) . '/code128/74/0/1');
+                            $type   = $Settings->barcode_img ? 'png' : 'svg+xml';
+                            $data   = file_get_contents($path);
+                            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                            ?>
+                            <!-- <img src="<?= $base64; ?>" alt="<?= $inv->reference_no; ?>" class="bcimg" /> -->
+                            <?php /*echo $this->sma->qrcode('link', urlencode(admin_url('sales/view/' . $inv->id)), 2);*/ ?>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
             <div class="clearfix"></div>
             <div class="padding10">
                 <?php if ($Settings->invoice_view == 1) {
@@ -109,44 +147,6 @@
 
             </div>
             <div class="clearfix"></div>
-            <div class="padding10">
-                <div class="col-xs-5">
-                    <span style="font-weight:bold;"><?= lang('warehouse'); ?></span>:<br>
-                    <span class="bold"><?= $Settings->site_name; ?></span><br>
-                    <?= $warehouse->name ?>
-
-                    <?php
-                        echo $warehouse->address . '<br>';
-                        echo($warehouse->phone ? lang('tel') . ': ' . $warehouse->phone . '<br>' : '') . ($warehouse->email ? lang('email') . ': ' . $warehouse->email : '');
-                    ?>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="col-xs-5">
-                    <div class="bold">
-                        <?= lang('date'); ?>: <?= $this->sma->hrld($inv->date); ?><br>
-                        <?= lang('ref'); ?>: <?= $inv->reference_no; ?><br>
-                        <?= lang('payment_status'); ?>: <?= lang($inv->payment_status); ?>
-                        <?= $inv->payment_method ? '<br>' . lang('payment_method') . ': ' . lang($inv->payment_method) : ''; ?>
-                        <?php if ($inv->payment_status != 'paid' && $inv->due_date) {
-                        echo '<br>' . lang('due_date') . ': ' . $this->sma->hrsd($inv->due_date);
-                    } ?>
-                        <?php if (!empty($inv->return_sale_ref)) {
-                        echo lang('return_ref') . ': ' . $inv->return_sale_ref . '<br>';
-                    } ?>
-                        <div class="order_barcodes barcode">
-                            <?php
-                            $path   = admin_url('misc/barcode/' . $this->sma->base64url_encode($inv->reference_no) . '/code128/74/0/1');
-                            $type   = $Settings->barcode_img ? 'png' : 'svg+xml';
-                            $data   = file_get_contents($path);
-                            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                            ?>
-                            <img src="<?= $base64; ?>" alt="<?= $inv->reference_no; ?>" class="bcimg" />
-                            <?php /*echo $this->sma->qrcode('link', urlencode(admin_url('sales/view/' . $inv->id)), 2);*/ ?>
-                        </div>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
 
             <div class="clearfix"></div>
             <?php

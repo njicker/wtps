@@ -968,47 +968,52 @@ class Sales_model extends CI_Model
             $this->Settings->overselling = true;
             $cost                        = $this->site->costing($items, true);
         }
-        // $this->sma->print_arrays($cost);
-
+        // $this->sma->print_arrays($data);
+        // var_dump($this->db->update('sales', $data, ['id' => $id]));exit;
         if ($this->db->update('sales', $data, ['id' => $id]) && $this->db->delete('sale_items', ['sale_id' => $id]) && $this->db->delete('costing', ['sale_id' => $id])) {
+            // var_dump($items);exit;
             foreach ($items as $item) {
                 $item['sale_id'] = $id;
                 $this->db->insert('sale_items', $item);
-                $sale_item_id = $this->db->insert_id();
-                if ($data['sale_status'] == 'completed' && $this->site->getProductByID($item['product_id'])) {
-                    $item_costs = $this->site->item_costing($item);
-                    foreach ($item_costs as $item_cost) {
-                        if (isset($item_cost['date']) || isset($item_cost['pi_overselling'])) {
-                            $item_cost['sale_item_id'] = $sale_item_id;
-                            $item_cost['sale_id']      = $id;
-                            $item_cost['date']         = date('Y-m-d', strtotime($data['date']));
-                            if (!isset($item_cost['pi_overselling'])) {
-                                $this->db->insert('costing', $item_cost);
-                            }
-                        } else {
-                            foreach ($item_cost as $ic) {
-                                $ic['sale_item_id'] = $sale_item_id;
-                                $ic['sale_id']      = $id;
-                                $item_cost['date']  = date('Y-m-d', strtotime($data['date']));
-                                if (!isset($ic['pi_overselling'])) {
-                                    $this->db->insert('costing', $ic);
-                                }
-                            }
-                        }
-                    }
-                }
+                // $sale_item_id = $this->db->insert_id();
+                // if ($data['sale_status'] == 'completed' && $this->site->getProductByID($item['product_id'])) {
+                //     $item_costs = $this->site->item_costing($item);
+                //     foreach ($item_costs as $item_cost) {
+                //         if (isset($item_cost['date']) || isset($item_cost['pi_overselling'])) {
+                //             $item_cost['sale_item_id'] = $sale_item_id;
+                //             $item_cost['sale_id']      = $id;
+                //             $item_cost['date']         = date('Y-m-d', strtotime($data['date']));
+                //             if (!isset($item_cost['pi_overselling'])) {
+                //                 // var_dump($item_cost);exit;
+                //                 $this->db->insert('costing', $item_cost);
+                //             }
+                //         } else {
+                //             foreach ($item_cost as $ic) {
+                //                 $ic['sale_item_id'] = $sale_item_id;
+                //                 $ic['sale_id']      = $id;
+                //                 $item_cost['date']  = date('Y-m-d', strtotime($data['date']));
+                //                 if (!isset($ic['pi_overselling'])) {
+                //                     // var_dump($ic);exit;
+                //                     $this->db->insert('costing', $ic);
+                //                 }
+                //             }
+                //         }
+                //         // var_dump($item_cost);exit;
+                //     }
+                // }
             }
-
+            // var_dump($cost);exit;
             if ($data['sale_status'] == 'completed') {
-                $this->site->syncPurchaseItems($cost);
+                // $this->site->syncPurchaseItems($cost);
             }
 
             $this->site->syncSalePayments($id);
-            $this->site->syncQuantity($id);
+            // $this->site->syncQuantity($id);
             $sale = $this->getInvoiceByID($id);
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $sale->created_by);
         }
         $this->db->trans_complete();
+        // var_dump($this->db->trans_status()); exit;
         if ($this->db->trans_status() === false) {
             log_message('error', 'An errors has been occurred while adding the sale (Update:Sales_model.php)');
         } else {

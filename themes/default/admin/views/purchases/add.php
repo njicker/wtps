@@ -2,7 +2,7 @@
 <?php
     function getMonth(){
         $bln_romawi = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-        $bln = date("m");
+        $bln = date("n");
         return $bln_romawi[$bln];
     }
 ?>
@@ -275,11 +275,13 @@
                                 <div class="form-group">
                                     <?= lang('warehouse', 'powarehouse'); ?>
                                     <?php
-                                    $wh[''] = '';
-                    foreach ($warehouses as $warehouse) {
-                        $wh[$warehouse->id] = $warehouse->name;
-                    }
-                    echo form_dropdown('warehouse', $wh, ($_POST['warehouse'] ?? $Settings->default_warehouse), 'id="powarehouse" class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" required="required" style="width:100%;" '); ?>
+                                    // $wh[''] = '';
+                                    foreach ($warehouses as $warehouse) {
+                                        if(str_contains($warehouse->name,"Raw Material")){
+                                            $wh[$warehouse->id] = $warehouse->name;
+                                        }
+                                    }
+                                    echo form_dropdown('warehouse', $wh, ($_POST['warehouse'] ?? $Settings->default_warehouse), 'id="powarehouse" class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" required="required" style="width:100%;" '); ?>
                                 </div>
                             </div>
                         <?php

@@ -943,6 +943,7 @@ class Sales extends MY_Controller
             $biller           = !empty($biller_details->company) && $biller_details->company != '-' ? $biller_details->company : $biller_details->name;
             $note             = $this->sma->clear_tags($this->input->post('note'));
             $staff_note       = $this->sma->clear_tags($this->input->post('staff_note'));
+            $salesman_id       = $this->sma->clear_tags($this->input->post('salesman_id'));
 
             $total            = 0;
             $product_tax      = 0;
@@ -1061,6 +1062,7 @@ class Sales extends MY_Controller
                 'due_date'            => $due_date,
                 'updated_by'          => $this->session->userdata('user_id'),
                 'updated_at'          => date('Y-m-d H:i:s'),
+                'salesman_id'         => $salesman_id,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
@@ -1185,6 +1187,8 @@ class Sales extends MY_Controller
             $this->data['units']      = $this->site->getAllBaseUnits();
             $this->data['tax_rates']  = $this->site->getAllTaxRates();
             $this->data['warehouses'] = $this->site->getAllWarehouses();
+            $this->data['payment_terms']  = $this->site->getAllPaymentTerms();
+            $this->data['salesman']   = $this->site->getAllEmployee('Sales');
 
             $bc   = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('sales'), 'page' => lang('sales')], ['link' => '#', 'page' => lang('edit_sale')]];
             $meta = ['page_title' => lang('edit_sale'), 'bc' => $bc];
@@ -1627,7 +1631,6 @@ class Sales extends MY_Controller
             <li>' . $edit_link . '</li>
             <li>' . $pdf_link . '</li>
             <li>' . $email_link . '</li>
-            <li>' . $return_link . '</li>
             <li>' . $delete_link . '</li>
         </ul>
     </div></div>';

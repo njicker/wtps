@@ -479,7 +479,7 @@ if (!empty($variants)) {
                             <div class="form-group all">
                                 <?= lang('pcf1', 'cf1') ?>
                                 <?php
-                                    $dt[''] = '';
+                                    $dt[''] = '-';
                                     foreach($cf1 as $cf){
                                         $dt[$cf->code] = $cf->descr;
                                     }

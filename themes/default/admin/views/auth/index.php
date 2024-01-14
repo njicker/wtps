@@ -19,11 +19,11 @@
                 "mRender": checkbox
             }, null, null, null, null, null, null, {"mRender": user_status}, {"bSortable": false}]
         }).fnSetFilteringDelay().dtFilter([
-            {column_number: 1, filter_default_label: "[<?=lang('first_name');?>]", filter_type: "text", data: []},
-            {column_number: 2, filter_default_label: "[<?=lang('last_name');?>]", filter_type: "text", data: []},
-            {column_number: 3, filter_default_label: "[<?=lang('email_address');?>]", filter_type: "text", data: []},
-            {column_number: 4, filter_default_label: "[<?=lang('company');?>]", filter_type: "text", data: []},
-            {column_number: 5, filter_default_label: "[<?=lang('award_points');?>]", filter_type: "text", data: []},
+            {column_number: 1, filter_default_label: "[NIK]", filter_type: "text", data: []},
+            {column_number: 2, filter_default_label: "[<?=lang('first_name');?>]", filter_type: "text", data: []},
+            {column_number: 3, filter_default_label: "[<?=lang('last_name');?>]", filter_type: "text", data: []},
+            {column_number: 4, filter_default_label: "[<?=lang('email_address');?>]", filter_type: "text", data: []},
+            {column_number: 5, filter_default_label: "[<?=lang('company');?>]", filter_type: "text", data: []},
             {column_number: 6, filter_default_label: "[<?=lang('group');?>]", filter_type: "text", data: []},
             {
                 column_number: 7, select_type: 'select2',
@@ -52,7 +52,7 @@
 } ?>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-users"></i><?= lang('users'); ?></h2>
+        <h2 class="blue"><i class="fa-fw fa fa-users"></i>Karyawan</h2>
 
         <div class="box-icon">
             <ul class="btn-tasks">

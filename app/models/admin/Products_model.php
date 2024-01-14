@@ -1317,12 +1317,34 @@ class Products_model extends CI_Model
     public function finishProduction($header, $detail, $detail_raw){
         $err = false;
         $this->db->trans_start();
+        
         if(count($detail_raw) > 0){
             foreach($detail_raw as $dtl){
-                if(!$this->site->syncPurchaseQty($dtl, false, "production")){
+                if(!$this->site->syncPurchaseQty($dtl, false, "production", "X")){
                     $err = true;
                     break;
                 }
+                $mov_type = 'out';
+                if($dtl['qty'] < 0){
+                    $mov_type = 'in';
+                }
+                $item_movement = [
+                    "warehouse_id" => $dtl['warehouse_id'],
+                    "product_id" => $dtl['product_id'],
+                    "product_code" => $dtl['product_code'],
+                    "product_desc" => '',
+                    "quantity" => $dtl['qty'] * -1,
+                    "unit_code" => $dtl['unit_code'],
+                    "movement_type" => $mov_type,
+                    "product_batch" => ($dtl['type_item'] == 'raw' ? $dtl["product_batch"] : $dtl["reff_doc"]),
+                    "movement_status" => 'good',
+                    "reff_type" => 'production',
+                    "reff_no" => $dtl['reff_doc'],
+                    "stock_date" => date("Y-m-d"),
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $a = $this->site->submitMovementItem($item_movement, false);
+                // var_dump($a);exit;
             }
         }
         if($err){
@@ -1425,7 +1447,11 @@ class Products_model extends CI_Model
                 }
                 else {
                     $this->db->trans_complete();
-                    return true;
+                    if ($this->db->trans_status() === false) {
+                        log_message('error', 'An errors has been occurred while adding the sale (Add:Purchases_model.php)');
+                    } else {
+                        return true;
+                    }
                 }
             }
             else {
@@ -1502,7 +1528,9 @@ class Products_model extends CI_Model
                 }
                 $this->site->syncProductQty($dtl->product_id, $dtl->warehouse_id);
             }
-            
+            $data['reff_type'] = "production";
+            $data['reff_no'] = $header['reff_doc'];
+            $this->site->deleteMovementItemByDoc($data);
             return true;
         }
         return false;

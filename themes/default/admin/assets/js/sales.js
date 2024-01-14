@@ -281,11 +281,12 @@ $(document).ready(function (e) {
                 return;
             } else {
                 localStorage.setItem('slpayment_term', new_payment_term);
-                $('#slpayment_term').val(new_payment_term);
+                $('#slpayment_term').select2('val', new_payment_term);
             }
         });
     if ((slpayment_term = localStorage.getItem('slpayment_term'))) {
-        $('#slpayment_term').val(slpayment_term);
+        // console.log(slpayment_term);
+        $('#slpayment_term').select2('val', slpayment_term);
     }
 
     var old_shipping;

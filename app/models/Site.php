@@ -1165,6 +1165,7 @@ class Site extends CI_Model
                         unset($item['pi_overselling']);
                         $option_id = (isset($item['option_id']) && !empty($item['option_id'])) ? $item['option_id'] : null;
                         $clause    = ['purchase_id' => null, 'transfer_id' => null, 'product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'option_id' => $option_id, 'product_batch' => $item['product_batch']];
+                        var_dump($this->getPurchasedItem($clause));exit;
                         if ($pi = $this->getPurchasedItem($clause)) {
                             $quantity_balance = $pi->quantity_balance + $item['quantity_balance'];
                             $this->db->update('purchase_items', ['quantity_balance' => $quantity_balance], ['id' => $pi->id]);
@@ -1420,8 +1421,11 @@ class Site extends CI_Model
         return 0;
     }
 
-    public function syncPurchaseQty($item, $simulate, $type = ""){        
+    public function syncPurchaseQty($item, $simulate, $type = "", $revise = ""){        
         $upd = 0;
+        $upd2 = 0;
+        $cost = 0;
+        $total_cost = 0;
         if($item['qty'] < 0){
             $purchase_all = array();
             $sisa = $item['qty'] * -1;
@@ -1437,23 +1441,36 @@ class Site extends CI_Model
                 if($sisa_bal == 0){
                     continue;
                 }
+                $net_unit_cost = $purchase->net_unit_cost;
+                $unit = $this->getUnitByID($purchase->product_unit_id);
+                if($purchase->product_unit_id != $item['unit_id']){
+                    $net_unit_cost = $this->convertToBase($unit, $purchase->net_unit_cost);
+                }
                 if($sisa_bal >= $sisa){
                     $qty = $purchase->quantity_balance + $sisa;
                     $sisa = 0;
+                    $qty_used = $sisa;
                 }
                 else {
                     $sisa -= $sisa_bal;
+                    $qty_used = $sisa_bal;
                     $qty = $purchase->quantity_balance + $sisa_bal;
                 }
                 if(!$simulate){
                     $upd += $this->db->update('purchase_items', ['quantity_balance' => $qty], ['id' => $purchase->id]);
                 }
+                $cost += $net_unit_cost;
+                $total_cost += ($net_unit_cost * $qty_used);
+                $purchase_arr[] = $purchase->id;
             }
+            // var_dump($sisa);exit;
             if($sisa == 0){
                 if(!$simulate){
-                    return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
+                    // return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
                 }
-                return true;
+                $cost *= -1;
+                $total_cost *= -1;
+                // return true;
             }
             else {
                 if(!$simulate){
@@ -1461,88 +1478,123 @@ class Site extends CI_Model
                         $this->db->update('purchase_items', ['quantity_balance' => $pur->quantity_balance], ['id' => $pur->id]);
                     }
                 }
+                return false;
             }
-            return false;
+            // return false;
         }
         else
         {
+            if(!isset($item['product_batch'])){
+                $item['product_batch'] = "";
+            }
             $purchase = $this->getPurchasedItems($item['product_id'], $item['warehouse_id'], null, false, $item["product_batch"]);
-        }
 
-        if(!$purchase){
-            if(!$simulate){
-                $this->session->set_flashdata('error', 'Stock '.$item['product_code'].' tidak ada digudang');
-            }
-            return false;
-        }
-
-        $sisa = $item['qty'];
-        $cost = 0;
-        $cnt_item = 0;
-        $total_cost = 0;
-        $diff_unit = false;
-        foreach($purchase as $pur){
-            if($sisa == 0){
-                break;
-            }
-            $unit = null;
-            if($pur->quantity_balance > 0){
-                $net_unit_cost = $pur->net_unit_cost;
-                $unit = $this->getUnitByID($pur->product_unit_id);
-                if($pur->product_unit_id != $item['unit_id']){
-                    $diff_unit = true;
-                    $sisa = $this->convertToBase($unit, $sisa);
-                    $net_unit_cost = $this->convertToBase($unit, $pur->net_unit_cost);
-                }
-                else {
-                    if($diff_unit){
-                        $sisa = $this->convertToUnit($unit, $sisa);
-                        $diff_unit = false;
-                    }
-                    $unit = null;
-                }
-                // var_dump($sisa);exit;
-                if($pur->quantity_balance >= $sisa){
-                    $qty = $pur->quantity_balance - $sisa;
-                    $qty_used = $sisa;
-                    $sisa = 0;
-                }
-                else {
-                    $qty = $pur->quantity_balance;
-                    $sisa = $sisa - $qty;
-                    $qty_used = $qty;
-                }
+            if(!$purchase){
                 if(!$simulate){
-                    $upd += $this->db->update('purchase_items', ['quantity_balance' => $qty], ['id' => $pur->id]);
+                    $this->session->set_flashdata('error', 'Stock '.$item['product_code'].' tidak ada digudang');
                 }
-                if($unit != null){
-                    $qty_used = $this->convertToUnit($unit,  $qty_used);
-                }
-                $cost += $net_unit_cost;
-                $total_cost += ($net_unit_cost * $qty_used);
-                $purchase_arr[] = $pur->id;
+                return false;
             }
-        }
-        if($sisa != 0){
-            if(!$simulate){
-                foreach($purchase as $pur){
-                    $this->db->update('purchase_items', ['quantity_balance' => $pur->quantity_balance], ['id' => $pur->id]);
+    
+            $sisa = $item['qty'];
+            $cnt_item = 0;
+            $diff_unit = false;
+            foreach($purchase as $pur){
+                if($sisa == 0){
+                    break;
                 }
-                $this->session->set_flashdata('error', 'Stock '.$item['product_code'].' tidak mencukupi');
+                $unit = null;
+                if($pur->quantity_balance > 0){
+                    $net_unit_cost = $pur->net_unit_cost;
+                    $unit = $this->getUnitByID($pur->product_unit_id);
+                    if($pur->product_unit_id != $item['unit_id']){
+                        $diff_unit = true;
+                        $sisa = $this->convertToBase($unit, $sisa);
+                        $net_unit_cost = $this->convertToBase($unit, $pur->net_unit_cost);
+                    }
+                    else {
+                        if($diff_unit){
+                            $sisa = $this->convertToUnit($unit, $sisa);
+                            $diff_unit = false;
+                        }
+                        $unit = null;
+                    }
+                    // var_dump($sisa);exit;
+                    if($pur->quantity_balance >= $sisa){
+                        $qty = $pur->quantity_balance - $sisa;
+                        $qty_used = $sisa;
+                        $sisa = 0;
+                    }
+                    else {
+                        $qty = $pur->quantity_balance;
+                        $sisa = $sisa - $qty;
+                        $qty_used = $qty;
+                    }
+                    if(!$simulate){
+                        $upd += $this->db->update('purchase_items', ['quantity_balance' => $qty], ['id' => $pur->id]);
+                    }
+                    if($unit != null){
+                        $qty_used = $this->convertToUnit($unit,  $qty_used);
+                    }
+                    $cost += $net_unit_cost;
+                    $total_cost += ($net_unit_cost * $qty_used);
+                    $purchase_arr[] = $pur->id;
+                }
             }
-            return false;
-        }
-
-        if($sisa == 0 && $simulate){
-            return true;
+            if($sisa != 0){
+                if(!$simulate){
+                    foreach($purchase as $pur){
+                        $this->db->update('purchase_items', ['quantity_balance' => $pur->quantity_balance], ['id' => $pur->id]);
+                    }
+                    $this->session->set_flashdata('error', 'Stock '.$item['product_code'].' tidak mencukupi');
+                }
+                return false;
+            }
+    
+            if($sisa == 0 && $simulate){
+                return true;
+            }
         }
 
         if(!$simulate){
             if($type == "production"){
                 $net_cost = $cost / count($purchase_arr);
-                $purchase_id = implode(",", $purchase_arr);
-                $add = ['purchase_id' => $purchase_id, 'product_unit_cost' => $net_cost, 'product_total_cost' => $total_cost];
-                $upd2 += $this->db->update('production_items', $add, ['reff_doc' => $item['reff_doc'], 'product_id' => $item['product_id']]);
+                $add = false;
+                if($revise == ""){
+                    $purchase_id = implode(",", $purchase_arr);
+                    $add = [
+                        'purchase_id' => $purchase_id, 
+                        'product_unit_cost' => $net_cost, 
+                        'product_total_cost' => $total_cost
+                    ];
+                }
+                else {
+                    $param['reff_doc'] = $item['reff_doc'];
+                    $param['product_id'] = $item['product_id'];
+                    $param['warehouse_id'] = $item['warehouse_id'];
+                    $param['product_batch'] = $item['product_batch'];
+                    $prod_items = $this->getProductionDetail($param);
+                    if($prod_items){
+                        $row = $prod_items[0];
+                        $qty_confirm = $row->qty + $item['qty'];
+                        $add = [
+                            'qty' => $qty_confirm, 
+                            // 'product_unit_cost' => $row->product_unit_cost + $net_cost, 
+                            'product_total_cost' => $row->product_total_cost + $total_cost
+                        ];
+                    }
+                    else {
+                        var_dump($param);exit;
+                    }
+                }
+                if($add){
+                    $upd2 += $this->db->update('production_items', $add, [
+                        'reff_doc' => $item['reff_doc'], 
+                        'product_id' => $item['product_id'], 
+                        'product_batch' => $item['product_batch'], 
+                        'warehouse_id' => $item['warehouse_id']
+                    ]);
+                }
             }
             return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
         }
@@ -1624,6 +1676,18 @@ class Site extends CI_Model
         $this->db->insert('item_movement', $data);
     }
 
+    public function deleteMovementItemByDoc($data){
+        $this->db->update('item_movement',
+            [
+                'flag_delete' => 'X'
+            ],
+            [
+                'reff_type' => $data['reff_type'], 
+                'reff_no' => $data['reff_no'],
+            ]
+        );
+    }
+
     public function syncInvoicePayments($id)
     {
         $invoice = $this->getInvoicesByID($id);
@@ -1668,6 +1732,35 @@ class Site extends CI_Model
     public function getInvoicePayments($invoice_id)
     {
         $q = $this->db->get_where('payments', ['invoice_id' => $invoice_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getProductionDetail($param)
+    {
+        $this->db->select("production_items.*, products.name");
+        $this->db->from("production_items");
+        $this->db->join("products", "production_items.product_id = products.id");
+        $this->db->where($param);
+        $q = $this->db->get();
+        // var_dump($q);exit;
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getItemsMovement($param = [])
+    {
+        $q = $this->db->get_where('item_movement', $param);
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;

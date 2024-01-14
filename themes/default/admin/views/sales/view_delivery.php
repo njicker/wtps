@@ -10,12 +10,13 @@
             </button>
             <?php if ($logo) {
     ?>
-                <div class="text-center" style="margin-bottom:20px;">
+                <!-- <div class="text-center" style="margin-bottom:20px;">
                     <img src="<?= base_url() . 'assets/uploads/logos/' . $biller->logo; ?>"
                          alt="<?= $biller->company && $biller->company != '-' ? $biller->company : $biller->name; ?>">
-                </div>
+                </div> -->
             <?php
 } ?>
+            <div class="text-center" style="margin-bottom:20px;"><h2>Surat Jalan</h2></div>
             <div class="table-responsive">
                 <table class="table table-bordered">
 

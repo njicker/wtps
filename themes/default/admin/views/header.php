@@ -570,7 +570,7 @@
                                 </ul>
                             </li>
 
-                            <li class="mm_quotes">
+                            <!-- <li class="mm_quotes">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-heart-o"></i>
                                     <span class="text"> <?= lang('quotes'); ?> </span>
@@ -590,7 +590,7 @@
                                         </a>
                                     </li>
                                 </ul>
-                            </li>
+                            </li> -->
 
                             <li class="mm_transfers">
                                 <a class="dropmenu" href="#">
@@ -752,11 +752,11 @@
                                         </li>
                                         <?php
                                 } ?>
-                                        <li id="system_settings_change_logo">
+                                        <!-- <li id="system_settings_change_logo">
                                             <a href="<?= admin_url('system_settings/change_logo') ?>" data-toggle="modal" data-target="#myModal">
                                                 <i class="fa fa-upload"></i><span class="text"> <?= lang('change_logo'); ?></span>
                                             </a>
-                                        </li>
+                                        </li> -->
                                         <li id="system_settings_currencies">
                                             <a href="<?= admin_url('system_settings/currencies') ?>">
                                                 <i class="fa fa-money"></i><span class="text"> <?= lang('currencies'); ?></span>

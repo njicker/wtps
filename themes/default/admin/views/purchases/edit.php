@@ -192,33 +192,48 @@
                     <div class="col-lg-12">
 
                         <?php if ($Owner || $Admin) {
-                    ?>
+                        ?>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <?= lang('date', 'podate'); ?>
-                                    <?php echo form_input('date', ($_POST['date'] ?? $this->sma->hrld($purchase->date)), 'class="form-control input-tip datetime" id="podate" required="required"'); ?>
+                                    <?= lang('podate', 'podate'); ?>
+                                    <?php echo form_input('date', ($_POST['date'] ?? $this->sma->hrld($purchase->date)), 'class="form-control input-tip datetime" id="podate" required="required" readonly'); ?>
                                 </div>
                             </div>
                         <?php
-                } ?>
+                        } ?>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('reference_no', 'poref'); ?>
                                 <?php echo form_input('reference_no', ($_POST['reference_no'] ?? $purchase->reference_no), 'class="form-control input-tip" id="poref" required="required" readonly'); ?>
                             </div>
                         </div>
+                        <input type="hidden" name="mode_post" value="<?=$mode?>">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('warehouse', 'powarehouse'); ?>
                                 <?php
-                                $wh[''] = '';
+                                // $wh[''] = '';
                                 foreach ($warehouses as $warehouse) {
-                                    $wh[$warehouse->id] = $warehouse->name;
+                                    if(str_contains($warehouse->name,"Raw Material")){
+                                        $wh[$warehouse->id] = $warehouse->name;
+                                    }
                                 }
                                 echo form_dropdown('warehouse', $wh, ($_POST['warehouse'] ?? $purchase->warehouse_id), 'id="powarehouse" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('warehouse') . '" required="required" style="width:100%;" ');
                                 ?>
                             </div>
                         </div>
+
+                        <?php if ($mode == "received") {
+                        ?>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <?= lang('receive_date', 'receive_date'); ?>
+                                    <?php echo form_input('receive_date', $this->sma->hrld(date("Ymd H:i")), 'class="form-control input-tip datetime" id="receive_date" required="required"'); ?>
+                                </div>
+                            </div>
+                        <?php
+                        } ?>
+
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('status', 'postatus'); ?>

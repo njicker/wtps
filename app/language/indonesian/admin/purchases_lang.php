@@ -21,6 +21,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Thank you
  */
 
+$lang['podate']                              = 'Tanggal Pembelian';
+$lang['receive_date']                        = 'Tanggal Terima Barang';
 $lang['add_purchase']                        = 'Tambah Pembelian';
 $lang['edit_purchase']                       = 'Ubah Pembelian';
 $lang['delete_purchase']                     = 'Hapus Pembelian';
@@ -28,6 +30,7 @@ $lang['delete_purchases']                    = 'Hapus Pembelian - pembelian';
 $lang['purchase_added']                      = 'Pembelian sukses ditambah';
 $lang['purchase_updated']                    = 'Pembelian sukses diubah';
 $lang['purchase_deleted']                    = 'Pembelian sukses dihapus';
+$lang['purchase_receive']                    = 'Barang sukses diterima';
 $lang['purchases_deleted']                   = 'Pembelian - pembelian sukses dihapus';
 $lang['ref_no']                              = 'No Refenresi';
 $lang['purchase_details']                    = 'Pembelian Detail';
@@ -47,12 +50,12 @@ $lang['product_price_is_required']           = 'Harga Produk diperlukan';
 $lang['ordered']                             = 'Pesanan';
 $lang['tax_rate_name']                       = 'Nama Tarif Pajak';
 $lang['no_purchase_selected']                = 'Tidak ada pembelian dipilih. Silakan pilih setidaknya satu pembelian.';
-$lang['view_payments']                       = 'View Pembayaran - pembayaran';
+$lang['view_payments']                       = 'View Pembayaran';
 $lang['add_payment']                         = 'Tambah Pembayaran';
 $lang['payment_reference_no']                = 'Pembayaran Reference No';
 $lang['edit_payment']                        = 'Ubah Pembayaran';
 $lang['delete_payment']                      = 'Hapus Pembayaran';
-$lang['delete_payments']                     = 'Hapus Pembayaran - pembayaran';
+$lang['delete_payments']                     = 'Hapus Pembayaran';
 $lang['payment_added']                       = 'Pembayaran sukses ditambah';
 $lang['payment_updated']                     = 'Pembayaran sukses diubah';
 $lang['payment_deleted']                     = 'Pembayaran sukses dihapus';

@@ -154,10 +154,15 @@
     </div>
 </div>
 <div style="display:none;">
+<select id="list_warehouse" name="warehouse_id[]" class="form-control input-tip select">
 <?php
 foreach ($warehouses as $warehouse) {
+    echo "<option value='" . $warehouse->id . "'>" . $warehouse->name . "</option>";
     $wh[$warehouse->id] = $warehouse->name;
 }
-echo form_dropdown('warehouse_id[]', $wh, ($_POST['warehouse_id'] ?? $Settings->default_warehouse), 'id="list_warehouse" class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;" '); 
+?>
+</select>
+<?php
+// echo form_dropdown('warehouse_id[]', $wh, ($_POST['warehouse_id'] ?? $Settings->default_warehouse), 'id="list_warehouse" class="form-control input-tip select" data-placeholder="' . lang('select') . ' ' . lang('warehouse') . '" style="width:100%;"'); 
 ?>
 </div>

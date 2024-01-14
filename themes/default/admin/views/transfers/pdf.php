@@ -18,9 +18,9 @@
     $type   = pathinfo($path, PATHINFO_EXTENSION);
     $data   = file_get_contents($path);
     $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data); ?>
-                    <div class="text-center" style="margin-bottom:20px;">
+                    <!-- <div class="text-center" style="margin-bottom:20px;">
                         <img src="<?= $base64; ?>" alt="<?=$Settings->site_name; ?>">
-                    </div>
+                    </div> -->
                     <?php
 } ?>
 
@@ -36,7 +36,7 @@
                         $data   = file_get_contents($path);
                         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
                         ?>
-                        <img src="<?= $base64; ?>" alt="<?= $transfer->transfer_no; ?>" class="bcimg" />
+                        <!-- <img src="<?= $base64; ?>" alt="<?= $transfer->transfer_no; ?>" class="bcimg" /> -->
                         <?php /*echo $this->sma->qrcode('link', urlencode(admin_url('transfers/view/' . $transfer->id)), 2);*/ ?>
                     </div>
                     <div class="clearfix"></div>
@@ -48,15 +48,15 @@
 
     <div class="row">
         <div class="col-xs-5">
-            <p><?php echo $this->lang->line('to'); ?>:</p>
-            <h3><?php echo $to_warehouse->name . ' ( ' . $to_warehouse->code . ' )'; ?></h3>
-            <?php echo '<p>' . $to_warehouse->address . '<br>' . $to_warehouse->phone . '<br>' . $to_warehouse->email . '</p>';
-            ?>
-        </div>
-        <div class="col-xs-5">
             <p><?php echo $this->lang->line('from'); ?>:</p>
             <h3><?php echo $from_warehouse->name . ' ( ' . $from_warehouse->code . ' )'; ?></h3>
             <?php echo '<p>' . $from_warehouse->address . '<br>' . $from_warehouse->phone . '<br>' . $from_warehouse->email . '</p>';
+            ?>
+        </div>
+        <div class="col-xs-5">
+            <p><?php echo $this->lang->line('to'); ?>:</p>
+            <h3><?php echo $to_warehouse->name . ' ( ' . $to_warehouse->code . ' )'; ?></h3>
+            <?php echo '<p>' . $to_warehouse->address . '<br>' . $to_warehouse->phone . '<br>' . $to_warehouse->email . '</p>';
             ?>
         </div>
         <div class="clearfix"></div>

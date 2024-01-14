@@ -153,3 +153,4 @@ $lang['topup_added']                     = 'Saldo Gift Cards berhasil diperbarui
 $lang['duplicate_sale']                  = 'Penjualan Duplikat';
 $lang['update_customer_email']           = 'Silakan perbarui alamat email pelanggan';
 $lang['no_vehicle']           = 'No. Polisi (Plat Mobil)';
+$lang['due_date']                          = 'Jatuh Tempo';

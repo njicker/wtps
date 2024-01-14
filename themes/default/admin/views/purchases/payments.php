@@ -5,9 +5,9 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                 <i class="fa fa-2x">&times;</i>
             </button>
-            <button type="button" class="btn btn-xs btn-default no-print pull-right" style="margin-right:15px;" onclick="window.print();">
+            <!-- <button type="button" class="btn btn-xs btn-default no-print pull-right" style="margin-right:15px;" onclick="window.print();">
                 <i class="fa fa-print"></i> <?= lang('print'); ?>
-            </button>
+            </button> -->
             <h4 class="modal-title" id="myModalLabel"><?= lang('view_payments') . ' (' . lang('purcahse') . ' ' . lang('reference') . ': ' . $inv->reference_no . ')'; ?></h4>
         </div>
         <div class="modal-body">

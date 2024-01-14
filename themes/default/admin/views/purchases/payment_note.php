@@ -13,8 +13,8 @@
             <?php if ($logo) {
     ?>
                 <!--<div class="text-center" style="margin-bottom:20px;">-->
-                <img src="<?= base_url('assets/uploads/logos/' . $Settings->logo) ?>"
-                     alt="<?= $Settings->site_name ?>">
+                <!-- <img src="<?= base_url('assets/uploads/logos/' . $Settings->logo) ?>"
+                     alt="<?= $Settings->site_name ?>"> -->
                 <!--</div>-->
             <?php
 } ?>

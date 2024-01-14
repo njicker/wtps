@@ -144,7 +144,7 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <?= lang('date', 'sldate'); ?>
-                                    <?php echo form_input('date', (isset($_POST['date']) ? $_POST['date'] : $this->sma->hrld($inv->date)), 'class="form-control input-tip datetime" id="sldate" required="required"'); ?>
+                                    <?php echo form_input('date', (isset($_POST['date']) ? $_POST['date'] : $this->sma->hrld($inv->date)), 'class="form-control input-tip datetime" id="sldate" required="required" readonly'); ?>
                                 </div>
                             </div>
                         <?php
@@ -152,7 +152,7 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('reference_no', 'slref'); ?>
-                                <?php echo form_input('reference_no', (isset($_POST['reference_no']) ? $_POST['reference_no'] : ''), 'class="form-control input-tip" id="slref" required="required"'); ?>
+                                <?php echo form_input('reference_no', (isset($_POST['reference_no']) ? $_POST['reference_no'] : ''), 'class="form-control input-tip" id="slref" required="required" readonly'); ?>
                             </div>
                         </div>
                         <?php if ($Owner || $Admin || !$this->session->userdata('biller_id')) {
@@ -178,7 +178,18 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
                     ];
                     echo form_input($biller_input);
                 } ?>
-
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Salesman</label>
+                                <?php 
+                                    $sl[''] = 'Pilih Salesman';
+                                    foreach($salesman as $sales){
+                                        $sl[$sales->id] = "(".$sales->username.") ".$sales->first_name." ".$sales->last_name;
+                                    }
+                                    echo form_dropdown('salesman_id', $sl, ($inv->salesman_id ?? ''), 'id="slsalesman" data-placeholder="' . lang('select') . ' Salesman" required="required" class="form-control input-tip select" style="width:100%;"');
+                                ?>
+                            </div>
+                        </div>
                         <div class="clearfix"></div>
                         <div class="col-md-12">
                             <div class="panel panel-warning">
@@ -188,7 +199,7 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
 
                                     <?php if ($Owner || $Admin || !$this->session->userdata('warehouse_id')) {
                     ?>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4" style="display:none;">
                                             <div class="form-group">
                                                 <?= lang('warehouse', 'slwarehouse'); ?>
                                                 <?php
@@ -349,9 +360,14 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
                         </div>
                         <div class="col-sm-4">
                             <div class="form-group">
-                                <?= lang('payment_term', 'slpayment_term'); ?>
-                                <?php echo form_input('payment_term', '', 'class="form-control tip" data-trigger="focus" data-placement="top" title="' . lang('payment_term_tip') . '" id="slpayment_term"'); ?>
-
+                                <label>Terms of Payment (TOP)</label>
+                                <?php
+                                    $py[''] = "";
+                                    foreach($payment_terms as $pay){
+                                        $py[$pay->num_day] = $pay->description;
+                                    }
+                                    echo form_dropdown('payment_term', $py, '', 'id="slpayment_term" class="form-control input-tip select" style="width:100%;"');
+                                ?>
                             </div>
                         </div>
                         <?= form_hidden('payment_status', $inv->payment_status); ?>
@@ -445,7 +461,7 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
                     <?php if ($Settings->product_serial) {
                                     ?>
                         <div class="form-group">
-                            <label for="pserial" class="col-sm-4 control-label"><?= lang('serial_no') ?></label>
+                            <label for="pserial" class="col-sm-4 control-label">Batch Produksi</label>
 
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" id="pserial">

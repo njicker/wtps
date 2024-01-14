@@ -34,7 +34,7 @@
 
                     <div class="form-group">
                         <?= lang('customer', 'customer'); ?>
-                        <?php echo form_input('customer', (isset($_POST['customer']) ? $_POST['customer'] : $customer->name), 'class="form-control" id="customer" required="required" '); ?>
+                        <?php echo form_input('customer', (isset($_POST['customer']) ? $_POST['customer'] : $customer->company), 'class="form-control" id="customer" required="required" readonly'); ?>
                     </div>
 
                     <div class="form-group">

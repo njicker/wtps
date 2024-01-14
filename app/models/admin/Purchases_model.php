@@ -615,9 +615,13 @@ class Purchases_model extends CI_Model
         $this->db->trans_start();
         $opurchase = $this->getPurchaseByID($id);
         $oitems    = $this->getAllPurchaseItems($id);
+        $receive_date = $data['receive_date'];
+        unset($data['receive_date']);
         if ($this->db->update('purchases', $data, ['id' => $id]) && $this->db->delete('purchase_items', ['purchase_id' => $id])) {
             $purchase_id = $id;
             foreach ($items as $item) {
+                $receive_quantity = $item['receive_quantity'];
+                unset($item['receive_quantity']);
                 $item['purchase_id'] = $id;
                 $item['option_id']   = !empty($item['option_id']) && is_numeric($item['option_id']) ? $item['option_id'] : null;
                 $this->db->insert('purchase_items', $item);
@@ -628,17 +632,17 @@ class Purchases_model extends CI_Model
                         "product_id" => $item['product_id'],
                         "product_code" => $item['product_code'],
                         "product_desc" => $item['product_name'],
-                        "quantity" => $item['quantity_balance'] * ($data['status'] == 'returned' ? -1 : 1),
+                        "quantity" => $receive_quantity * ($data['status'] == 'returned' ? -1 : 1),
                         "unit_code" => $item['product_unit_code'],
                         "movement_type" => $data['status'] == 'returned' ? 'out' : 'in',
                         "product_batch" => '',
                         "movement_status" => 'good',
                         "reff_type" => 'purchase',
                         "reff_no" => $data['reference_no'],
-                        "stock_date" => date("Y-m-d"),
+                        "stock_date" => date("Y-m-d", strtotime($receive_date)),
                         "created_by" => $this->session->userdata('user_id'),
                     ];
-                    $this->site->submitMovementItem($item_movement, true);
+                    $this->site->submitMovementItem($item_movement, false);
                 }
             }
             $this->site->syncQuantity(null, null, $oitems);

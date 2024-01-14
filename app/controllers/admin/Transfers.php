@@ -595,11 +595,7 @@ class Transfers extends MY_Controller
             . lang('actions') . ' <span class="caret"></span></button>
         <ul class="dropdown-menu pull-right" role="menu">
             <li>' . $detail_link . '</li>
-            <li>' . $edit_link . '</li>
             <li>' . $pdf_link . '</li>
-            <li>' . $email_link . '</li>
-            <li>' . $print_barcode . '</li>
-            <li>' . $delete_link . '</li>
         </ul>
     </div></div>';
 

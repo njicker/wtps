@@ -591,6 +591,7 @@ class Purchases extends MY_Controller
             $note             = $this->sma->clear_tags($this->input->post('note'));
             $payment_term     = $this->input->post('payment_term');
             $due_date         = $payment_term ? date('Y-m-d', strtotime('+' . $payment_term . ' days', strtotime($date))) : null;
+            $receive_date     = $this->sma->fld(trim($this->input->post('receive_date')));
 
             $total            = 0;
             $product_tax      = 0;
@@ -684,6 +685,7 @@ class Purchases extends MY_Controller
                         'real_unit_cost'    => $real_unit_cost,
                         'supplier_part_no'  => $supplier_part_no,
                         'date'              => date('Y-m-d', strtotime($date)),
+                        'receive_quantity'  => $_POST['received_base_quantity'][$r],
                     ];
 
                     if ($unit->id != $product_details->unit) {
@@ -734,6 +736,7 @@ class Purchases extends MY_Controller
                 'updated_at'                  => date('Y-m-d H:i:s'),
                 'payment_term'                => $payment_term,
                 'due_date'                    => $due_date,
+                'receive_date'                => $receive_date,
             ];
             if ($date) {
                 $data['date'] = $date;
@@ -766,7 +769,12 @@ class Purchases extends MY_Controller
 
         if ($this->form_validation->run() == true && $this->purchases_model->updatePurchase($id, $data, $products)) {
             $this->session->set_userdata('remove_pols', 1);
-            $this->session->set_flashdata('message', $this->lang->line('purchase_added'));
+            $mode_post = $this->input->post('mode_post');
+            $msg = $this->lang->line('purchase_updated');
+            if($mode_post == "received"){
+                $msg = $this->lang->line('purchase_receive');
+            }
+            $this->session->set_flashdata('message', $msg);
             admin_redirect('purchases');
         } else {
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -1230,6 +1238,7 @@ class Purchases extends MY_Controller
             $warehouse_id = $user->warehouse_id;
         }
         $detail_link      = anchor('admin/purchases/view/$1', '<i class="fa fa-file-text-o"></i> ' . lang('purchase_details'));
+        $delivery_link    = anchor('admin/purchases/view_received/$1', '<i class="fa fa-truck"></i> Daftar Terima Barang', 'data-toggle="modal" data-target="#myModal"');
         $payments_link    = anchor('admin/purchases/payments/$1', '<i class="fa fa-money"></i> ' . lang('view_payments'), 'data-toggle="modal" data-target="#myModal"');
         $add_payment_link = anchor('admin/purchases/add_payment/$1', '<i class="fa fa-money"></i> ' . lang('add_payment'), 'data-toggle="modal" data-target="#myModal"');
         $email_link       = anchor('admin/purchases/email/$1', '<i class="fa fa-envelope"></i> ' . lang('email_purchase'), 'data-toggle="modal" data-target="#myModal"');
@@ -1250,11 +1259,11 @@ class Purchases extends MY_Controller
             <li>' . $payments_link . '</li>
             <li>' . $add_payment_link . '</li>
             <li>' . $edit_link . '</li>
+            <li>' . $delivery_link . '</li>
             <li>' . $received_link . '</li>
             <li>' . $return_link . '</li>
             <li>' . $pdf_link . '</li>
             <li>' . $email_link . '</li>
-            <li>' . $print_barcode . '</li>
             <li>' . $delete_link . '</li>
         </ul>
     </div></div>';
@@ -2118,5 +2127,25 @@ class Purchases extends MY_Controller
         $this->data['rows']      = $this->purchases_model->getAllReturnItems($id);
         $this->data['purchase']  = $this->purchases_model->getPurchaseByID($inv->purchase_id);
         $this->load->view($this->theme . 'purchases/view_return', $this->data);
+    }
+
+    public function view_received($id)
+    {
+        $this->data['purchase']  = $this->purchases_model->getPurchaseByID($id);
+        $this->data['rows']      = $this->purchases_model->getAllPurchaseItems($id);
+
+        $param['reff_type'] = 'purchase';
+        $param['reff_no'] = $this->data['purchase']->reference_no;
+        $param['flag_delete'] = '';
+        $this->data['item_movement']  = $this->site->getItemsMovement($param);
+        $warehouse = $this->site->getAllWarehouses();
+        foreach ($warehouse as $warehouse) {
+            $wh[$warehouse->id] = $warehouse->name;
+        }
+        $this->data['warehouses'] = $wh;
+        $this->data['modal_js'] = $this->site->modal_js();
+
+        // $this->sma->print_arrays($this->data);
+        $this->load->view($this->theme . 'purchases/view_received', $this->data);
     }
 }

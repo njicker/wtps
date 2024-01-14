@@ -129,7 +129,9 @@
                                                 $tr .= "<input type='hidden' name='raw_warehouse_id[]' value='" . $dtl->warehouse_id . "'/>";
                                                 $tr .= "<input type='hidden' name='raw_type_item[]' value='" . $dtl->type_item . "'/>";
                                                 $tr .= "<input type='hidden' name='raw_unit_id[]' value='" . $dtl->unit_id . "'/>";
+                                                $tr .= "<input type='hidden' name='raw_unit_code[]' value='" . $dtl->unit_code . "'/>";
                                                 $tr .= "<input type='hidden' name='raw_purchase_id[]' value='" . $dtl->purchase_id . "'/>";
+                                                $tr .= "<input type='hidden' name='raw_product_batch[]' value='" . $dtl->product_batch . "'/>";
                                                 $tr .= "</td>";
                                                 $tr .= "<td>" . $dtl->unit_code . "</td>";
                                                 $tr .= "<td>" . $dtl->product_batch . "</td>";
