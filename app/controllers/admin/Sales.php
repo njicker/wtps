@@ -2577,10 +2577,10 @@ class Sales extends MY_Controller
         $qty       = $analyzed['quantity'] ?? null;
         $bprice    = $analyzed['price']    ?? null;
 
-        $warehouse      = $this->site->getWarehouseByID($warehouse_id);
+        // $warehouse      = $this->site->getWarehouseByID($warehouse_id);
         $customer       = $this->site->getCompanyByID($customer_id);
         $customer_group = $this->site->getCustomerGroupByID($customer->customer_group_id);
-        $rows           = $this->sales_model->getProductNames($sr, $warehouse_id, $pos);
+        $rows           = $this->sales_model->getProductNamesSales($sr, $pos);
         if ($rows) {
             $r = 0;
             foreach ($rows as $row) {
@@ -2604,7 +2604,7 @@ class Sales extends MY_Controller
                     $option_id  = false;
                 }
                 $row->option = $option_id;
-                $pis         = $this->site->getPurchasedItems($row->id, $warehouse_id, $row->option);
+                $pis         = $this->site->getPurchasedItemsSales($row->id, $row->option);
                 if ($pis) {
                     $row->quantity = 0;
                     foreach ($pis as $pi) {
@@ -2614,7 +2614,7 @@ class Sales extends MY_Controller
                 if ($options) {
                     $option_quantity = 0;
                     foreach ($options as $option) {
-                        $pis = $this->site->getPurchasedItems($row->id, $warehouse_id, $row->option);
+                        $pis = $this->site->getPurchasedItemsSales($row->id, $row->option);
                         if ($pis) {
                             foreach ($pis as $pi) {
                                 $option_quantity += $pi->quantity_balance;
@@ -2649,7 +2649,7 @@ class Sales extends MY_Controller
                 $row->comment         = '';
                 $combo_items          = false;
                 if ($row->type == 'combo') {
-                    $combo_items = $this->sales_model->getProductComboItems($row->id, $warehouse_id);
+                    $combo_items = $this->sales_model->getProductComboItems($row->id);
                 }
                 $row->qty = $qty ? $qty : ($bprice ? $bprice / $row->price : 1);
                 $units    = $this->site->getUnitsByBUID($row->base_unit);

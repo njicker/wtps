@@ -695,6 +695,38 @@ class Site extends CI_Model
         return false;
     }
 
+    public function getPurchasedItemsSales($product_id, $option_id = null, $nonPurchased = false, $product_batch = 'XXXX')
+    {
+        $orderby = empty($this->Settings->accounting_method) ? 'asc' : 'desc';
+        // $this->db->select('id, purchase_id, quantity, quantity_balance, net_unit_cost, unit_cost, item_tax, base_unit_cost');
+        $this->db->select('*');
+        // $this->db->where('quantity_balance !=', 0);
+        if($product_batch != 'XXXX'){
+            // var_dump($product_batch);exit;
+            $this->db->where('product_batch', $product_batch);
+        }
+        if (!isset($option_id) || empty($option_id)) {
+            $this->db->group_start()->where('option_id', null)->or_where('option_id', 0)->group_end();
+        } else {
+            $this->db->where('option_id', $option_id);
+        }
+        if ($nonPurchased) {
+            $this->db->group_start()->where('purchase_id !=', null)->or_where('transfer_id !=', null)->group_end();
+        }
+        $this->db->group_start()->where('status', 'received')->or_where('status', 'partial')->group_end();
+        $this->db->group_by('id');
+        $this->db->order_by('date', $orderby);
+        $this->db->order_by('purchase_id', $orderby);
+        $q = $this->db->get('purchase_items');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
     public function getPurchasePayments($purchase_id)
     {
         $q = $this->db->get_where('payments', ['purchase_id' => $purchase_id]);
