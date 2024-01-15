@@ -14,7 +14,7 @@
                 });
                 $.ajax({'dataType': 'json', 'type': 'POST', 'url': sSource, 'data': aoData, 'success': fnCallback});
             },
-            "aoColumns": [{"bSortable": false, "mRender": checkbox}, null, null, null, null, null, {"bSortable": false}]
+            "aoColumns": [{"bSortable": false, "mRender": checkbox}, null, null, null, null, null, null, {"bSortable": false}]
         });
     });
 </script>
@@ -67,6 +67,7 @@
                                 <th><?= lang('base_unit'); ?></th>
                                 <th><?= lang('operator'); ?></th>
                                 <th><?= lang('operation_value'); ?></th>
+                                <th>Catatan</th>
                                 <th style="width:100px;"><?= lang('actions'); ?></th>
                             </tr>
                         </thead>

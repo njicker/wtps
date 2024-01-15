@@ -1274,11 +1274,15 @@ class Purchases extends MY_Controller
             $this->datatables
                 ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
                 ->from('purchases')
-                ->where('warehouse_id', $warehouse_id);
+                ->where('warehouse_id', $warehouse_id)
+                ->where('status !=', 'received')
+                ->or_where('payment_status !=', 'paid');
         } else {
             $this->datatables
                 ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
-                ->from('purchases');
+                ->from('purchases')
+                ->where('status !=', 'received')
+                ->or_where('payment_status !=', 'paid');
         }
         $this->datatables->where('supplier_id !=', '999');
         // $this->datatables->where('status !=', 'returned');

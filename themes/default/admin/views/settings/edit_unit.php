@@ -19,6 +19,10 @@
                 <?= form_input('name', set_value('name', $unit->name), 'class="form-control tip" id="name" required="required"'); ?>
             </div>
             <div class="form-group">
+                <label>Note</label>
+                <?= form_input('note', set_value('note', $unit->note), 'class="form-control tip" id="note" required="required"'); ?>
+            </div>
+            <div class="form-group">
                 <?= lang('base_unit', 'base_unit'); ?>
                 <?php
                 $opts[0] = lang('select') . ' ' . lang('unit');

@@ -755,6 +755,11 @@ class Sales extends MY_Controller
         if ($inv->sale_status == 'returned') {
             $this->sma->send_json(['error' => 1, 'msg' => lang('sale_x_action')]);
         }
+        $delv = $this->sales_model->getDeliveryBySaleID($id);
+        if($delv){
+            $this->sma->send_json(['error' => 1, 'msg' => 'Hapus penjualan tidak bisa dilakukan karena sudah ada pengiriman']);
+            exit;
+        }
 
         if ($this->sales_model->deleteSale($id)) {
             if ($this->input->is_ajax_request()) {

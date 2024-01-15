@@ -314,6 +314,7 @@ class system_settings extends MY_Controller
             $data = [
                 'name'            => $this->input->post('name'),
                 'code'            => $this->input->post('code'),
+                'note'            => $this->input->post('note'),
                 'base_unit'       => $this->input->post('base_unit') ? $this->input->post('base_unit') : null,
                 'operator'        => $this->input->post('base_unit') ? $this->input->post('operator') : null,
                 'operation_value' => $this->input->post('operation_value') ? $this->input->post('operation_value') : null,
@@ -1377,6 +1378,7 @@ class system_settings extends MY_Controller
             $data = [
                 'name'            => $this->input->post('name'),
                 'code'            => $this->input->post('code'),
+                'note'            => $this->input->post('note'),
                 'base_unit'       => $this->input->post('base_unit') ? $this->input->post('base_unit') : null,
                 'operator'        => $this->input->post('base_unit') ? $this->input->post('operator') : null,
                 'operation_value' => $this->input->post('operation_value') ? $this->input->post('operation_value') : null,
@@ -1692,7 +1694,7 @@ class system_settings extends MY_Controller
     {
         $this->load->library('datatables');
         $this->datatables
-            ->select("{$this->db->dbprefix('units')}.id as id, {$this->db->dbprefix('units')}.code, {$this->db->dbprefix('units')}.name, b.name as base_unit, {$this->db->dbprefix('units')}.operator, {$this->db->dbprefix('units')}.operation_value", false)
+            ->select("{$this->db->dbprefix('units')}.id as id, {$this->db->dbprefix('units')}.code, {$this->db->dbprefix('units')}.name, b.name as base_unit, {$this->db->dbprefix('units')}.operator, {$this->db->dbprefix('units')}.operation_value, {$this->db->dbprefix('units')}.note", false)
             ->from('units')
             ->join('units b', 'b.id=units.base_unit', 'left')
             ->group_by('units.id')
