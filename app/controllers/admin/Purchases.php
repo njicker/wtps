@@ -37,17 +37,20 @@ class Purchases extends MY_Controller
         $this->form_validation->set_message('is_natural_no_zero', $this->lang->line('no_zero_required'));
         $this->form_validation->set_rules('warehouse', $this->lang->line('warehouse'), 'required|is_natural_no_zero');
         $this->form_validation->set_rules('supplier', $this->lang->line('supplier'), 'required');
+        $this->form_validation->set_rules('payment_term', 'Terms of Payment (TOP)', 'required');
 
         $this->session->unset_userdata('csrf_token');
         if ($this->form_validation->run() == true) {
             // $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('po');
             // Generate Reference
             // Get No Urut
-            $no_urut = $this->purchases_model->getCountForReff(date("Y"));
+            // $no_urut = $this->purchases_model->getCountForReff(date("Y"));
+            $type = 'PO';
+            $no_urut = $this->site->getCountForReff($type);
             $no_urut = 10000 + $no_urut + 1;
             $no_urut = substr($no_urut, 1, 4);
             // Genarete reff with helper
-            $reference = generate_ref($no_urut, 'PO');
+            $reference = generate_ref($no_urut, $type);
             // var_dump($reference);exit;
 
             if ($this->Owner || $this->Admin) {
@@ -566,9 +569,19 @@ class Purchases extends MY_Controller
             $this->session->set_flashdata('error', lang('purchase_x_action'));
             admin_redirect($_SERVER['HTTP_REFERER'] ?? 'welcome');
         }
+        if($mode != 'received' && ($inv->payment_status == 'partial' || $inv->payment_status == 'paid')){
+            $this->session->set_flashdata('error', 'Tidak bisa ubah pembelian karena sudah ada pembayaran');
+            admin_redirect($_SERVER['HTTP_REFERER'] ?? 'welcome');
+        }
+        if($mode != 'received' && ($inv->status == 'received' || $inv->status == 'partial')){
+            $this->session->set_flashdata('error', 'Tidak bisa ubah pembelian karena sudah ada penerimaan barang');
+            admin_redirect($_SERVER['HTTP_REFERER'] ?? 'welcome');
+        }
         if (!$this->session->userdata('edit_right')) {
             $this->sma->view_rights($inv->created_by);
         }
+
+        $rcv_items = array();
         $this->form_validation->set_message('is_natural_no_zero', $this->lang->line('no_zero_required'));
         $this->form_validation->set_rules('reference_no', $this->lang->line('ref_no'), 'required');
         $this->form_validation->set_rules('warehouse', $this->lang->line('warehouse'), 'required|is_natural_no_zero');
@@ -627,7 +640,7 @@ class Purchases extends MY_Controller
                     $balance_qty = $quantity_received - ($ordered_quantity - $quantity_balance);
                 } else {
                     $balance_qty       = $item_quantity;
-                    $quantity_received = $item_quantity;
+                    $quantity_received = $quantity_received;
                 }
                 if (isset($item_code) && isset($real_unit_cost) && isset($unit_cost) && isset($item_quantity) && isset($quantity_balance)) {
                     $product_details = $this->purchases_model->getProductByCode($item_code);
@@ -687,6 +700,23 @@ class Purchases extends MY_Controller
                         'date'              => date('Y-m-d', strtotime($date)),
                         'receive_quantity'  => $_POST['received_base_quantity'][$r],
                     ];
+                    // var_dump($item);exit;
+                    // if($mode == "received"){
+                    //     $rcv = [
+                    //         'reff_doc'          => $_POST['received_reff_doc'],
+                    //         'product_id'        => $product_details->id,
+                    //         'product_code'      => $item_code,
+                    //         'product_name'      => $product_details->name,
+                    //         'quantity'          => $_POST['received_base_quantity'][$r],
+                    //         'warehouse_id'      => $warehouse_id,
+                    //         'product_unit_id'   => $item_unit,
+                    //         'product_unit_code' => $unit->code,
+                    //         'received_date'     => $receive_date,
+                    //         'created_by'        => $this->session->userdata('user_id'),
+                    //     ];
+
+                    //     $rcv_items[] = $rcv;
+                    // }
 
                     if ($unit->id != $product_details->unit) {
                         $item['base_unit_cost'] = $this->site->convertToBase($unit, $real_unit_cost);
@@ -737,6 +767,7 @@ class Purchases extends MY_Controller
                 'payment_term'                => $payment_term,
                 'due_date'                    => $due_date,
                 'receive_date'                => $receive_date,
+                'supporting_reff_doc'         => $this->input->post('supporting_reff_doc'),
             ];
             if ($date) {
                 $data['date'] = $date;
@@ -767,7 +798,7 @@ class Purchases extends MY_Controller
             // $this->sma->print_arrays($data, $products);
         }
 
-        if ($this->form_validation->run() == true && $this->purchases_model->updatePurchase($id, $data, $products)) {
+        if ($this->form_validation->run() == true && $this->purchases_model->updatePurchase($id, $data, $products, $mode)) {
             $this->session->set_userdata('remove_pols', 1);
             $mode_post = $this->input->post('mode_post');
             $msg = $this->lang->line('purchase_updated');

@@ -45,6 +45,8 @@
                             <th><?= lang('name'); ?></th>
                             <th><?= lang('quantity'); ?></th>
                             <th>Gudang</th>
+                            <th>No Surat Jalan</th>
+                            <th>Lampiran</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,6 +56,8 @@
                         echo '<td>' . $item->product_code ." - ". $item->product_desc .'</td>';
                         echo '<td>' . $this->sma->formatQuantity($item->quantity) . ' ' . $item->unit_code . '</td>';
                         echo '<td>' . $warehouses[$item->warehouse_id] . '</td>';
+                        echo '<td>' . $item->supporting_reff_doc .'</td>';
+                        echo '<td class="fileAttach">' . $item->attachment .'</td>';
                         echo '</tr>';
                     } ?>
                     </tbody>
@@ -62,3 +66,12 @@
         </div>
     </div>
 </div>
+<script>
+    $(".fileAttach").each(function(){
+        let isi = $(this).html();
+        if(isi != ""){
+            let div = attachment(isi);
+            $(this).html(div);
+        }
+    });
+</script>

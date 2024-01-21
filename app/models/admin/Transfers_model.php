@@ -62,6 +62,9 @@ class Transfers_model extends CI_Model
                     }
                 }
             }
+
+            $type = 'TR';
+            $this->site->updateReff($type);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {

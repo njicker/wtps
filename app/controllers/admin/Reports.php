@@ -1700,6 +1700,7 @@ class Reports extends MY_Controller
                 ->from('purchases')
                 ->join('purchase_items', 'purchase_items.purchase_id=purchases.id', 'left')
                 ->join('warehouses', 'warehouses.id=purchases.warehouse_id', 'left')
+                ->where('purchases.supplier_id !=', '999')
                 ->group_by('purchases.id')
                 ->order_by('purchases.date desc');
 
@@ -1799,7 +1800,8 @@ class Reports extends MY_Controller
                 ->select("DATE_FORMAT({$this->db->dbprefix('purchases')}.date, '%Y-%m-%d %T') as date, reference_no, {$this->db->dbprefix('warehouses')}.name as wname, supplier, (FPI.item_nane) as iname, grand_total, paid, (grand_total-paid) as balance, {$this->db->dbprefix('purchases')}.status, {$this->db->dbprefix('purchases')}.id as id", false)
                 ->from('purchases')
                 ->join($pi, 'FPI.purchase_id=purchases.id', 'left')
-                ->join('warehouses', 'warehouses.id=purchases.warehouse_id', 'left');
+                ->join('warehouses', 'warehouses.id=purchases.warehouse_id', 'left')
+                ->where('purchases.supplier_id !=', '999');
             // ->group_by('purchases.id');
 
             if ($user) {

@@ -97,6 +97,9 @@ class Purchases_model extends CI_Model
             if ($data['status'] == 'received' || $data['status'] == 'returned') {
                 $this->site->syncQuantity(null, $purchase_id);
             }
+
+            $type = 'PO';
+            $this->site->updateReff($type);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -610,13 +613,20 @@ class Purchases_model extends CI_Model
         return false;
     }
 
-    public function updatePurchase($id, $data, $items = [])
+    public function updatePurchase($id, $data, $items = [], $mode = "")
     {
         $this->db->trans_start();
         $opurchase = $this->getPurchaseByID($id);
         $oitems    = $this->getAllPurchaseItems($id);
         $receive_date = $data['receive_date'];
         unset($data['receive_date']);
+        $supporting_reff_doc = $data['supporting_reff_doc'];
+        unset($data['supporting_reff_doc']);
+        $attachment = "";
+        if($mode == "received"){
+            $attachment = $data['attachment'];
+            unset($data['attachment']);
+        }
         if ($this->db->update('purchases', $data, ['id' => $id]) && $this->db->delete('purchase_items', ['purchase_id' => $id])) {
             $purchase_id = $id;
             foreach ($items as $item) {
@@ -627,6 +637,9 @@ class Purchases_model extends CI_Model
                 $this->db->insert('purchase_items', $item);
                 if ($data['status'] == 'received' || $data['status'] == 'partial') {
                     $this->updateAVCO(['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'quantity' => $item['quantity'], 'cost' => $item['real_unit_cost']]);
+                    if($receive_quantity <= 0){
+                        continue;
+                    }
                     $item_movement = [
                         "warehouse_id" => $item['warehouse_id'],
                         "product_id" => $item['product_id'],
@@ -641,6 +654,8 @@ class Purchases_model extends CI_Model
                         "reff_no" => $data['reference_no'],
                         "stock_date" => date("Y-m-d", strtotime($receive_date)),
                         "created_by" => $this->session->userdata('user_id'),
+                        "supporting_reff_doc" => $supporting_reff_doc,
+                        "attachment" => $attachment,
                     ];
                     $this->site->submitMovementItem($item_movement, false);
                 }

@@ -184,7 +184,7 @@
                 <p class="introtext"><?php echo lang('enter_info'); ?></p>
                 <?php
                 $attrib = ['data-toggle' => 'validator', 'role' => 'form', 'class' => 'edit-po-form'];
-                echo admin_form_open_multipart('purchases/edit/' . $inv->id, $attrib)
+                echo admin_form_open_multipart('purchases/edit/' . $inv->id . '?mode=' . $mode, $attrib)
                 ?>
 
 
@@ -257,6 +257,17 @@
                                        data-show-preview="false" class="form-control file">
                             </div>
                         </div>
+
+                        <?php if ($mode == "received") {
+                        ?>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>No Surat Jalan</label>
+                                    <?php echo form_input('supporting_reff_doc', '', 'class="form-control input-tip" id="supporting_reff_doc"'); ?>
+                                </div>
+                            </div>
+                        <?php
+                        } ?>
 
                         <div class="col-md-12">
                             <div class="panel panel-warning">

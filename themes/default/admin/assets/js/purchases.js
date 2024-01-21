@@ -554,9 +554,12 @@ $(document).ready(function () {
                 });
             }
             poitems[item_id].row.qty = new_qty;
-            poitems[item_id].row.received = new_qty;
+            // poitems[item_id].row.received = new_qty;
             localStorage.setItem('poitems', JSON.stringify(poitems));
             loadItems();
+            if(mode != "received"){
+                $(".rec_con").hide();
+            }
         });
 
     var old_received;
@@ -823,7 +826,8 @@ function loadItems() {
                 '"><input name="product_base_quantity[]" type="hidden" class="rbase_quantity" value="' +
                 base_quantity +
                 '"></td>';
-            if (po_edit && (mode == 'received' || mode == 'partial')) {
+            // if (po_edit && (mode == 'received' || mode == 'partial')) {
+            if (po_edit) {
                 tr_html +=
                     '<td class="rec_con"><input class="form-control text-center already_received" name="already_received[]" type="text" value="' +
                     formatDecimal(unit_qty_already_received) +

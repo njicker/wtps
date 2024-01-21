@@ -103,6 +103,8 @@ class Returns_model extends CI_Model
             //     // }
             // }
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by'], true);
+            $type = 'RET';
+            $this->site->updateReff($type);
         }
         else {
             return false;

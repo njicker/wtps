@@ -301,7 +301,7 @@
                                 <?php
                                 $post = ['ordered' => lang('ordered'), 'received' => lang('received'), 'pending' => 'Pending'];
                                 // echo form_dropdown('statusXXX', $post, ($_POST['status'] ?? 'ordered'), 'id="postatus" class="form-control input-tip select" data-placeholder="' . $this->lang->line('select') . ' ' . $this->lang->line('status') . '" style="width:100%;" disabled');
-                                echo form_input('status', (isset($_POST['status']) ?? 'ordered'), 'class="form-control input-tip" required="required" style="display:none;"');
+                                echo form_input('status', (isset($_POST['status']) ? $_POST['status'] : 'pending'), 'class="form-control input-tip" required="required" style="display:none;"');
                                 echo form_input('statusXXX', (isset($_POST['status']) ? $post[$_POST['status']] : 'Open Order'), 'class="form-control input-tip" required="required" readonly');
                                 ?>
                             </div>
@@ -469,7 +469,7 @@
                                             foreach($payment_terms as $pay){
                                                 $py[$pay->num_day] = $pay->description;
                                             }
-                                            echo form_dropdown('payment_term', $py, '', 'id="popayment_term" class="form-control input-tip select" style="width:100%;"');
+                                            echo form_dropdown('payment_term', $py, '', 'id="popayment_term" class="form-control input-tip select" style="width:100%;" required="required"');
                                         ?>
                                     </div>
                                 </div>

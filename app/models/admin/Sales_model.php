@@ -90,8 +90,15 @@ class Sales_model extends CI_Model
                 return false;
             }
             else {
+                $type = 'SJ';
+                $this->site->updateReff($type);
+
                 $this->db->trans_complete();
-                return true;
+                if ($this->db->trans_status() === false) {
+                    log_message('error', 'An errors has been occurred while adding the delivery (Add:Sales_model.php)');
+                } else {
+                    return true;
+                }
             }
         }
         return false;
@@ -233,6 +240,9 @@ class Sales_model extends CI_Model
             // untuk pengiriman
             // $this->site->syncQuantity($sale_id);
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by']);
+
+            $type = 'SO';
+            $this->site->updateReff($type);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -1164,8 +1174,14 @@ class Sales_model extends CI_Model
                 $this->db->update('deliveries', ['invoice_id' => $invoice_id], ['id' => $id]);
             }
 
-            $this->db->trans_complete();
-            return true;
+            $type = 'INV';
+            $this->site->updateReff($type);
+
+            if ($this->db->trans_status() === false) {
+                log_message('error', 'An errors has been occurred while adding the invoice (Add:Sales_model.php)');
+            } else {
+                return true;
+            }
         }
         else {
             return false;
@@ -1194,6 +1210,7 @@ class Sales_model extends CI_Model
                 $this->site->updateReference('pay');
             }
             $this->site->syncInvoicePayments($data['invoice_id']);
+            $this->site->syncSalePayments($data['sale_id']);
             if ($data['paid_by'] == 'gift_card') {
                 $gc = $this->site->getGiftCardByNO($data['cc_no']);
                 $this->db->update('gift_cards', ['balance' => ($gc->balance - $data['amount'])], ['card_no' => $data['cc_no']]);
@@ -1212,6 +1229,7 @@ class Sales_model extends CI_Model
         $this->site->log('Payment', ['model' => $opay]);
         if ($this->db->delete('payments', ['id' => $id])) {
             $this->site->syncInvoicePayments($opay->invoice_id);
+            $this->site->syncSalePayments($opay->sale_id);
             if ($opay->paid_by == 'gift_card') {
                 $gc = $this->site->getGiftCardByNO($opay->cc_no);
                 $this->db->update('gift_cards', ['balance' => ($gc->balance + $opay->amount)], ['card_no' => $opay->cc_no]);
@@ -1260,6 +1278,7 @@ class Sales_model extends CI_Model
         $opay = $this->getPaymentByID($id);
         if ($this->db->update('payments', $data, ['id' => $id])) {
             $this->site->syncInvoicePayments($data['invoice_id']);
+            $this->site->syncSalePayments($data['sale_id']);
             if ($opay->paid_by == 'gift_card') {
                 $gc = $this->site->getGiftCardByNO($opay->cc_no);
                 $this->db->update('gift_cards', ['balance' => ($gc->balance + $opay->amount)], ['card_no' => $opay->cc_no]);

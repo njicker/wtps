@@ -44,11 +44,12 @@ class Sales extends MY_Controller
 
         if ($this->form_validation->run() == true) {
             // $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('so');
-            $no_urut = $this->sales_model->getCountForReff(date("Y"));
+            $type = 'SO';
+            $no_urut = $this->site->getCountForReff($type);
             $no_urut = 10000 + $no_urut + 1;
             $no_urut = substr($no_urut, 1, 4);
             // Genarete reff with helper
-            $reference = generate_ref($no_urut, 'SO');
+            $reference = generate_ref($no_urut, $type);
             if ($this->Owner || $this->Admin) {
                 $date = $this->sma->fld(trim($this->input->post('date')));
             } else {
@@ -438,11 +439,12 @@ class Sales extends MY_Controller
                     exit;
                 }
 
-                $no_urut = $this->sales_model->getCountDeliveryForReff(date("Y"));
+                $type = 'SJ';
+                $no_urut = $this->site->getCountForReff($type);
                 $no_urut = 10000 + $no_urut + 1;
                 $no_urut = substr($no_urut, 1, 4);
                 // Genarete reff with helper
-                $reference = generate_ref($no_urut, 'SJ');
+                $reference = generate_ref($no_urut, $type);
 
                 $dlDetails = [
                     'date'              => $date,
@@ -754,6 +756,9 @@ class Sales extends MY_Controller
         $inv = $this->sales_model->getInvoiceByID($id);
         if ($inv->sale_status == 'returned') {
             $this->sma->send_json(['error' => 1, 'msg' => lang('sale_x_action')]);
+        }
+        if ($inv->payment_status == 'paid' || $inv->payment_status == 'partial') {
+            $this->sma->send_json(['error' => 1, 'msg' => 'Hapus penjualan tidak bisa dilakukan karena sudah ada pembayaran']);
         }
         $delv = $this->sales_model->getDeliveryBySaleID($id);
         if($delv){
@@ -1213,6 +1218,7 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('sale_reference_no', lang('sale_reference_no'), 'required');
         $this->form_validation->set_rules('customer', lang('customer'), 'required');
         $this->form_validation->set_rules('address', lang('address'), 'required');
+        $this->form_validation->set_rules('no_vehicle', lang('no_vehicle'), 'required');
 
         if ($this->form_validation->run() == true) {
             $dlDetails = [
@@ -1224,6 +1230,7 @@ class Sales extends MY_Controller
                 'status'            => $this->input->post('status'),
                 'delivered_by'      => $this->input->post('delivered_by'),
                 'received_by'       => $this->input->post('received_by'),
+                'no_vehicle'       => $this->input->post('no_vehicle'),
                 'note'              => $this->sma->clear_tags($this->input->post('note')),
                 'created_by'        => $this->session->userdata('user_id'),
             ];
@@ -1571,7 +1578,6 @@ class Sales extends MY_Controller
         <li>' . $detail_link . '</li>
         <li>' . $edit_link . '</li>
         <li>' . $pdf_link . '</li>
-        <li>' . $delete_link . '</li>
     </ul>
 </div></div>';
 
@@ -1582,7 +1588,7 @@ class Sales extends MY_Controller
             ->from('deliveries')
             ->join('sale_items', 'sale_items.sale_id=deliveries.sale_id', 'left')
             ->group_by('deliveries.id');
-        $this->datatables->edit_column('invoice_id', $invoice_link, 'invoice_id');
+        // $this->datatables->edit_column('invoice_id', $invoice_link, 'invoice_id');
         $this->datatables->add_column('Actions', $action, 'id');
 
         echo $this->datatables->generate();
@@ -2841,6 +2847,7 @@ class Sales extends MY_Controller
         $this->datatables
             ->select('id, doc_date, reff_doc, reff_sale_doc, customer, total_amount, total_paid, status_payment, due_date')
             ->from('invoices');
+        // $this->datatables->edit_column('due_date', 'status#$1', 'status_payment');
         $this->datatables->add_column('Actions', $action, 'id');
 
         echo $this->datatables->generate();
@@ -2853,11 +2860,12 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('total_amount', lang('amount'), 'trim|integer|required');
 
         if ($this->form_validation->run() == true) {
-            $no_urut = $this->sales_model->getCountInvoiceForReff(date("Y"));
+            $type = 'INV';
+            $no_urut = $this->site->getCountForReff($type);
             $no_urut = 10000 + $no_urut + 1;
             $no_urut = substr($no_urut, 1, 4);
             // Genarete reff with helper
-            $reference = generate_ref($no_urut, 'INV');
+            $reference = generate_ref($no_urut, $type);
 
             $delv_id = $_POST['delv_id'];
             $sale = $this->sales_model->getInvoiceByID($this->input->post('sale_id'));
@@ -3089,8 +3097,8 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('paid_by', lang('paid_by'), 'required');
         $this->form_validation->set_rules('userfile', lang('attachment'), 'xss_clean');
         if ($this->form_validation->run() == true) {
+            $invoice = $this->sales_model->getInvoicesByID($this->input->post('invoice_id'));
             if ($this->input->post('paid_by') == 'deposit') {
-                $invoice = $this->sales_model->getInvoicesByID($this->input->post('invoice_id'));
                 $customer_id = $invoice->customer_id;
                 $amount      = $this->input->post('amount-paid') - $payment->amount;
                 if (!$this->site->check_customer_deposit($customer_id, $amount)) {
@@ -3108,6 +3116,7 @@ class Sales extends MY_Controller
             $payment = [
                 'date'         => $date,
                 'invoice_id'   => $this->input->post('invoice_id'),
+                'sale_id'      => $invoice->sale_id,
                 'reference_no' => $this->input->post('reference_no'),
                 'amount'       => $this->input->post('amount-paid'),
                 'paid_by'      => $this->input->post('paid_by'),

@@ -119,17 +119,17 @@
             <div class="row">
                 <div class="col-xs-4">
                     <p style="height:80px;"><?= lang('prepared_by'); ?>
-                        : <?= $user->first_name . ' ' . $user->last_name; ?> </p>
+                        :<br/> <?= $user->first_name . ' ' . $user->last_name; ?> </p>
                     <hr>
                     <p><?= lang('stamp_sign'); ?></p>
                 </div>
                 <div class="col-xs-4">
-                    <p style="height:80px;"><?= lang('delivered_by'); ?>: </p>
+                    <p style="height:80px;"><?= lang('delivered_by'); ?>:<br> <?= $delivery->delivered_by; ?> </p>
                     <hr>
                     <p><?= lang('stamp_sign'); ?></p>
                 </div>
                 <div class="col-xs-4">
-                    <p style="height:80px;"><?= lang('received_by'); ?>: </p>
+                    <p style="height:80px;"><?= lang('received_by'); ?>:<br> <?= $delivery->received_by; ?> </p>
                     <hr>
                     <p><?= lang('stamp_sign'); ?></p>
                 </div>

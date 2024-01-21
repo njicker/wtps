@@ -13,6 +13,14 @@
             return x;
             return (x != null) ? (dss[x] ? dss[x] : x) : x;
         }
+        function inv(x){
+            // console.log(x);
+            if(x != null){
+                return '<div class="text-center"><span class="label label-success">Invoice</span></div>';
+            }
+            return x;
+        }
+        // console.log(fld);
         oTable = $('#DOData').dataTable({
             "aaSorting": [[1, "desc"]],
             "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "<?= lang('all') ?>"]],
@@ -32,7 +40,7 @@
                 nRow.className = "delivery_link";
                 return nRow;
             },
-            "aoColumns": [{"bSortable": false,"mRender": checkbox}, {"mRender": fld}, null, {sClass: 'no_so'}, null, null, {"mRender": ds}, null, {"bSortable": false,"mRender": attachment}, {"bSortable": false}]
+            "aoColumns": [{"bSortable": false,"mRender": checkbox}, {"mRender": fld}, null, {sClass: 'no_so'}, null, null, {"mRender": ds}, {"mRender": inv}, {"bSortable": false,"mRender": attachment}, {"bSortable": false}]
         }).fnSetFilteringDelay().dtFilter([
             {column_number: 1, filter_default_label: "[<?=lang('date');?> (yyyy-mm-dd)]", filter_type: "text", data: []},
             {column_number: 2, filter_default_label: "[<?=lang('do_reference_no');?>]", filter_type: "text", data: []},

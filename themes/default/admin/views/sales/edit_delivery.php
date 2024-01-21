@@ -23,18 +23,23 @@
         } ?>
             <div class="form-group">
                 <?= lang('do_reference_no', 'do_reference_no'); ?>
-                <?= form_input('do_reference_no', (isset($_POST['do_reference_no']) ? $_POST['do_reference_no'] : $delivery->do_reference_no), 'class="form-control tip" id="do_reference_no" required="required"'); ?>
+                <?= form_input('do_reference_no', (isset($_POST['do_reference_no']) ? $_POST['do_reference_no'] : $delivery->do_reference_no), 'class="form-control tip" id="do_reference_no" required="required" readonly'); ?>
             </div>
 
             <div class="form-group">
                 <?= lang('sale_reference_no', 'sale_reference_no'); ?>
-                <?= form_input('sale_reference_no', (isset($_POST['sale_reference_no']) ? $_POST['sale_reference_no'] : $delivery->sale_reference_no), 'class="form-control tip" id="sale_reference_no" required="required"'); ?>
+                <?= form_input('sale_reference_no', (isset($_POST['sale_reference_no']) ? $_POST['sale_reference_no'] : $delivery->sale_reference_no), 'class="form-control tip" id="sale_reference_no" required="required" readonly'); ?>
             </div>
             <input type="hidden" value="<?= $delivery->sale_id; ?>" name="sale_id"/>
 
             <div class="form-group">
                 <?= lang('customer', 'customer'); ?>
                 <?= form_input('customer', (isset($_POST['customer']) ? $_POST['customer'] : $delivery->customer), 'class="form-control" id="customer" required="required" '); ?>
+            </div>
+
+            <div class="form-group">
+                <?= lang('no_vehicle', 'no_vehicle'); ?>
+                <?php echo form_input('no_vehicle', (isset($_POST['no_vehicle']) ? $_POST['no_vehicle'] : $delivery->no_vehicle), 'class="form-control" id="no_vehicle" required="required" '); ?>
             </div>
 
             <div class="form-group">
@@ -47,7 +52,8 @@
             <div class="form-group">
                 <?= lang('status', 'status'); ?>
                 <?php
-                $opts = ['packing' => lang('packing'), 'delivering' => lang('delivering'), 'delivered' => lang('delivered')];
+                // $opts = ['packing' => lang('packing'), 'delivering' => lang('delivering'), 'delivered' => lang('delivered')];
+                $opts = ['delivering' => lang('delivering')];
                 ?>
                 <?= form_dropdown('status', $opts, (isset($_POST['status']) ? $_POST['status'] : $delivery->status), 'class="form-control" id="status" required="required" style="width:100%;"'); ?>
             </div>

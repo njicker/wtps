@@ -13,6 +13,40 @@
             return x;
             return (x != null) ? (dss[x] ? dss[x] : x) : x;
         }
+
+        function due(obj){
+            let rtn = "";
+            let dt = moment(obj);
+            let formDt = formatDate(obj);
+            let due = false;
+            if(obj != moment().format("YYYY-MM-DD")){
+                if(dt < moment()){
+                    due = true;
+                }
+            }
+            if(due){
+                rtn = '<div class="text-center"><span class="label label-danger">' + formDt + '</span></div>';
+            }
+            else {
+                rtn = formDt;
+            }
+            return rtn;
+        }
+
+        function formatDate(oObj) {
+            if (oObj != null) {
+                var aDate = oObj.split('-');
+                if (site.dateFormats.js_sdate == 'dd-mm-yyyy') return aDate[2] + '-' + aDate[1] + '-' + aDate[0];
+                else if (site.dateFormats.js_sdate === 'dd/mm/yyyy') return aDate[2] + '/' + aDate[1] + '/' + aDate[0];
+                else if (site.dateFormats.js_sdate == 'dd.mm.yyyy') return aDate[2] + '.' + aDate[1] + '.' + aDate[0];
+                else if (site.dateFormats.js_sdate == 'mm/dd/yyyy') return aDate[1] + '/' + aDate[2] + '/' + aDate[0];
+                else if (site.dateFormats.js_sdate == 'mm-dd-yyyy') return aDate[1] + '-' + aDate[2] + '-' + aDate[0];
+                else if (site.dateFormats.js_sdate == 'mm.dd.yyyy') return aDate[1] + '.' + aDate[2] + '.' + aDate[0];
+                else return oObj;
+            } else {
+                return '';
+            }
+        }
         oTable = $('#DOData').dataTable({
             "aaSorting": [[1, "desc"]],
             "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "<?= lang('all') ?>"]],
@@ -32,7 +66,7 @@
                 nRow.className = "invoice_link_new";
                 return nRow;
             },
-            "aoColumns": [{"bSortable": false,"mRender": checkbox}, {"mRender": fsd}, null, null, null, {"mRender": currencyFormat}, {"mRender": currencyFormat}, {"mRender": pay_status}, {"mRender": fsd}, {"bSortable": false}]
+            "aoColumns": [{"bSortable": false,"mRender": checkbox}, {"mRender": fsd}, null, null, null, {"mRender": currencyFormat}, {"mRender": currencyFormat}, {"mRender": pay_status}, {"mRender": due}, {"bSortable": false}]
         }).fnSetFilteringDelay().dtFilter([
         ], "footer");
     });

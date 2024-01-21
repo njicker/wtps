@@ -1356,9 +1356,11 @@ class Site extends CI_Model
             $payment_status = $paid == 0 ? 'pending' : $sale->payment_status;
             if ($this->sma->formatDecimal($grand_total) == 0 || $this->sma->formatDecimal($grand_total) <= $this->sma->formatDecimal($paid)) {
                 $payment_status = 'paid';
-            } elseif ($sale->due_date <= date('Y-m-d') && !$sale->sale_id) {
-                $payment_status = 'due';
-            } elseif ($paid != 0) {
+            } 
+            // elseif ($sale->due_date <= date('Y-m-d') && !$sale->sale_id) {
+            //     $payment_status = 'due';
+            // } 
+            elseif ($paid != 0) {
                 $payment_status = 'partial';
             }
 
@@ -1800,5 +1802,33 @@ class Site extends CI_Model
             return $data;
         }
         return false;
+    }
+
+    public function getCountForReff($type){
+        $curr = 0;
+        $param['ref_type'] = $type;
+        $param['ref_year'] = date("Y");
+        $q = $this->db->get_where('reference_ranges', $param);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $curr = $row->current_number;
+            }
+        }
+        return $curr;
+    }
+
+    public function updateReff($type){
+        $curr_number = $this->getCountForReff($type);
+        $next_number = $curr_number + 1;
+        $data['ref_type'] = $type;
+        $data['ref_year'] = date("Y");
+        if($curr_number == 0){
+            $data['current_number'] = $next_number;
+            $this->db->insert('reference_ranges', $data);
+        }
+        else {
+            $upd['current_number'] = $next_number;
+            $this->db->update('reference_ranges', $upd, $data);
+        }
     }
 }
