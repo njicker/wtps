@@ -116,7 +116,8 @@
                     dataType: "json",
                     data: {
                         term: request.term,
-                        supplier_id: $("#posupplier").val()
+                        supplier_id: $("#posupplier").val(),
+                        cf2: 'gimmick'
                     },
                     success: function (data) {
                         $(this).removeClass('ui-autocomplete-loading');
@@ -454,7 +455,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-4" style="display:none;">
                                     <div class="form-group">
                                         <?= lang('shipping', 'poshipping'); ?>
                                         <?php echo form_input('shipping', '', 'class="form-control input-tip" id="poshipping"'); ?>

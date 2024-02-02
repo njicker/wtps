@@ -337,6 +337,7 @@ class Products extends MY_Controller
             $this->data['brands']              = $this->site->getAllBrands();
             $this->data['base_units']          = $this->site->getAllBaseUnits();
             $this->data['cf1']                 = $this->site->getListProductCF('cf1');
+            $this->data['cf2']                 = $this->site->getListProductCF('cf2');
             $this->data['warehouses']          = $warehouses;
             $this->data['warehouses_products'] = $id ? $this->products_model->getAllWarehousesWithPQ($id) : null;
             $this->data['product']             = $id ? $this->products_model->getProductByID($id) : null;
@@ -1215,6 +1216,7 @@ class Products extends MY_Controller
             $this->data['combo_items']         = $product->type == 'combo' ? $this->products_model->getProductComboItems($product->id) : null;
             $this->data['product_options']     = $id ? $this->products_model->getProductOptionsWithWH($id) : null;
             $this->data['cf1']                 = $this->site->getListProductCF('cf1');
+            $this->data['cf2']                 = $this->site->getListProductCF('cf2');
             $bc                                = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('products'), 'page' => lang('products')], ['link' => '#', 'page' => lang('edit_product')]];
             $meta                              = ['page_title' => lang('edit_product'), 'bc' => $bc];
             $this->page_construct('products/edit', $meta, $this->data);

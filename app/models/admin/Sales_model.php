@@ -1177,6 +1177,7 @@ class Sales_model extends CI_Model
             $type = 'INV';
             $this->site->updateReff($type);
 
+            $this->db->trans_complete();
             if ($this->db->trans_status() === false) {
                 log_message('error', 'An errors has been occurred while adding the invoice (Add:Sales_model.php)');
             } else {

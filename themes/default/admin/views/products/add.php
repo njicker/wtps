@@ -468,7 +468,14 @@ if (!empty($variants)) {
                         <div class="col-md-4">
                             <div class="form-group all">
                                 <?= lang('pcf2', 'cf2') ?>
-                                <?= form_input('cf2', ($_POST['cf2'] ?? ($product ? $product->cf2 : '')), 'class="form-control tip" id="cf2"') ?>
+                                <?php
+                                    $dt2[''] = '';
+                                    foreach($cf2 as $cf){
+                                        $dt2[$cf->code] = $cf->descr;
+                                    }
+                                    echo form_dropdown('cf2', $dt2, ($_POST['cf2'] ?? ($product ? $product->cf2 : '')), 'class="form-control tip" id="cf2"');
+                                    //form_input('cf2', ($_POST['cf2'] ?? ($product ? $product->cf2 : '')), 'class="form-control tip" id="cf2"') 
+                                ?>
                             </div>
                         </div>
 

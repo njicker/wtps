@@ -23,7 +23,7 @@
 
             <div class="form-group">
                 <?= lang('reference', 'reference'); ?>
-                <?= form_input('reference', (isset($_POST['reference']) ? $_POST['reference'] : $exnumber), 'class="form-control tip" id="reference"'); ?>
+                <?= form_input('reference', (isset($_POST['reference']) ? $_POST['reference'] : $exnumber), 'class="form-control tip" id="reference" readonly'); ?>
             </div>
 
             <div class="form-group">
@@ -39,7 +39,7 @@
                 <?= form_dropdown('category', $ct, set_value('category'), 'class="form-control tip" id="category"'); ?>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display:none;">
                 <?= lang('warehouse', 'warehouse'); ?>
                 <?php
                 $wh[''] = lang('select') . ' ' . lang('warehouse');
@@ -47,6 +47,16 @@
                     $wh[$warehouse->id] = $warehouse->name;
                 }
                 echo form_dropdown('warehouse', $wh, (isset($_POST['warehouse']) ? $_POST['warehouse'] : ''), 'id="warehouse" class="form-control input-tip select" style="width:100%;" ');
+                ?>
+            </div>
+
+            <div class="form-group">
+                <label>Divisi</label>
+                <?php
+                // $dv['All'] = 'All';
+                $dv['mie'] = 'Mie';
+                $dv['soun'] = 'Soun';
+                echo form_dropdown('division', $dv, (isset($_POST['division']) ? $_POST['division'] : ''), 'id="division" class="form-control input-tip select" style="width:100%;" ');
                 ?>
             </div>
 

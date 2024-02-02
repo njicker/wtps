@@ -1494,7 +1494,7 @@ class Site extends CI_Model
                     $upd += $this->db->update('purchase_items', ['quantity_balance' => $qty], ['id' => $purchase->id]);
                 }
                 $cost += $net_unit_cost;
-                $total_cost += ($net_unit_cost * $qty_used);
+                // $total_cost += ($net_unit_cost * $qty_used);
                 $purchase_arr[] = $purchase->id;
             }
             // var_dump($sisa);exit;
@@ -1503,7 +1503,7 @@ class Site extends CI_Model
                     // return $this->syncProductQty($item['product_id'], $item['warehouse_id'], $item['product_batch']);
                 }
                 $cost *= -1;
-                $total_cost *= -1;
+                // $total_cost *= -1;
                 // return true;
             }
             else {
@@ -1571,7 +1571,7 @@ class Site extends CI_Model
                         $qty_used = $this->convertToUnit($unit,  $qty_used);
                     }
                     $cost += $net_unit_cost;
-                    $total_cost += ($net_unit_cost * $qty_used);
+                    // $total_cost += ($net_unit_cost * $qty_used);
                     $purchase_arr[] = $pur->id;
                 }
             }
@@ -1593,11 +1593,13 @@ class Site extends CI_Model
         if(!$simulate){
             if($type == "production"){
                 $net_cost = $cost / count($purchase_arr);
+                $total_cost = $net_cost * $item['qty'];
                 $add = false;
                 if($revise == ""){
                     $purchase_id = implode(",", $purchase_arr);
                     $add = [
                         'purchase_id' => $purchase_id, 
+                        'raw_cost' => $net_cost,
                         'product_unit_cost' => $net_cost, 
                         'product_total_cost' => $total_cost
                     ];
@@ -1611,10 +1613,13 @@ class Site extends CI_Model
                     if($prod_items){
                         $row = $prod_items[0];
                         $qty_confirm = $row->qty + $item['qty'];
+                        $prd_net_cost = ($row->product_unit_cost / $row->qty) + ($net_cost / $item['qty']);
                         $add = [
-                            'qty' => $qty_confirm, 
-                            // 'product_unit_cost' => $row->product_unit_cost + $net_cost, 
-                            'product_total_cost' => $row->product_total_cost + $total_cost
+                            'qty' => $qty_confirm,
+                            'raw_cost' => $prd_net_cost,
+                            'product_unit_cost' => $prd_net_cost, 
+                            'product_total_cost' => $row->product_total_cost + $total_cost,
+                            // 'product_total_cost' => $total_cost,
                         ];
                     }
                     else {
@@ -1830,5 +1835,52 @@ class Site extends CI_Model
             $upd['current_number'] = $next_number;
             $this->db->update('reference_ranges', $upd, $data);
         }
+    }
+
+    public function calcExpenseCost($type){
+        $final_cost = 0;
+        $days = 26; // to be maintain
+        $method = 'last_data';  // to be maintain (last or average)
+
+        $cost = 0;
+        if($method == 'last_data'){
+            $cat = $this->getExpenseCategoryByType($type);
+            if($cat){
+                foreach($cat as $cat){
+                    $exp = $this->getLastExpenseByCatId($cat->id);
+                    if($exp){
+                        $cost += $exp->amount;
+                    }
+                }
+            }
+        }
+        $final_cost = $cost / $days;
+
+        return $final_cost;
+    }
+
+    public function getLastExpenseByCatId($cat_id){
+        $this->db->select("*");
+        $this->db->from("expenses");
+        $this->db->where("category_id", $cat_id);
+        $this->db->order_by("date", "DESC");
+        $this->db->limit(1);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function getExpenseCategoryByType($type)
+    {
+        $q = $this->db->get_where('expense_categories', ['expense_type' => $type]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
     }
 }

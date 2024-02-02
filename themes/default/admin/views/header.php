@@ -9,9 +9,11 @@
     <link href="<?= $assets ?>styles/theme.css" rel="stylesheet"/>
     <link href="<?= $assets ?>styles/style.css" rel="stylesheet"/>
     <link href="<?= base_url('assets/custom/custom.css') ?>" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
     <script type="text/javascript" src="<?= $assets ?>js/jquery-2.0.3.min.js"></script>
     <script type="text/javascript" src="<?= $assets ?>js/jquery-migrate-1.2.1.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
     <!--[if lt IE 9]>
     <script src="<?= $assets ?>js/jquery.js"></script>
     <![endif]-->
@@ -660,7 +662,7 @@
                                     <span class="chevron closed"></span>
                                 </a>
                                 <ul>
-                                    <?php if ($Owner) {
+                                <?php if ($Owner) {
                                 ?>
                                     <li id="auth_users">
                                         <a class="submenu" href="<?= admin_url('users'); ?>">
@@ -672,11 +674,6 @@
                                             <i class="fa fa-user-plus"></i><span class="text"> <?= lang('new_user'); ?></span>
                                         </a>
                                     </li> -->
-                                    <li id="billers_index">
-                                        <a class="submenu" href="<?= admin_url('billers'); ?>">
-                                            <i class="fa fa-users"></i><span class="text"> Bill To</span>
-                                        </a>
-                                    </li>
                                     <!-- <li id="billers_index">
                                         <a class="submenu" href="<?= admin_url('billers/add'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_biller'); ?></span>
@@ -684,6 +681,11 @@
                                     </li> -->
                                     <?php
                             } ?>
+                                    <li id="billers_index">
+                                        <a class="submenu" href="<?= admin_url('billers'); ?>">
+                                            <i class="fa fa-users"></i><span class="text"> Bill To</span>
+                                        </a>
+                                    </li>
                                     <li id="customers_index">
                                         <a class="submenu" href="<?= admin_url('customers'); ?>">
                                             <i class="fa fa-users"></i><span class="text"> Pelanggan</span>

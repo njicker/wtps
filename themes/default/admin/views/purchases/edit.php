@@ -252,7 +252,7 @@
 
                         <div class="col-md-4">
                             <div class="form-group">
-                                <?= lang('document', 'document') ?>
+                                <?= lang('document', 'document') ?> <?php if($mode == "received"){ echo "<b>*</b>"; } ?>
                                 <input id="document" type="file" data-browse-label="<?= lang('browse'); ?>" name="document" data-show-upload="false"
                                        data-show-preview="false" class="form-control file">
                             </div>

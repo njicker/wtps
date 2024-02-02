@@ -9,7 +9,7 @@
     </div>
     <div class="box-content">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-sm-12">
 
                 <p class="introtext"><?php echo lang('enter_info'); ?></p>
                 <?php
@@ -17,7 +17,7 @@
                 echo admin_form_open_multipart('returns/add', $attrib);
                 ?>
                 <div class="row">
-                    <div class="col-lg-12">
+                    <div class="col-sm-12">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>No Delivery*</label>
@@ -25,7 +25,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-12">
+                    <div class="col-sm-12">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?php echo form_submit('add_return', lang('submit'), 'id="add_return" class="btn btn-primary" style="padding: 6px 15px; margin:15px 0;"'); ?>

@@ -98,7 +98,7 @@ if (!empty($variants)) {
                     </div>
                     <div class="form-group all">
                         <?= lang('product_code', 'code') ?>
-                        <?= form_input('code', (isset($_POST['code']) ? $_POST['code'] : ($product ? $product->code : '')), 'class="form-control" id="code"  required="required"') ?>
+                        <?= form_input('code', (isset($_POST['code']) ? $_POST['code'] : ($product ? $product->code : '')), 'class="form-control" id="code" required="required" readonly') ?>
                         <span class="help-block"><?= lang('you_scan_your_barcode_too') ?></span>
                     </div>
 
@@ -492,7 +492,14 @@ if (!empty($variants)) {
                         <div class="col-md-4">
                             <div class="form-group all">
                                 <?= lang('pcf2', 'cf2') ?>
-                                <?= form_input('cf2', (isset($_POST['cf2']) ? $_POST['cf2'] : ($product ? $product->cf2 : '')), 'class="form-control tip" id="cf2"') ?>
+                                <?php
+                                    $dt2[''] = '-';
+                                    foreach($cf2 as $cf){
+                                        $dt2[$cf->code] = $cf->descr;
+                                    }
+                                    echo form_dropdown('cf2', $dt2, ($_POST['cf2'] ?? ($product ? $product->cf2 : '')), 'class="form-control tip" id="cf2"');
+                                    // form_input('cf1', ($_POST['cf1'] ?? ($product ? $product->cf1 : '')), 'class="form-control tip" id="cf1"') 
+                                ?>
                             </div>
                         </div>
 

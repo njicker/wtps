@@ -74,6 +74,7 @@
                                         'Office Boy' => 'Office Boy',
                                         'Security' => 'Security',
                                         'Admin' => 'Admin',
+                                        'Purchasing' => 'Purchasing',
                                         'Sales' => 'Sales',
                                         'Gudang' => 'Gudang'
                                     ];

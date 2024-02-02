@@ -21,6 +21,31 @@
                 <?= form_input('name', '', 'class="form-control" id="name" required="required"'); ?>
             </div>
 
+            <div class="form-group">
+                <label>No. Account</label>
+                <?= form_input('no_account', '', 'class="form-control" id="no_account" required="required"'); ?>
+            </div>
+
+            <div class="form-group">
+                <label>Group Account</label>
+                <?php
+                // $dv['All'] = 'All';
+                $dv['1'] = 'Kas/Bank';
+                $dv['2'] = 'Akun Piutang';
+                echo form_dropdown('group_account_id', $dv, (isset($_POST['group_account']) ? $_POST['group_account'] : ''), 'id="group_account" class="form-control input-tip select" style="width:100%;" ');
+                ?>
+            </div>
+
+            <div class="form-group">
+                <label>Tipe Pengeluaran</label>
+                <?php
+                // $dv['All'] = 'All';
+                $lbr['overhead'] = 'Biaya Overhead';
+                $lbr['labour'] = 'Biaya Tenaga Kerja';
+                echo form_dropdown('expense_type', $lbr, (isset($_POST['expense_type']) ? $_POST['expense_type'] : ''), 'id="expense_type" class="form-control input-tip select" style="width:100%;" ');
+                ?>
+            </div>
+
         </div>
         <div class="modal-footer">
             <?= form_submit('add_expense_category', lang('add_expense_category'), 'class="btn btn-primary"'); ?>

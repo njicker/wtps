@@ -1292,14 +1292,25 @@ class Products_model extends CI_Model
                     //     return false;
                     // }
                     // else {
-                        $total_cost = 0;
+                        $raw_cost = 0;
                         $prm["reff_doc"] = $header["reff_doc"];
                         $hsl_dtl = $this->getProductionDetail($prm);
                         foreach($hsl_dtl as $dtl){
-                            $total_cost += $dtl->product_total_cost;
+                            $raw_cost += $dtl->product_total_cost;
                         }
-                        $this->db->update("production", ['total_cost' => $total_cost], ["reff_doc" => $header["reff_doc"]]);
-                        
+                        // get overahead cost
+                        $overhead_cost = $this->site->calcExpenseCost('overhead');
+                        // get labour cost
+                        $labour_cost = $this->site->calcExpenseCost('labour');
+                        $total_cost = $raw_cost + $overhead_cost + $labour_cost;
+                        $upd = [
+                            'total_cost' => $total_cost,
+                            'overhead_cost' => $overhead_cost,
+                            'labour_cost' => $labour_cost,
+                            'raw_cost' => $raw_cost,
+                        ];
+
+                        $this->db->update("production", $upd, ["reff_doc" => $header["reff_doc"]]);
                         $this->db->trans_complete();
                         if ($this->db->trans_status() === false) {
                             log_message('error', 'An errors has been occurred while adding the sale (Add:Purchases_model.php)');
@@ -1352,13 +1363,20 @@ class Products_model extends CI_Model
         }
         // update header
         if($this->db->update('production', ['status_doc' => $header['status_doc']], ['id' => $header["id"]])){
+            unset($param);
+            $param["reff_doc"] = $header["reff_doc"];
+            $hdr = $this->getProductionHeader($param);
             // calculate cost
             $total_cost = 0;
+            $raw_cost = 0;
+            unset($param);
             $param["reff_doc"] = $header["reff_doc"];
             $raw = $this->getProductionDetail($param);
             foreach($raw as $raw){
-                $total_cost += $raw->product_total_cost;
+                $raw_cost += $raw->product_total_cost;
             }
+            $total_cost = $raw_cost + $hdr->overhead_cost + $hdr->labour_cost;
+            $this->db->update('production', ['raw_cost' => $raw_cost, 'total_cost' => $total_cost], ['reff_doc' => $header->reff_doc]);
             // var_dump($total_cost);exit;
             // insert header purchase_items
             $pur_header = [
@@ -1388,8 +1406,14 @@ class Products_model extends CI_Model
                 }
                 foreach($detail as $dtl){
                     // insert detail
-                    $dtl["product_unit_cost"] = $total_cost * ($dtl['qty'] / $total_product) / $dtl['qty'];
-                    $dtl["product_total_cost"] = $total_cost * ($dtl['qty'] / $total_product);
+                    $percentage = $dtl['qty'] / $total_product / $dtl['qty'];
+                    $dtl["raw_cost"] = $raw_cost * $percentage;
+                    $dtl["overhead_cost"] = $hdr->overhead_cost * $percentage;
+                    $dtl["labour_cost"] = $hdr->labour_cost * $percentage;
+                    $dtl["product_unit_cost"] = $dtl["raw_cost"] + $dtl["overhead_cost"] + $dtl["labour_cost"];
+                    // $dtl["product_unit_cost"] = $total_cost * ($dtl['qty'] / $total_product) / $dtl['qty'];
+                    $dtl["product_total_cost"] = $dtl["product_unit_cost"] * $dtl['qty'];
+                    // $dtl["product_total_cost"] = $total_cost * ($dtl['qty'] / $total_product);
 
                     $produk = $this->getProductByID($dtl["product_id"]);
                     $pur_dtl = [

@@ -14,7 +14,7 @@
                 });
                 $.ajax({'dataType': 'json', 'type': 'POST', 'url': sSource, 'data': aoData, 'success': fnCallback});
             },
-            "aoColumns": [{"bSortable": false, "mRender": checkbox}, null, null, {"bSortable": false}]
+            "aoColumns": [{"bSortable": false, "mRender": checkbox}, null, null, {"mRender": exptype}, null, {"bSortable": false}]
         });
     });
 </script>
@@ -69,6 +69,8 @@
                                 </th>
                                 <th><?= $this->lang->line('category_code'); ?></th>
                                 <th><?= $this->lang->line('category_name'); ?></th>
+                                <th>Tipe Pengeluaran</th>
+                                <th>No Acoount</th>
                                 <th style="width:100px;"><?= $this->lang->line('actions'); ?></th>
                             </tr>
                         </thead>
@@ -113,5 +115,16 @@
         });
 
     });
+
+    function exptype(type){
+        let rtn = "";
+        if(type == "labour"){
+            rtn = "Biaya Tenaga Kerja";
+        }
+        else if(type == "overhead"){
+            rtn = "Biaya Overhead";
+        }
+        return rtn;
+    }
 </script>
 

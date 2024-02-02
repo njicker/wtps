@@ -34,10 +34,10 @@
                     $ct[$category->id] = $category->name;
                 }
                 ?>
-                <?= form_dropdown('category', $ct, set_value('category', $expense->category_id), 'class="form-control tip" id="category"'); ?>
+                <?= form_dropdown('category', $ct, set_value('category', $expense->category_id), 'class="form-control tip" id="category" disabled'); ?>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="display:none;">
                 <?= lang('warehouse', 'warehouse'); ?>
                 <?php
                 $wh[''] = lang('select') . ' ' . lang('warehouse');
@@ -45,6 +45,16 @@
                     $wh[$warehouse->id] = $warehouse->name;
                 }
                 echo form_dropdown('warehouse', $wh, set_value('warehouse', $expense->warehouse_id), 'id="warehouse" class="form-control input-tip select" style="width:100%;" ');
+                ?>
+            </div>
+
+            <div class="form-group">
+                <label>Divisi</label>
+                <?php
+                // $dv['All'] = 'All';
+                $dv['mie'] = 'Mie';
+                $dv['soun'] = 'Soun';
+                echo form_dropdown('division', $dv, set_value('warehouse', $expense->division), 'id="division" class="form-control input-tip select" style="width:100%;" ');
                 ?>
             </div>
 

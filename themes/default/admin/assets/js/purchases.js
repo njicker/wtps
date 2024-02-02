@@ -353,13 +353,14 @@ $(document).ready(function () {
         }
 
         uopt = $('<select id="punit" name="punit" class="form-control select" />');
-        $.each(item.units, function () {
-            if (this.id == item.row.unit) {
-                $('<option />', { value: this.id, text: this.name, selected: true }).appendTo(uopt);
-            } else {
-                $('<option />', { value: this.id, text: this.name }).appendTo(uopt);
-            }
-        });
+        $('<option />', { value: item.units.id, text: item.units.name, selected: true }).appendTo(uopt);
+        // $.each(item.units, function () {
+        //     if (this.id == item.row.unit) {
+        //         $('<option />', { value: this.id, text: this.name, selected: true }).appendTo(uopt);
+        //     } else {
+        //         $('<option />', { value: this.id, text: this.name }).appendTo(uopt);
+        //     }
+        // });
 
         $('#poptions-div').html(opt);
         $('#punits-div').html(uopt);

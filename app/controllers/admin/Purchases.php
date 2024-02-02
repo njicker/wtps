@@ -19,6 +19,7 @@ class Purchases extends MY_Controller
         $this->load->library('form_validation');
         $this->load->helper('reference_helper');
         $this->load->admin_model('purchases_model');
+        $this->load->admin_model('settings_model');
         $this->digital_upload_path = 'files/';
         $this->upload_path         = 'assets/uploads/';
         $this->thumbs_path         = 'assets/uploads/thumbs/';
@@ -333,6 +334,8 @@ class Purchases extends MY_Controller
             } else {
                 $date = date('Y-m-d H:i:s');
             }
+            $cat_id = $this->input->post('category', true);
+            $exp_cat = $this->settings_model->getExpenseCategoryByID($cat_id);
             $data = [
                 'date'         => $date,
                 'reference'    => $this->input->post('reference') ? $this->input->post('reference') : $this->site->getReference('ex'),
@@ -341,6 +344,8 @@ class Purchases extends MY_Controller
                 'note'         => $this->input->post('note', true),
                 'category_id'  => $this->input->post('category', true),
                 'warehouse_id' => $this->input->post('warehouse', true),
+                'division'     => $this->input->post('division'),
+                'expense_type' => $exp_cat->expense_type,
             ];
 
             if ($_FILES['userfile']['size'] > 0) {
@@ -901,7 +906,7 @@ class Purchases extends MY_Controller
                 'reference'    => $this->input->post('reference'),
                 'amount'       => $this->input->post('amount'),
                 'note'         => $this->input->post('note', true),
-                'category_id'  => $this->input->post('category', true),
+                // 'category_id'  => $this->input->post('category', true),
                 'warehouse_id' => $this->input->post('warehouse', true),
             ];
             if ($_FILES['userfile']['size'] > 0) {
@@ -1246,7 +1251,7 @@ class Purchases extends MY_Controller
         $this->load->library('datatables');
 
         $this->datatables
-            ->select($this->db->dbprefix('expenses') . ".id as id, date, reference, {$this->db->dbprefix('expense_categories')}.name as category, amount, note, CONCAT({$this->db->dbprefix('users')}.first_name, ' ', {$this->db->dbprefix('users')}.last_name) as user, attachment", false)
+            ->select($this->db->dbprefix('expenses') . ".id as id, date, reference, {$this->db->dbprefix('expense_categories')}.name as category, amount, division, note, CONCAT({$this->db->dbprefix('users')}.first_name, ' ', {$this->db->dbprefix('users')}.last_name) as user, attachment", false)
             ->from('expenses')
             ->join('users', 'users.id=expenses.created_by', 'left')
             ->join('expense_categories', 'expense_categories.id=expenses.category_id', 'left')
@@ -1980,6 +1985,7 @@ class Purchases extends MY_Controller
     {
         $term        = $this->input->get('term', true);
         $cf1         = $this->input->get('cf1', true);
+        $cf2         = $this->input->get('cf2', true);
         $supplier_id = $this->input->get('supplier_id', true);
 
         if (strlen($term) < 1 || !$term) {
@@ -2000,6 +2006,17 @@ class Purchases extends MY_Controller
         $rows = $this->purchases_model->getProductNames($sr, 5, $type, "");
         if($cf1 != ""){
             $rows_cf = $this->purchases_model->getProductNames($sr, 5, "", $cf1);
+            if($rows_cf){
+                if($rows){
+                    $rows = array_merge($rows, $rows_cf);
+                }
+                else {
+                    $rows = $rows_cf;
+                }
+            }
+        }
+        if($cf2 != ""){
+            $rows_cf = $this->purchases_model->getProductNames($sr, 5, "", "", $cf2);
             if($rows_cf){
                 if($rows){
                     $rows = array_merge($rows, $rows_cf);
@@ -2182,5 +2199,48 @@ class Purchases extends MY_Controller
 
         // $this->sma->print_arrays($this->data);
         $this->load->view($this->theme . 'purchases/view_received', $this->data);
+    }
+
+    public function delete_received(){
+        $id = $this->input->post('id_item');
+        if(isset($id) && $id != ""){
+            $param['id'] = $id;
+            $item = $this->site->getItemsMovement($param);
+            if($item){
+                $itm = $item[0];
+                unset($param);
+                $param['reference_no'] = $itm->reff_no;
+                $purchase = $this->purchases_model->getPurchaseByParam($param);
+                if(!$purchase){
+                    // Jika tidak ditemukan di purchase
+                    $this->session->set_flashdata('error', 'Pembelian tidak ditemukan dengan Surat Jalan: ' . $itm->reff_no);
+                    admin_redirect('purchases');
+                }
+                // var_dump($purchase);exit;
+                unset($param);
+                $param['reff_no'] = $itm->reff_no;
+                $param['supporting_reff_doc'] = $itm->supporting_reff_doc;
+                $items = $this->site->getItemsMovement($param);
+                // echo json_encode($items);exit;
+                $rtn = $this->purchases_model->deleteReceived($purchase->id, $items);
+                // var_dump($rtn);exit;
+                if($rtn->success){
+                    $this->session->set_flashdata('message', 'Berhasil hapus Surat Jalan: ' . $itm->supporting_reff_doc);
+                }
+                else {
+                    // var_dump($rtn);exit;
+                    $this->session->set_flashdata('error', $rtn->msg);
+                }
+            }
+            else {
+                $this->session->set_flashdata('error', 'Transaksi terima barang tidak ditemukan');
+                admin_redirect('purchases');
+            }
+        }
+        else {
+            // error tidak ada id
+            $this->session->set_flashdata('error', 'Terjadi kesalahan data, id undefined');
+        }
+        admin_redirect('purchases');
     }
 }

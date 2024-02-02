@@ -392,13 +392,16 @@ class Purchases_model extends CI_Model
         return false;
     }
 
-    public function getProductNames($term, $limit = 5, $type, $cf1 = "")
+    public function getProductNames($term, $limit = 5, $type, $cf1 = "", $cf2 = "")
     {
         if($type != ""){
             $this->db->where('type', $type);
         }
         if($cf1 != ""){
             $this->db->where('cf1', $cf1);
+        }
+        if($cf2 != ""){
+            $this->db->where('cf2', $cf2);
         }
         $this->db->where("(name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR supplier1_part_no LIKE '%" . $term . "%' OR supplier2_part_no LIKE '%" . $term . "%' OR supplier3_part_no LIKE '%" . $term . "%' OR supplier4_part_no LIKE '%" . $term . "%' OR supplier5_part_no LIKE '%" . $term . "%' OR  concat(name, ' (', code, ')') LIKE '%" . $term . "%')");
         $this->db->limit($limit);
@@ -472,9 +475,27 @@ class Purchases_model extends CI_Model
         return false;
     }
 
+    public function getPurchaseItemByKey($purchase_id, $product_id)
+    {
+        $q = $this->db->get_where('purchase_items', ['purchase_id' => $purchase_id, 'product_id' => $product_id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
     public function getPurchaseByID($id)
     {
         $q = $this->db->get_where('purchases', ['id' => $id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function getPurchaseByParam($param)
+    {
+        $q = $this->db->get_where('purchases', $param, 1);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -623,7 +644,7 @@ class Purchases_model extends CI_Model
         $supporting_reff_doc = $data['supporting_reff_doc'];
         unset($data['supporting_reff_doc']);
         $attachment = "";
-        if($mode == "received"){
+        if($mode == "received" && isset($data['attachment'])){
             $attachment = $data['attachment'];
             unset($data['attachment']);
         }
@@ -716,5 +737,55 @@ class Purchases_model extends CI_Model
     {
         $q = $this->db->get_where('purchases', ['year(`date`)' => $year]);
         return $q->num_rows();
+    }
+
+    public function deleteReceived($purchase_id, $items){
+        $this->db->trans_begin();
+        $err = false;
+        $msg = "";
+        // var_dump($items);exit;
+        foreach($items as $itm){
+            $pur = $this->getPurchaseItemByKey($purchase_id, $itm->product_id);
+            if(!$pur){
+                // error purchase item tidak ditemukan
+                $err = true;
+                $msg = 'Tidak ditemukan pembelian dengan produk '.$itm->product_code.' - '.$itm->product_desc;
+                break;
+            }
+            if($pur->quantity_balance < $itm->quantity){
+                // error qty kurang
+                $err = true;
+                $msg = 'Gagal hapus pembelian karena stock tidak mencukupi dengan produk '.$itm->product_code.' - '.$itm->product_desc;
+                break;
+            }
+            $qty = $pur->quantity_balance - $itm->quantity;
+            $qty_rcv = $pur->quantity_received - $itm->quantity;
+            if($this->db->update('purchase_items', ['quantity_balance' => $qty, 'quantity_received' => $qty_rcv], ['id' => $pur->id])){
+                $this->db->update('item_movement', ['flag_delete' => 'X'], ['id' => $itm->id]);
+            }
+        }
+        // var_dump($err);exit;
+        $rtn = (object)array(
+            'success' => false,
+            'msg' => $msg
+        );
+        if($err){
+            $this->db->trans_rollback();
+            return $rtn;
+        }
+        $this->site->syncQuantity(null, $purchase_id);
+        // $this->db->trans_complete();
+        if ($this->db->trans_status() === false) {
+            $this->db->trans_rollback();
+            log_message('error', 'An errors has been occurred while adding the sale (UpdateStatus:Purchases_model.php)');
+        } else {
+            $this->db->trans_commit();
+            $rtn = (object)array(
+                'success' => true,
+                'msg' => $msg
+            );
+            return $rtn;
+        }
+        return $rtn;
     }
 }

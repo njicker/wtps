@@ -230,11 +230,15 @@ class system_settings extends MY_Controller
     {
         $this->form_validation->set_rules('code', lang('category_code'), 'trim|is_unique[categories.code]|required');
         $this->form_validation->set_rules('name', lang('name'), 'required|min_length[3]');
+        $this->form_validation->set_rules('no_account', 'no_account', 'required');
 
         if ($this->form_validation->run() == true) {
             $data = [
                 'name' => $this->input->post('name'),
                 'code' => $this->input->post('code'),
+                'no_account' => $this->input->post('no_account'),
+                'group_account_id' => $this->input->post('group_account_id'),
+                'expense_type' => $this->input->post('expense_type'),
             ];
         } elseif ($this->input->post('add_expense_category')) {
             $this->session->set_flashdata('error', validation_errors());
@@ -1237,6 +1241,9 @@ class system_settings extends MY_Controller
             $data = [
                 'code' => $this->input->post('code'),
                 'name' => $this->input->post('name'),
+                'no_account' => $this->input->post('no_account'),
+                'group_account_id' => $this->input->post('group_account_id'),
+                'expense_type' => $this->input->post('expense_type'),
             ];
         } elseif ($this->input->post('edit_expense_category')) {
             $this->session->set_flashdata('error', validation_errors());
@@ -1639,7 +1646,7 @@ class system_settings extends MY_Controller
     {
         $this->load->library('datatables');
         $this->datatables
-            ->select('id, code, name')
+            ->select('id, code, name, expense_type, no_account')
             ->from('expense_categories')
             ->add_column('Actions', "<div class=\"text-center\"><a href='" . admin_url('system_settings/edit_expense_category/$1') . "' data-toggle='modal' data-target='#myModal' class='tip' title='" . lang('edit_expense_category') . "'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>" . lang('delete_expense_category') . "</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('system_settings/delete_expense_category/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'id');
 
@@ -1671,6 +1678,7 @@ class system_settings extends MY_Controller
         $this->datatables
             ->select("{$this->db->dbprefix('products')}.id as id, {$this->db->dbprefix('products')}.code as product_code, {$this->db->dbprefix('products')}.name as product_name, PP.price as price ")
             ->from('products')
+            ->where('type', 'combo')
             ->join($pp, 'PP.product_id=products.id', 'left')
             ->edit_column('price', '$1__$2', 'id, price')
             ->add_column('Actions', '<div class="text-center"><button class="btn btn-primary btn-xs form-submit" type="button"><i class="fa fa-check"></i></button></div>', 'id');
