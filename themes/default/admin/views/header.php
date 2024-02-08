@@ -643,13 +643,13 @@
                             <li class="mm_accounting">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-money"></i>
-                                    <span class="text"> Jurnal Umum </span>
+                                    <span class="text"> <?=lang('accounting')?></span>
                                     <span class="chevron closed"></span>
                                 </a>
                                 <ul>
-                                    <li id="auth_users">
-                                        <a class="submenu" href="<?= admin_url('users'); ?>">
-                                            <i class="fa fa-money"></i><span class="text"> Jurnal Umum</span>
+                                    <li id="accounting_index_journal">
+                                        <a class="submenu" href="<?= admin_url('accounting/index_journal'); ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?=lang('journal')?></span>
                                         </a>
                                     </li>
                                 </ul>
@@ -808,6 +808,11 @@
                                         <li id="system_settings_warehouses">
                                             <a href="<?= admin_url('system_settings/warehouses') ?>">
                                                 <i class="fa fa-building-o"></i><span class="text"> <?= lang('warehouses'); ?></span>
+                                            </a>
+                                        </li>
+                                        <li id="system_settings_account_journal">
+                                            <a href="<?= admin_url('system_settings/account_journal') ?>">
+                                                <i class="fa fa-folder-open"></i><span class="text"> Akun Jurnal</span>
                                             </a>
                                         </li>
                                         <li id="system_settings_email_templates">

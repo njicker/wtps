@@ -744,4 +744,64 @@ class Settings_model extends CI_Model
         }
         return false;
     }
+
+    public function getAllGroupAccount()
+    {
+        $q = $this->db->get('group_account');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function addAccountJournal($data)
+    {
+        if ($this->db->insert('account_journal', $data)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getAccountJournalByNo($no_account)
+    {
+        $q = $this->db->get_where('account_journal', ['no_account' => $no_account], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function updateAccountJournal($no_account, $data = [])
+    {
+        $this->db->where('no_account', $no_account);
+        if ($this->db->update('account_journal', $data)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function deleteAccountJournal($no_account)
+    {
+        $this->db->where('no_account', $no_account);
+        if ($this->db->update('account_journal', ['flag_delete' => 'X'])) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getAllAccountJournalActive()
+    {
+        $this->db->where('flag_delete', '');
+        $q = $this->db->get('account_journal');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
 }

@@ -2889,4 +2889,103 @@ class system_settings extends MY_Controller
         @chmod($output_path, 0644);
         return false;
     }
+
+    public function getAccountJournal()
+    {
+        $this->load->library('datatables');
+        $this->datatables
+            ->select('no_account, account_desc, group_account_id, group_account_desc')
+            ->from('account_journal')
+            ->where('flag_delete', '')
+            ->add_column('Actions', "<div class=\"text-center\"><a href='" . admin_url('system_settings/edit_account_journal/$1') . "' data-toggle='modal' data-target='#myModal' class='tip' title='".lang('edit_account_journal')."'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>".lang('delete_account_journal')."</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('system_settings/delete_account_journal/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'no_account');
+
+        echo $this->datatables->generate();
+    }
+
+    public function account_journal()
+    {
+        $this->data['error'] = validation_errors() ? validation_errors() : $this->session->flashdata('error');
+        $bc                  = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('system_settings'), 'page' => lang('system_settings')], ['link' => '#', 'page' => 'Akun Jurnal']];
+        $meta                = ['page_title' => 'Akun Jurnal', 'bc' => $bc];
+        $this->page_construct('settings/account_journal', $meta, $this->data);
+    }
+
+    public function add_account_journal()
+    {
+        $this->form_validation->set_rules('no_account', lang('no_account'), 'trim|required');
+        $this->form_validation->set_rules('account_desc', lang('account_desc'), 'required|min_length[3]');
+        $this->form_validation->set_rules('group_account', lang('group_account_id'), 'trim|required');
+
+        if ($this->form_validation->run() == true) {
+            $no_account = $this->settings_model->getAccountJournalByNo($this->input->post('no_account'));
+            if($no_account){
+                $status = 'Aktif';
+                if($no_account->flag_delete != ""){ $status = 'Tidak Aktif'; }
+                $this->session->set_flashdata('error', 'No Akun '.$no_account->no_account.' sudah ada di sistem dengan status '. $status);
+                admin_redirect('system_settings/account_journal');
+                exit;
+            }
+            $grp = explode("#", $this->input->post('group_account'));
+            $data = [
+                'no_account' => $this->input->post('no_account'),
+                'account_desc' => $this->input->post('account_desc'),
+                'group_account_id' => $grp[0],
+                'group_account_desc' => $grp[1],
+            ];
+        } elseif ($this->input->post('add_account_journal')) {
+            $this->session->set_flashdata('error', validation_errors());
+            admin_redirect('system_settings/account_journal');
+        }
+
+        if ($this->form_validation->run() == true && $this->settings_model->addAccountJournal($data)) {
+            $this->session->set_flashdata('message', 'Berhasil menambahkan Akun Jurnal');
+            admin_redirect('system_settings/account_journal');
+        } else {
+            $this->data['error']    = validation_errors() ? validation_errors() : $this->session->flashdata('error');
+            $this->data['modal_js'] = $this->site->modal_js();
+            $this->data['group_account'] = $this->settings_model->getAllGroupAccount();
+            $this->load->view($this->theme . 'settings/add_account_journal', $this->data);
+        }
+    }
+
+    public function edit_account_journal($no_account = null)
+    {
+        $this->form_validation->set_rules('no_account', lang('no_account'), 'trim|required');
+        $this->form_validation->set_rules('account_desc', lang('account_desc'), 'required|min_length[3]');
+        $this->form_validation->set_rules('group_account', lang('group_account_id'), 'trim|required');
+
+        if ($this->form_validation->run() == true) {
+            $no_account = $this->input->post('no_account');
+            $grp = explode("#", $this->input->post('group_account'));
+            $data = [
+                'account_desc' => $this->input->post('account_desc'),
+                'group_account_id' => $grp[0],
+                'group_account_desc' => $grp[1],
+            ];
+        } elseif ($this->input->post('edit_account_journal')) {
+            $this->session->set_flashdata('error', validation_errors());
+            admin_redirect('system_settings/account_journal');
+        }
+
+        if ($this->form_validation->run() == true && $this->settings_model->updateAccountJournal($no_account, $data)) {
+            $this->session->set_flashdata('message', 'Berhasil update akun jurnal');
+            admin_redirect('system_settings/account_journal');
+        } else {
+            $this->data['error']    = validation_errors() ? validation_errors() : $this->session->flashdata('error');
+            $this->data['akun'] = $this->settings_model->getAccountJournalByNo($no_account);
+            $this->data['group_account'] = $this->settings_model->getAllGroupAccount();
+            $this->data['modal_js'] = $this->site->modal_js();
+            $this->load->view($this->theme . 'settings/edit_account_journal', $this->data);
+        }
+    }
+
+    public function delete_account_journal($no_account = null)
+    {
+        if ($this->settings_model->deleteAccountJournal($no_account)) {
+            $this->sma->send_json(['error' => 0, 'msg' => 'Berhasil hapus Akun Jurnal']);
+        }
+        else {
+            $this->sma->send_json(['error' => 1, 'msg' => 'Gagal hapus Akun Jurnal']);
+        }
+    }
 }

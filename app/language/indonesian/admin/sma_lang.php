@@ -637,3 +637,5 @@ $lang['private_shop']               = 'Toko pribadi (khusus untuk anggota)';
 $lang['hide_price']                 = 'Nonaktifkan keranjang & harga';
 $lang['login_to_your_account']      = 'Silakan login ke akun Anda.';
 $lang['forgot_password_successful'] = 'Email telah dikirim dengan instruksi kata sandi reset';
+$lang['accounting']                        = 'Accounting';
+$lang['journal']                        = 'Jurnal Umum';
