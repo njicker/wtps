@@ -373,3 +373,7 @@ $lang['group_account_desc']                                           = 'Nama Gr
 $lang['add_account_journal']                                                = 'Tambah Akun Jurnal';
 $lang['edit_account_journal']                                                = 'Ubah Akun Jurnal';
 $lang['delete_account_journal']                                                = 'Hapus Akun Jurnal';
+$lang['expense_type']                                                = 'Tipe Pengeluaran';
+$lang['initial_capital']                                                = 'Modal Awal';
+$lang['work_days']                                                = 'Hari kerja per bulan';
+$lang['cost_method']                                                = 'Metode Perhitungan Biaya';

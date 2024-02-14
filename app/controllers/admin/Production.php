@@ -119,6 +119,7 @@ class Production extends MY_Controller
 
             $header['reff_doc'] = $batch . "-" . $no_urut;
             $header['status_doc'] = $this->input->post('status_doc');
+            $header['division'] = $this->input->post('division');
             $header['created_by'] = $this->session->userdata('user_id');
 
             $detail = array();

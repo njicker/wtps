@@ -38,20 +38,20 @@ class Transfers extends MY_Controller
 
         if ($this->form_validation->run()) {
             // $transfer_no = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('to');
-            // Generate Reference
-            // Get No Urut
-            $type = 'TR';
-            $no_urut = $this->site->getCountForReff($type);
-            $no_urut = 10000 + $no_urut + 1;
-            $no_urut = substr($no_urut, 1, 4);
-            // Genarete reff with helper
-            $transfer_no = generate_ref($no_urut, $type);
-
             if ($this->Owner || $this->Admin) {
                 $date = $this->sma->fld(trim($this->input->post('date')));
             } else {
                 $date = date('Y-m-d H:i:s');
             }
+            // Generate Reference
+            // Get No Urut
+            $type = 'TR';
+            $no_urut = $this->site->getCountForReff($type, $date);
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $transfer_no = generate_ref($no_urut, $type, $date);
+
             $to_warehouse           = $this->input->post('to_warehouse');
             $from_warehouse         = $this->input->post('from_warehouse');
             $note                   = $this->sma->clear_tags($this->input->post('note'));

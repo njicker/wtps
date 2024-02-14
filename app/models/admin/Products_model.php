@@ -1299,9 +1299,9 @@ class Products_model extends CI_Model
                             $raw_cost += $dtl->product_total_cost;
                         }
                         // get overahead cost
-                        $overhead_cost = $this->site->calcExpenseCost('overhead');
+                        $overhead_cost = $this->site->calcExpenseCost('overhead', $header['division']);
                         // get labour cost
-                        $labour_cost = $this->site->calcExpenseCost('labour');
+                        $labour_cost = $this->site->calcExpenseCost('labour', $header['division']);
                         $total_cost = $raw_cost + $overhead_cost + $labour_cost;
                         $upd = [
                             'total_cost' => $total_cost,

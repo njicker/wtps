@@ -91,7 +91,7 @@ class Sales_model extends CI_Model
             }
             else {
                 $type = 'SJ';
-                $this->site->updateReff($type);
+                $this->site->updateReff($type, $data['date']);
 
                 $this->db->trans_complete();
                 if ($this->db->trans_status() === false) {
@@ -242,7 +242,7 @@ class Sales_model extends CI_Model
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by']);
 
             $type = 'SO';
-            $this->site->updateReff($type);
+            $this->site->updateReff($type, $data['date']);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -1175,7 +1175,7 @@ class Sales_model extends CI_Model
             }
 
             $type = 'INV';
-            $this->site->updateReff($type);
+            $this->site->updateReff($type, $data['doc_date']);
 
             $this->db->trans_complete();
             if ($this->db->trans_status() === false) {
@@ -1298,6 +1298,15 @@ class Sales_model extends CI_Model
                 $customer = $this->site->getCompanyByID($customer_id);
                 $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount - $data['amount'])], ['id' => $customer_id]);
             }
+            return true;
+        }
+        return false;
+    }
+
+    public function deleteInvoice($id)
+    {
+        $this->site->log('Invoices', ['model' => $this->getInvoicesByID($id)]);
+        if ($this->db->delete('invoices', ['id' => $id])) {
             return true;
         }
         return false;

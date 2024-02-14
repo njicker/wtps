@@ -43,22 +43,22 @@ class Purchases extends MY_Controller
         $this->session->unset_userdata('csrf_token');
         if ($this->form_validation->run() == true) {
             // $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('po');
-            // Generate Reference
-            // Get No Urut
-            // $no_urut = $this->purchases_model->getCountForReff(date("Y"));
-            $type = 'PO';
-            $no_urut = $this->site->getCountForReff($type);
-            $no_urut = 10000 + $no_urut + 1;
-            $no_urut = substr($no_urut, 1, 4);
-            // Genarete reff with helper
-            $reference = generate_ref($no_urut, $type);
-            // var_dump($reference);exit;
-
             if ($this->Owner || $this->Admin) {
                 $date = $this->sma->fld(trim($this->input->post('date')));
             } else {
                 $date = date('Y-m-d H:i:s');
             }
+            // Generate Reference
+            // Get No Urut
+            // $no_urut = $this->purchases_model->getCountForReff(date("Y"));
+            $type = 'PO';
+            $no_urut = $this->site->getCountForReff($type, $date);
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $reference = generate_ref($no_urut, $type, $date);
+            // var_dump($reference);exit;
+
             $warehouse_id     = $this->input->post('warehouse');
             $supplier_id      = $this->input->post('supplier');
             $status           = $this->input->post('status');

@@ -72,7 +72,7 @@
     });
 </script>
 <?php if ($Owner) {
-    ?><?= admin_form_open('sales/delivery_actions', 'id="action-form"') ?><?php
+    ?><?= admin_form_open('sales/invoice_actions', 'id="action-form"') ?><?php
 } ?>
 <div class="box">
     <div class="box-header">
@@ -88,10 +88,10 @@
                         <li><a href="#" id="excel" data-action="export_excel"><i class="fa fa-file-excel-o"></i> <?= lang('export_to_excel') ?></a></li>
                         <li class="divider"></li>
                         <li>
-                            <a href="#" class="bpo" title="<b><?= $this->lang->line('delete_deliveries') ?></b>" 
+                            <a href="#" class="bpo" title="<b>Hapus Invoice</b>" 
                                 data-content="<p><?= lang('r_u_sure') ?></p><button type='button' class='btn btn-danger' id='delete' data-action='delete'><?= lang('i_m_sure') ?></a> <button class='btn bpo-close'><?= lang('no') ?></button>" 
                                 data-html="true" data-placement="left">
-                                <i class="fa fa-trash-o"></i> <?= lang('delete_deliveries') ?>
+                                <i class="fa fa-trash-o"></i> Hapus Invoice
                             </a>
                         </li>
                     </ul>

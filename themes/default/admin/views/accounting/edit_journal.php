@@ -7,19 +7,29 @@
 <div class="box">
     <div class="box-header">
         <h2 class="blue"><i class="fa-fw fa fa-plus"></i><?= lang($mode.'_journal') ?></h2>
+        <?php 
+        $comma = "";
+        if($mode == "view")
+        { 
+            $comma = ".";
+        ?>
+            <button type="button" class="btn btn-default no-print pull-right" style="margin-right:15px;" onclick="doPrint()">
+                <i class="fa fa-print"></i> Print            
+            </button>
+        <?php } ?>
     </div>
     <div class="box-content">
         <?php $attrib = ['data-toggle' => 'validator', 'role' => 'form', 'id' => 'form_submit'];
             echo admin_form_open_multipart('accounting/edit_journal/'.$id.'/'.$mode, $attrib); 
         ?>
-        <p><?= lang('enter_info'); ?></p>
+        <!-- <p><?= lang('enter_info'); ?></p> -->
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-xs-6">
                 <?php if ($Owner || $Admin) {
                 ?>
                     <div class="form-group">
                         <?= lang('doc_date', 'date'); ?>
-                        <?= form_input('doc_date', $header->doc_date, 'class="form-control date" id="doc_date" required="required"'); ?>
+                        <?= form_input('doc_date', $header->doc_date, 'class="form-control date" id="doc_date" required="required" readonly'); ?>
                     </div>
                 <?php
                 } ?>
@@ -39,6 +49,12 @@
                 </div>
 
                 <div class="form-group">
+                    <?= lang('attachment', 'attachment') ?>
+                    <input id="attachment" type="file" data-browse-label="<?= lang('browse'); ?>" name="userfile" data-show-upload="false" data-show-preview="false"
+                        class="form-control file">
+                </div>
+
+                <div class="form-group" id="div_doc_status">
                     <?= lang('doc_status', 'doc_status'); ?>&nbsp;&nbsp;
                     <span class="fa fa-square" id="indicator_status" style="color:#34d707"></span>
                     <input type="hidden" name="doc_status" value="<?=$header->doc_status?>">
@@ -47,15 +63,15 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-xs-6">
                 <div class="form-group">
                     <?= lang('total_debit', 'debit'); ?>
-                    <?php echo form_input('total_debit', number_format($header->total_debit, 0, "", ""), 'class="form-control" required="required" id="total_debit" readonly'); ?>
+                    <?php echo form_input('total_debit', number_format($header->total_debit, 0, "", $comma), 'class="form-control" required="required" id="total_debit" readonly'); ?>
                 </div>
 
                 <div class="form-group">
                     <?= lang('total_credit', 'credit'); ?>
-                    <?php echo form_input('total_credit', number_format($header->total_credit, 0, "", ""), 'class="form-control" required="required" id="total_credit" readonly'); ?>
+                    <?php echo form_input('total_credit', number_format($header->total_credit, 0, "", $comma), 'class="form-control" required="required" id="total_credit" readonly'); ?>
                 </div>
 
                 <div class="form-group">
@@ -103,7 +119,7 @@
                                 ?>
                             </td>
                             <td>
-                                <?php echo form_input('amount[]', (isset($detail[$i]->amount) ? number_format($detail[$i]->amount, 0, "", "") : ''), 'class="form-control amount" onchange="changeAmount(this)"'); ?>
+                                <?php echo form_input('amount[]', (isset($detail[$i]->amount) ? number_format($detail[$i]->amount, 0, "", $comma) : ''), 'class="form-control amount" onchange="changeAmount(this)"'); ?>
                             </td>
                             <td>
                                 <?php echo form_input('note_item[]', (isset($detail[$i]->note) ? $detail[$i]->note : ''), 'class="form-control"'); ?>
@@ -158,7 +174,7 @@
         });
 
         <?php if($mode == "view"){ ?>
-            $("select, input, textarea, button").prop("disabled", true);
+            $("select, input, textarea, #edit_journal").prop("disabled", true);
         <?php } ?>
     });
 
@@ -194,5 +210,11 @@
                 $("#doc_submit_status").val("nok");
             }
         }
+    }
+
+    function doPrint(){
+        $("#div_doc_status").hide();
+        window.print();
+        $("#div_doc_status").show();
     }
 </script>

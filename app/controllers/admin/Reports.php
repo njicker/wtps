@@ -2880,7 +2880,7 @@ class Reports extends MY_Controller
         $this->sma->generate_pdf($html, $name, false, false, false, false, false, 'L');
     }
 
-    public function purchases()
+    public function purchasesold()
     {
         $this->sma->checkPermissions('purchases');
         $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
@@ -2922,7 +2922,7 @@ class Reports extends MY_Controller
         $this->page_construct('reports/register', $meta, $this->data);
     }
 
-    public function sales()
+    public function salesold()
     {
         $this->sma->checkPermissions('sales');
         $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
@@ -3108,5 +3108,52 @@ class Reports extends MY_Controller
         $bc                         = [['link' => base_url(), 'page' => lang('home')], ['link' => '#', 'page' => lang('reports')]];
         $meta                       = ['page_title' => lang('reports'), 'bc' => $bc];
         $this->page_construct('reports/warehouse_stock', $meta, $this->data);
+    }
+
+    public function sales(){
+        $this->sma->checkPermissions('sales');
+        $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        if(isset($_POST['submit_report']))
+        {
+            $start_date = $this->input->post('start_date');
+            $end_date = $this->input->post('end_date');
+            if($start_date != ""){
+                $start_date = $this->sma->fsd($start_date);
+            }
+            if($end_date != ""){
+                $end_date = $this->sma->fsd($end_date);
+            }
+            $this->data['type'] = $this->input->post('type');
+            $this->data['start_date'] = $this->input->post('start_date');
+            $this->data['end_date'] = $this->input->post('end_date');
+            $this->data['pivot'] = json_encode($this->reports_model->getReportSales($start_date, $end_date));
+        }
+        $bc                         = [['link' => base_url(), 'page' => lang('home')], ['link' => '#', 'page' => lang('reports')], ['link' => admin_url('reports/sales'), 'page' => lang('sales_report')]];
+        $meta                       = ['page_title' => lang('reports'), 'bc' => $bc];
+        $this->page_construct('reports/sales_new', $meta, $this->data);
+    }
+
+    public function purchases()
+    {
+        $this->sma->checkPermissions('purchases');
+        $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        if(isset($_POST['submit_report']))
+        {
+            $start_date = $this->input->post('start_date');
+            $end_date = $this->input->post('end_date');
+            if($start_date != ""){
+                $start_date = $this->sma->fsd($start_date);
+            }
+            if($end_date != ""){
+                $end_date = $this->sma->fsd($end_date);
+            }
+            $this->data['type'] = $this->input->post('type');
+            $this->data['start_date'] = $this->input->post('start_date');
+            $this->data['end_date'] = $this->input->post('end_date');
+            $this->data['pivot'] = json_encode($this->reports_model->getReportPurchases($start_date, $end_date));
+        }
+        $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('purchases_report')]];
+        $meta                     = ['page_title' => lang('purchases_report'), 'bc' => $bc];
+        $this->page_construct('reports/purchases_new', $meta, $this->data);
     }
 }

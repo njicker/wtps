@@ -64,7 +64,7 @@ class Transfers_model extends CI_Model
             }
 
             $type = 'TR';
-            $this->site->updateReff($type);
+            $this->site->updateReff($type, $data['date']);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {

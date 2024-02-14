@@ -110,3 +110,4 @@ $lang['total_product_tax']        = 'Jumlah Pajak Produk';
 $lang['total_order_tax']          = 'Pesan Jumlah Pajak';
 $lang['refund']                   = 'Pengembalian Pembayaran';
 $lang['net_returns']              = 'Laba Bersih';
+$lang['sales_report']             = 'Laporan Penjualan';

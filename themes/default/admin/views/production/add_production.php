@@ -80,7 +80,7 @@
                 echo admin_form_open_multipart('production/add_production', $attrib);
                 ?>
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-sm-5">
                         <div class="form-group">
                             <div class="form-group all">
                                 <?= lang('batch_production', 'batch_production'); ?>
@@ -88,12 +88,23 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-sm-5">
                         <div class="form-group">
                             <div class="form-group all">
                                 <?= lang('status', 'status'); ?>
                                 <?= form_input('status_doc', ($_POST['status_doc'] ?? ('On Production')), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="status_doc" required="required" readonly'); ?>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <?= lang('division', 'division'); ?>
+                            <?php
+                            // $dv['All'] = 'All';
+                            $dv['mie'] = 'Mie';
+                            $dv['soun'] = 'Soun';
+                            echo form_dropdown('division', $dv, (isset($_POST['division']) ? $_POST['division'] : ''), 'id="division" class="form-control input-tip select" style="width:100%;" required="required"');
+                            ?>
                         </div>
                     </div>
                 </div>

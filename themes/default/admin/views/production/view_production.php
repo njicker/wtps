@@ -98,14 +98,14 @@
                         </div>
                         <div class="form-group">
                             <div class="form-group all">
-                                <label>Biaya Overhead</label>
-                                <?= form_input('overhead_cost', ($_POST['overhead_cost'] ?? ($header ? number_format($header->overhead_cost) : "")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="overhead_cost" required="required" readonly'); ?>
+                                <?= lang('division', 'division'); ?>
+                                <?= form_input('division', $header->division, 'class="form-control" id="division" required="required" readonly'); ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group all">
-                                <label>Total Biaya</label>
-                                <?= form_input('total_cost', ($_POST['total_cost'] ?? ($header ? number_format($header->total_cost) : "")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="total_cost" required="required" readonly'); ?>
+                                <label>Biaya Overhead</label>
+                                <?= form_input('overhead_cost', ($_POST['overhead_cost'] ?? ($header ? number_format($header->overhead_cost) : "")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="overhead_cost" required="required" readonly'); ?>
                             </div>
                         </div>
                     </div>
@@ -126,6 +126,12 @@
                             <div class="form-group all">
                                 <label>Biaya Tenaga Kerja</label>
                                 <?= form_input('labour_cost', ($_POST['labour_cost'] ?? ($header ? number_format($header->labour_cost) : "")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="labour_cost" required="required" readonly'); ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group all">
+                                <label>Total Biaya</label>
+                                <?= form_input('total_cost', ($_POST['total_cost'] ?? ($header ? number_format($header->total_cost) : "")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="total_cost" required="required" readonly'); ?>
                             </div>
                         </div>
                     </div>

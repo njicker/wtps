@@ -206,3 +206,4 @@ $lang['csv_issue']                                = 'idak ada produk yang diimpo
 $lang['products_updated']                         = 'Produk (%d) berhasil diperbarui';
 $lang['csv_update_tip']                           = 'Sistem akan memeriksa apakah kode milik produk apa pun kemudian akan memperbarui produk itu jika tidak akan menambah produk baru.';
 $lang['batch_production']                         = 'Batch Produksi';
+$lang['division']                                  = 'Divisi';

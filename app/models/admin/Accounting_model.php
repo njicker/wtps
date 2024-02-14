@@ -13,10 +13,13 @@ class Accounting_model extends CI_Model
         $this->db->trans_start();
         if($this->db->insert('journal', $header)){
             $id = $this->db->insert_id();
+            // var_dump($id);exit;
             foreach($detail as $d){
                 $d['journal_id'] = $id;
                 $this->db->insert('journal_items', $d);
             }
+            $type = 'RFP';
+            $this->site->updateReff($type, $header['doc_date']);
             $this->db->trans_complete();
             if ($this->db->trans_status() === false) {
                 log_message('error', 'An errors has been occurred while edit the journal (Add:Accounting_model.php)');

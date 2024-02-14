@@ -12,8 +12,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
     <script type="text/javascript" src="<?= $assets ?>js/jquery-2.0.3.min.js"></script>
     <script type="text/javascript" src="<?= $assets ?>js/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript" src="<?= $assets ?>js/jquery-ui.min-1.11.1.js"></script>
+    <script type="text/javascript" src="<?= $assets ?>js/pivottable/pivot.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+    <link href="<?= $assets ?>js/webdatarocks/webdatarocks.min.css" rel="stylesheet"/>
+    <link href="<?= $assets ?>js/webdatarocks/theme/lightblue/webdatarocks.min.css" rel="stylesheet" type="text/css"/>
+    <script src="<?= $assets ?>js/webdatarocks/webdatarocks.toolbar.min.js"></script>
+    <script src="<?= $assets ?>js/webdatarocks/webdatarocks.js"></script>
     <!--[if lt IE 9]>
     <script src="<?= $assets ?>js/jquery.js"></script>
     <![endif]-->
@@ -238,10 +244,10 @@
                         </a>
                         <ul class="dropdown-menu pull-right">
                             <?php $scanned_lang_dir = array_map(function ($path) {
-        return basename($path);
-    }, glob(APPPATH . 'language/*', GLOB_ONLYDIR));
-                            foreach ($scanned_lang_dir as $entry) {
-                                ?>
+                                    return basename($path);
+                                    }, glob(APPPATH . 'language/*', GLOB_ONLYDIR));
+                                    foreach ($scanned_lang_dir as $entry) {
+                            ?>
                                 <li>
                                     <a href="<?= admin_url('welcome/language/' . $entry); ?>">
                                         <img src="<?= base_url('assets/images/' . $entry . '.png'); ?>" class="language-img">
@@ -463,12 +469,12 @@
                                             <span class="text"> <?= lang('add_purchase_by_csv'); ?></span>
                                         </a> -->
                                     </li>
-                                    <li id="purchases_expenses">
+                                    <!-- <li id="purchases_expenses">
                                         <a class="submenu" href="<?= admin_url('purchases/expenses'); ?>">
                                             <i class="fa fa-dollar"></i>
                                             <span class="text"> <?= lang('list_expenses'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <!-- <li id="purchases_add_expense">
                                         <a class="submenu" href="<?= admin_url('purchases/add_expense'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i>

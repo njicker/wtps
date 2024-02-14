@@ -96,6 +96,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <div class="form-group all">
+                                <?= lang('division', 'division'); ?>
+                                <?= form_input('division', $header->division, 'class="form-control" id="division" required="required" readonly'); ?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">

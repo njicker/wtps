@@ -2198,6 +2198,9 @@ class system_settings extends MY_Controller
                 'weight_start'         => $this->input->post('weight_start'),
                 'weight_chars'         => $this->input->post('weight_chars'),
                 'weight_divide_by'     => $this->input->post('weight_divide_by'),
+                'initial_capital'      => $this->input->post('initial_capital'),
+                'work_days'            => $this->input->post('work_days'),
+                'cost_method'          => $this->input->post('cost_method'),
             ];
             if ($this->input->post('smtp_pass')) {
                 $data['smtp_pass'] = $this->input->post('smtp_pass');
@@ -2894,7 +2897,7 @@ class system_settings extends MY_Controller
     {
         $this->load->library('datatables');
         $this->datatables
-            ->select('no_account, account_desc, group_account_id, group_account_desc')
+            ->select('no_account, account_desc, group_account_id, group_account_desc, expense_type')
             ->from('account_journal')
             ->where('flag_delete', '')
             ->add_column('Actions', "<div class=\"text-center\"><a href='" . admin_url('system_settings/edit_account_journal/$1') . "' data-toggle='modal' data-target='#myModal' class='tip' title='".lang('edit_account_journal')."'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>".lang('delete_account_journal')."</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('system_settings/delete_account_journal/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'no_account');
@@ -2931,6 +2934,7 @@ class system_settings extends MY_Controller
                 'account_desc' => $this->input->post('account_desc'),
                 'group_account_id' => $grp[0],
                 'group_account_desc' => $grp[1],
+                'expense_type' => $this->input->post('expense_type'),
             ];
         } elseif ($this->input->post('add_account_journal')) {
             $this->session->set_flashdata('error', validation_errors());
@@ -2961,6 +2965,7 @@ class system_settings extends MY_Controller
                 'account_desc' => $this->input->post('account_desc'),
                 'group_account_id' => $grp[0],
                 'group_account_desc' => $grp[1],
+                'expense_type' => $this->input->post('expense_type'),
             ];
         } elseif ($this->input->post('edit_account_journal')) {
             $this->session->set_flashdata('error', validation_errors());

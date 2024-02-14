@@ -31,6 +31,16 @@
                 echo form_dropdown('group_account', $dv, ($akun->group_account_id."#".$akun->group_account_desc), 'id="group_account" class="form-control input-tip select" style="width:100%;" ');
                 ?>
             </div>
+
+            <div class="form-group">
+                <?= lang('expense_type', 'expense_type'); ?>
+                <?php
+                $exp[''] = '';
+                $exp['overhead'] = 'Biaya Overhead';
+                $exp['labour'] = 'Biaya Tenaga Kerja';
+                echo form_dropdown('expense_type', $exp, $akun->expense_type, 'id="expense_type" class="form-control input-tip select" style="width:100%;" ');
+                ?>
+            </div>
         </div>
         <div class="modal-footer">
             <?= form_submit('edit_account_journal', lang('edit_account_journal'), 'class="btn btn-primary"'); ?>

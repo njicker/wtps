@@ -99,7 +99,7 @@ class Purchases_model extends CI_Model
             }
 
             $type = 'PO';
-            $this->site->updateReff($type);
+            $this->site->updateReff($type, $data['date']);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {

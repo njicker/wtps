@@ -1809,10 +1809,13 @@ class Site extends CI_Model
         return false;
     }
 
-    public function getCountForReff($type){
+    public function getCountForReff($type, $date = null){
+        if(!isset($date)){
+            $date = date("Y-m-d");
+        }
         $curr = 0;
         $param['ref_type'] = $type;
-        $param['ref_year'] = date("Y");
+        $param['ref_year'] = date("Y", strtotime($date));
         $q = $this->db->get_where('reference_ranges', $param);
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1822,11 +1825,14 @@ class Site extends CI_Model
         return $curr;
     }
 
-    public function updateReff($type){
-        $curr_number = $this->getCountForReff($type);
+    public function updateReff($type, $date = null){
+        if(!isset($date)){
+            $date = date("Y-m-d");
+        }
+        $curr_number = $this->getCountForReff($type, $date);
         $next_number = $curr_number + 1;
         $data['ref_type'] = $type;
-        $data['ref_year'] = date("Y");
+        $data['ref_year'] = date("Y", strtotime($date));
         if($curr_number == 0){
             $data['current_number'] = $next_number;
             $this->db->insert('reference_ranges', $data);
@@ -1837,17 +1843,17 @@ class Site extends CI_Model
         }
     }
 
-    public function calcExpenseCost($type){
+    public function calcExpenseCost($type, $division){
         $final_cost = 0;
-        $days = 26; // to be maintain
-        $method = 'last_data';  // to be maintain (last or average)
+        $days = $this->getSettings('work_days') ? $this->getSettings('work_days') : 26; // to be maintain
+        $method = $this->getSettings('cost_method') ? $this->getSettings('cost_method') : 'last_data';  // to be maintain (last or average)
 
         $cost = 0;
         if($method == 'last_data'){
-            $cat = $this->getExpenseCategoryByType($type);
-            if($cat){
-                foreach($cat as $cat){
-                    $exp = $this->getLastExpenseByCatId($cat->id);
+            $acc = $this->getExpenseCategoryByType($type);
+            if($acc){
+                foreach($acc as $acct){
+                    $exp = $this->getLastExpenseByAccount($acct->no_account, $division);
                     if($exp){
                         $cost += $exp->amount;
                     }
@@ -1872,14 +1878,41 @@ class Site extends CI_Model
         return false;
     }
 
+    public function getLastExpenseByAccount($no_account, $division){
+        $this->db->select("journal_items.*, journal.doc_date");
+        $this->db->from("journal_items");
+        $this->db->join("journal", "journal_items.journal_id = journal.id", "left");
+        $this->db->where("journal_items.no_account", $no_account);
+        $this->db->where("journal.division", $division);
+        $this->db->order_by("journal.doc_date", "DESC");
+        $this->db->limit(1);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
     public function getExpenseCategoryByType($type)
     {
-        $q = $this->db->get_where('expense_categories', ['expense_type' => $type]);
+        // $q = $this->db->get_where('expense_categories', ['expense_type' => $type]);
+        $q = $this->db->get_where('account_journal', ['expense_type' => $type]);
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
             return $data;
+        }
+        return false;
+    }
+
+    public function getSettings($field){
+        $this->db->select("*");
+        $this->db->from("settings");
+        $this->db->limit(1);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            return $q->row()->$field;
         }
         return false;
     }

@@ -39,6 +39,12 @@
                 </div>
 
                 <div class="form-group">
+                    <?= lang('attachment', 'attachment') ?>
+                    <input id="attachment" type="file" data-browse-label="<?= lang('browse'); ?>" name="userfile" data-show-upload="false" data-show-preview="false"
+                        class="form-control file">
+                </div>
+
+                <div class="form-group">
                     <?= lang('doc_status', 'doc_status'); ?>&nbsp;&nbsp;
                     <span class="fa fa-square" id="indicator_status"></span>
                     <input type="hidden" name="doc_status" value="Active">
@@ -69,7 +75,7 @@
                 <table class="table table-bordered table-condensed">
                     <thead>
                         <tr>
-                            <th><?= lang('no_account') ?></th>
+                            <th style="width: 300px;"><?= lang('no_account') ?></th>
                             <th><?= lang('type_amount') ?></th>
                             <th><?= lang('amount') ?></th>
                             <th><?= lang('note') ?></th>
@@ -123,8 +129,8 @@
 <script type="text/javascript" charset="UTF-8">
     $(document).ready(function () {
         $.fn.datetimepicker.dates['sma'] = <?=$dp_lang?>;
-        $("#date").datetimepicker({
-            format: 'dd-M-yyyy',
+        $(".date").datetimepicker({
+            format: 'dd-mm-yyyy',
             fontAwesome: true,
             language: 'sma',
             weekStart: 1,
@@ -132,7 +138,8 @@
             autoclose: 1,
             todayHighlight: 1,
             startView: 2,
-            forceParse: 0
+            forceParse: 0,
+            minView: 2
         }).datetimepicker('update', new Date());
 
         $('select').select2('destroy');

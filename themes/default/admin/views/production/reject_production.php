@@ -33,8 +33,12 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <?= lang('division', 'division'); ?>
+                            <?= form_input('division', $header->division, 'class="form-control" id="division" required="required" readonly'); ?>
+                        </div>
+                        <div class="form-group">
                             <div class="form-group all">
-                                Total Cost
+                                <label>Total Cost</label>
                                 <?= form_input('total_cost', ($_POST['total_cost'] ?? ($header ? number_format($header->total_cost) : "")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="total_cost" required="required" readonly'); ?>
                             </div>
                         </div>

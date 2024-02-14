@@ -65,11 +65,11 @@ class Returns extends MY_Controller
             // Generate Reference
             // Get No Urut
             $type = 'RET';
-            $no_urut = $this->site->getCountForReff($type);
+            $no_urut = $this->site->getCountForReff($type, $date);
             $no_urut = 10000 + $no_urut + 1;
             $no_urut = substr($no_urut, 1, 4);
             // Genarete reff with helper
-            $reference = generate_ref($no_urut, $type);
+            $reference = generate_ref($no_urut, $type, $date);
 
             $warehouse_id     = $this->input->post('warehouse');
             $customer_id      = $this->input->post('customer');

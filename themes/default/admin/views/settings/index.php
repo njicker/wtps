@@ -352,6 +352,25 @@ $ps = ['0' => lang('disable'), '1' => lang('enable')];
                             <?= form_dropdown('use_code_for_slug', $ps, $Settings->use_code_for_slug, 'class="form-control tip" id="code_slig" required="required"'); ?>
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <?= lang('work_days', 'work_days'); ?>
+                            <?= form_input('work_days', $Settings->work_days, 'class="form-control tip" id="work_days" required="required"'); ?>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <?= lang('cost_method', 'cost_method'); ?>
+                            <?php $costmethod = ['last_data' => 'Transaksi Terbaru', 'average' => 'Rata - rata Transaksi']; ?>
+                            <?= form_dropdown('cost_method', $costmethod, $Settings->cost_method, 'class="form-control tip" id="cost_method" required="required"'); ?>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <?= lang('initial_capital', 'initial_capital'); ?>
+                            <?= form_input('initial_capital', number_format($Settings->initial_capital, 0, ",", ""), 'class="form-control tip" id="initial_capital" required="required"'); ?>
+                        </div>
+                    </div>
                     </fieldset>
 
                     <fieldset class="scheduler-border">

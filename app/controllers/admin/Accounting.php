@@ -81,17 +81,19 @@ class Accounting extends MY_Controller
         $this->form_validation->set_rules('doc_status', lang('doc_status'), 'required');
 
         if ($this->form_validation->run() == true) {
+            $doc_date = $this->input->post('doc_date') ? date('Y-m-d', strtotime($this->input->post('doc_date'))) : date("Y-m-d");
+            // var_dump($doc_date, $this->input->post('doc_date'));exit;
             // Generate Journal
             $type = 'RFP';
-            $no_urut = $this->site->getCountForReff($type);
+            $no_urut = $this->site->getCountForReff($type, $doc_date);
             $no_urut = 10000 + $no_urut + 1;
             $no_urut = substr($no_urut, 1, 4);
             // Genarete reff with helper
-            $no_journal = generate_ref($no_urut, $type);
-
+            $no_journal = generate_ref($no_urut, $type, $doc_date);
+// var_dump($no_journal);exit;
             $header = [
                 'no_journal' => $no_journal,
-                'doc_date' => $this->input->post('doc_date') ? date('Y-m-d', strtotime($this->input->post('doc_date'))) : date("Y-m-d"),
+                'doc_date' => $doc_date,
                 'type_reff' => $type,
                 'no_reff' => $no_journal,
                 'division' => $this->input->post('division'),
@@ -120,6 +122,23 @@ class Accounting extends MY_Controller
                 $this->session->set_flashdata('message', 'Gagal membuat jurnal umum karena item kosong');
                 admin_redirect('accounting/add_journal');
                 exit;
+            }
+
+            if ($_FILES['userfile']['size'] > 0) {
+                $this->load->library('upload');
+                $config['upload_path']   = $this->upload_path;
+                $config['allowed_types'] = $this->digital_file_types;
+                $config['max_size']      = $this->allowed_file_size;
+                $config['overwrite']     = false;
+                $config['encrypt_name']  = true;
+                $this->upload->initialize($config);
+                if (!$this->upload->do_upload()) {
+                    $error = $this->upload->display_errors();
+                    $this->session->set_flashdata('error', $error);
+                    redirect($_SERVER['HTTP_REFERER']);
+                }
+                $photo              = $this->upload->file_name;
+                $header['attachment'] = $photo;
             }
         }
 
@@ -175,6 +194,23 @@ class Accounting extends MY_Controller
                 $this->session->set_flashdata('message', 'Gagal ubah jurnal umum karena item kosong');
                 admin_redirect('accounting/edit_journal');
                 exit;
+            }
+
+            if ($_FILES['userfile']['size'] > 0) {
+                $this->load->library('upload');
+                $config['upload_path']   = $this->upload_path;
+                $config['allowed_types'] = $this->digital_file_types;
+                $config['max_size']      = $this->allowed_file_size;
+                $config['overwrite']     = false;
+                $config['encrypt_name']  = true;
+                $this->upload->initialize($config);
+                if (!$this->upload->do_upload()) {
+                    $error = $this->upload->display_errors();
+                    $this->session->set_flashdata('error', $error);
+                    redirect($_SERVER['HTTP_REFERER']);
+                }
+                $photo              = $this->upload->file_name;
+                $header['attachment'] = $photo;
             }
         }
 

@@ -680,4 +680,66 @@ class Reports_model extends CI_Model
         }
         return false;
     }
+
+    public function getReportSales($start_date, $end_date)
+    {
+        $this->db
+            ->select('companies.company, sale_items.product_name, sale_items.product_code, sales.reference_no,
+            sale_items.net_unit_price, sale_items.quantity, sale_items.subtotal, sales.date, sales.salesman_id,
+            users.first_name, users.last_name')
+            ->join('sales', 'sales.id = sale_items.sale_id', 'left')
+            ->join('companies', 'sales.customer_id = companies.id', 'left')
+            ->join('users', 'sales.salesman_id = users.id', 'left');
+            if($start_date != "" && $end_date != ""){
+                $this->db->where('date >=', $start_date)->where('date <=', $end_date);
+            }
+            else if($start_date != ""){
+                $this->db->where('date(date)', $start_date);
+            }
+            else if($end_date != ""){
+                $this->db->where('date(date)', $end_date);
+            }
+        $q = $this->db->get('sale_items');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                // var_dump($row);exit;
+                $row->product_full = $row->product_code." - ".$row->product_name;
+                $row->salesman = $row->first_name." ".$row->last_name;
+                $row->net_unit_price = number_format($row->net_unit_price, 0, ",", ".");
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getReportPurchases($start_date, $end_date)
+    {
+        $this->db
+            ->select('companies.company, purchase_items.product_name, purchase_items.product_code, purchases.reference_no,
+            purchase_items.net_unit_cost, purchase_items.quantity, purchase_items.subtotal, purchases.date')
+            ->join('purchases', 'purchases.id = purchase_items.purchase_id', 'left')
+            ->join('companies', 'purchases.supplier_id = companies.id', 'left');
+            if($start_date != "" && $end_date != ""){
+                $this->db->where('purchases.date >=', $start_date)->where('purchases.date <=', $end_date);
+            }
+            else if($start_date != ""){
+                $this->db->where('date(purchases.date)', $start_date);
+            }
+            else if($end_date != ""){
+                $this->db->where('date(purchases.date)', $end_date);
+            }
+        $this->db->where('purchases.supplier_id !=', 999);
+        $q = $this->db->get('purchase_items');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                // var_dump($row);exit;
+                $row->product_full = $row->product_code." - ".$row->product_name;
+                $row->net_unit_cost = number_format($row->net_unit_cost, 0, ",", ".");
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
 }

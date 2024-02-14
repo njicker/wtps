@@ -44,17 +44,18 @@ class Sales extends MY_Controller
 
         if ($this->form_validation->run() == true) {
             // $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('so');
-            $type = 'SO';
-            $no_urut = $this->site->getCountForReff($type);
-            $no_urut = 10000 + $no_urut + 1;
-            $no_urut = substr($no_urut, 1, 4);
-            // Genarete reff with helper
-            $reference = generate_ref($no_urut, $type);
             if ($this->Owner || $this->Admin) {
                 $date = $this->sma->fld(trim($this->input->post('date')));
             } else {
                 $date = date('Y-m-d H:i:s');
             }
+            $type = 'SO';
+            $no_urut = $this->site->getCountForReff($type, $date);
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $reference = generate_ref($no_urut, $type, $date);
+
             $warehouse_id     = $this->input->post('warehouse');
             $customer_id      = $this->input->post('customer');
             $biller_id        = $this->input->post('biller');
@@ -440,11 +441,11 @@ class Sales extends MY_Controller
                 }
 
                 $type = 'SJ';
-                $no_urut = $this->site->getCountForReff($type);
+                $no_urut = $this->site->getCountForReff($type, $date);
                 $no_urut = 10000 + $no_urut + 1;
                 $no_urut = substr($no_urut, 1, 4);
                 // Genarete reff with helper
-                $reference = generate_ref($no_urut, $type);
+                $reference = generate_ref($no_urut, $type, $date);
 
                 $dlDetails = [
                     'date'              => $date,
@@ -2797,7 +2798,8 @@ class Sales extends MY_Controller
             $this->sma->md();
         }
         $this->data['delivery']   = $deli;
-        $this->data['biller']     = $this->site->getCompanyByID($sale->biller_id);
+        // $this->data['biller']     = $this->site->getCompanyByID($sale->biller_id);
+        $this->data['customer']     = $this->site->getCompanyByID($sale->customer_id);
         // $this->data['rows']       = $this->sales_model->getAllInvoiceItemsWithDetails($deli->sale_id);
         $this->data['rows']       = $this->sales_model->getDeliveryItemByDelvID($deli->id);
         $this->data['user']       = $this->site->getUser($deli->created_by);
@@ -2860,18 +2862,19 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('total_amount', lang('amount'), 'trim|integer|required');
 
         if ($this->form_validation->run() == true) {
+            $doc_date = $this->input->post('date') ? date("Y-m-d", strtotime($this->input->post('date'))) : date("Y-m-d");
             $type = 'INV';
-            $no_urut = $this->site->getCountForReff($type);
+            $no_urut = $this->site->getCountForReff($type, $doc_date);
             $no_urut = 10000 + $no_urut + 1;
             $no_urut = substr($no_urut, 1, 4);
             // Genarete reff with helper
-            $reference = generate_ref($no_urut, $type);
+            $reference = generate_ref($no_urut, $type, $doc_date);
 
             $delv_id = $_POST['delv_id'];
             $sale = $this->sales_model->getInvoiceByID($this->input->post('sale_id'));
             $data = [
                 'reff_doc' => $reference,
-                'doc_date' => date("Y-m-d", strtotime($this->input->post('date'))),
+                'doc_date' => $doc_date,
                 'sale_id' => $this->input->post('sale_id'),
                 'reff_sale_doc' => $this->input->post('sale_reference_no'),
                 'customer_id' => $sale->customer_id,
@@ -3063,14 +3066,28 @@ class Sales extends MY_Controller
         $this->data['updated_by']  = $inv->updated_by ? $this->site->getUser($inv->updated_by) : null;
         // $this->data['warehouse']   = $this->site->getWarehouseByID($inv->warehouse_id);
         $this->data['inv']         = $inv;
+        $this->data['sale']          = $this->sales_model->getInvoiceByID($inv->sale_id);
 
         $listDelv = $this->sales_model->getListDeliveryInvoiceByInvID($id);
         $row = array();
         // var_dump($listDelv);exit;
         foreach($listDelv as $ls){
-            $row = array_merge($row, $this->sales_model->getAllInvoiceDeliveryItems($ls->id));
+            // $row = array_merge($row, $this->sales_model->getAllInvoiceDeliveryItems($ls->id));
+            $delv = $this->sales_model->getAllInvoiceDeliveryItems($ls->id);
+            if($delv){
+                foreach($delv as $d){
+                    if(!isset($row[$d->product_code])){
+                        $row[$d->product_code] = $d;
+                    }
+                    else {
+                        $row[$d->product_code]->qty += $d->qty;
+                        $row[$d->product_code]->total_price += $d->total_price;
+                    }
+                }
+            }
         }
         $this->data['rows'] = $row;
+        $this->data['listDelv'] = $listDelv;
         // $this->data['return_sale'] = $inv->return_id ? $this->sales_model->getInvoiceByID($inv->return_id) : null;
         // $this->data['return_rows'] = $inv->return_id ? $this->sales_model->getAllInvoiceItems($inv->return_id) : null;
         $this->data['return_sale'] = [];
@@ -3161,6 +3178,74 @@ class Sales extends MY_Controller
             $this->data['payment']  = $payment;
             $this->data['modal_js'] = $this->site->modal_js();
             $this->load->view($this->theme . 'sales/edit_payment_invoice', $this->data);
+        }
+    }
+
+    public function invoice_actions()
+    {
+        if (!$this->Owner && !$this->GP['bulk_actions']) {
+            $this->session->set_flashdata('warning', lang('access_denied'));
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+
+        $this->form_validation->set_rules('form_action', lang('form_action'), 'required');
+
+        if ($this->form_validation->run() == true) {
+            if (!empty($_POST['val'])) {
+                if ($this->input->post('form_action') == 'delete') {
+                    $this->sma->checkPermissions('delete_invoice');
+                    foreach ($_POST['val'] as $id) {
+                        $this->sales_model->deleteInvoice($id);
+                    }
+                    $this->session->set_flashdata('message', 'Berhasil hapus invoice');
+                    redirect($_SERVER['HTTP_REFERER']);
+                }
+
+                if ($this->input->post('form_action') == 'export_excel') {
+                    $this->load->library('excel');
+                    $this->excel->setActiveSheetIndex(0);
+                    $this->excel->getActiveSheet()->setTitle('Invoices');
+                    $this->excel->getActiveSheet()->SetCellValue('A1', lang('date'));
+                    $this->excel->getActiveSheet()->SetCellValue('B1', 'No Invoice');
+                    $this->excel->getActiveSheet()->SetCellValue('C1', 'No SO');
+                    $this->excel->getActiveSheet()->SetCellValue('D1', lang('customer'));
+                    $this->excel->getActiveSheet()->SetCellValue('E1', 'Total Amount');
+                    $this->excel->getActiveSheet()->SetCellValue('F1', 'Total Paid');
+                    $this->excel->getActiveSheet()->SetCellValue('G1', 'Status');
+                    $this->excel->getActiveSheet()->SetCellValue('H1', 'Jatuh Tempo');
+
+                    $row = 2;
+                    foreach ($_POST['val'] as $id) {
+                        $delivery = $this->sales_model->getInvoicesByID($id);
+                        // var_dump($delivery);exit;
+                        $this->excel->getActiveSheet()->SetCellValue('A' . $row, $delivery->doc_date);
+                        $this->excel->getActiveSheet()->SetCellValue('B' . $row, $delivery->reff_doc);
+                        $this->excel->getActiveSheet()->SetCellValue('C' . $row, $delivery->reff_sale_doc);
+                        $this->excel->getActiveSheet()->SetCellValue('D' . $row, $delivery->customer);
+                        $this->excel->getActiveSheet()->SetCellValue('E' . $row, $delivery->total_amount);
+                        $this->excel->getActiveSheet()->SetCellValue('F' . $row, $delivery->total_paid);
+                        $this->excel->getActiveSheet()->SetCellValue('G' . $row, $delivery->status_payment);
+                        $this->excel->getActiveSheet()->SetCellValue('H' . $row, $delivery->due_date);
+                        $row++;
+                    }
+
+                    $this->excel->getActiveSheet()->getColumnDimension('A')->setWidth(15);
+                    $this->excel->getActiveSheet()->getColumnDimension('B')->setWidth(30);
+                    $this->excel->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+                    $this->excel->getActiveSheet()->getColumnDimension('D')->setWidth(30);
+                    $this->excel->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+
+                    $filename = 'invoices_' . date('Y_m_d_H_i_s');
+                    $this->load->helper('excel');
+                    create_excel($this->excel, $filename);
+                }
+            } else {
+                $this->session->set_flashdata('error', 'Tidak ada invoice yang dipilih');
+                redirect($_SERVER['HTTP_REFERER']);
+            }
+        } else {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect($_SERVER['HTTP_REFERER']);
         }
     }
 }

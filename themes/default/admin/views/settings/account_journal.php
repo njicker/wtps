@@ -14,7 +14,7 @@
                 });
                 $.ajax({'dataType': 'json', 'type': 'POST', 'url': sSource, 'data': aoData, 'success': fnCallback});
             },
-            "aoColumns": [null, null, null, null, {"bSortable": false}]
+            "aoColumns": [null, null, null, null, null, {"bSortable": false}]
         });
     });
 </script>
@@ -71,6 +71,7 @@
                                 <th><?= lang('account_desc') ?></th>
                                 <th><?= lang('group_account_id') ?></th>
                                 <th><?= lang('group_account_desc') ?></th>
+                                <th><?= lang('expense_type') ?></th>
                                 <th style="width:100px;"><?= lang('actions'); ?></th>
                             </tr>
                         </thead>
