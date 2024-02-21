@@ -133,7 +133,7 @@
                                     <?= form_input('unit_id[]', $dtl->product_unit_id, 'class="form-control" style="display:none;"'); ?>
                                 </td>
                                 <td>
-                                    <?= form_input('product_batch[]', $dtl->serial_no, 'class="form-control" required="required"'); ?>
+                                    <?= form_input('product_batch[]', $dtl->serial_no, 'class="form-control"'); ?>
                                 </td>
                                 <td>
                                     <?php

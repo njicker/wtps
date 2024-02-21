@@ -41,7 +41,7 @@
                     </button>
                 </div>
             </div>
-            <h3 class="modal-title">Faktur Penjualan</h3>
+            <h3 class="modal-title">Pesanan Penjualan</h3>
             <div class="row">
                 <div class="col-sm-6 col-xs-6">
                     <img src="<?=base_url('themes/default/admin/assets/images/icon_wtps.png')?>" width="200px" class="img-login" alt="logo">

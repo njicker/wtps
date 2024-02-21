@@ -45,7 +45,7 @@ function row_status($x)
 } ?>
 <?php if ($Owner || $Admin) {
         ?>
-<div class="row" style="margin-bottom: 15px;">
+<div class="row" style="margin-bottom: 15px; display:none;">
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header">
@@ -141,7 +141,7 @@ function row_status($x)
 <?php
     } else {
         ?>
-<div class="row" style="margin-bottom: 15px;">
+<div class="row" style="margin-bottom: 15px; display:none;">
     <div class="col-lg-12">
         <div class="box">
             <div class="box-header">
@@ -244,7 +244,7 @@ function row_status($x)
                             <?php
     } if ($Owner || $Admin || $GP['quotes-index']) {
         ?>
-                            <li class=""><a href="#quotes"><?= lang('quotes') ?></a></li>
+                            <!-- <li class=""><a href="#quotes"><?= lang('quotes') ?></a></li> -->
                             <?php
     } if ($Owner || $Admin || $GP['purchases-index']) {
         ?>

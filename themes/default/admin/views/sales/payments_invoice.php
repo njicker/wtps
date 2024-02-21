@@ -31,7 +31,7 @@
                                 <td><?= $this->sma->hrld($payment->date); ?></td>
                                 <td><?= $payment->reference_no; ?></td>
                                 <td><?= $this->sma->formatMoney($payment->amount) . ' ' . (($payment->attachment) ? '<a href="' . admin_url('welcome/download/' . $payment->attachment) . '"><i class="fa fa-chain"></i></a>' : ''); ?></td>
-                                <td><?= $payment->paid_by == "other" ? "BCA" : lang($payment->paid_by); ?></td>
+                                <td><?= $payment_method[$payment->paid_by] ?? ""; ?></td>
                                 <td>
                                     <div class="text-center">
                                         <a href="<?= admin_url('sales/payment_note/' . $payment->id) ?>"
@@ -39,9 +39,9 @@
                                         <?php if ($payment->paid_by != 'gift_card') {
             ?>
                                             <!-- <a href="<?= admin_url('sales/email_payment/' . $payment->id) ?>" class="email_payment"><i class="fa fa-envelope"></i></a> -->
-                                            <a href="<?= admin_url('sales/edit_payment_invoice/' . $payment->id) ?>"
+                                            <!-- <a href="<?= admin_url('sales/edit_payment_invoice/' . $payment->id) ?>"
                                                data-toggle="modal" data-target="#myModal2"><i
-                                                    class="fa fa-edit"></i></a>
+                                                    class="fa fa-edit"></i></a> -->
                                             <a href="#" class="po"
                                                title="<b><?= $this->lang->line('delete_payment') ?></b>"
                                                data-content="<p><?= lang('r_u_sure') ?></p><a class='btn btn-danger' id='<?= $payment->id ?>' href='<?= admin_url('sales/delete_payment_invoice/' . $payment->id) ?>'><?= lang('i_m_sure') ?></a> <button class='btn po-close'><?= lang('no') ?></button>"

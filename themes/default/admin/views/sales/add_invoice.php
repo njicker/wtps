@@ -13,14 +13,16 @@
             $delv = array();
             $amount = 0;
             $discount = 0;
+            $shipping_amount = 0;
             foreach($header as $h){
                 $hdr = $h;
                 $amount += $h->amount;
                 $discount += $h->discount + $h->product_discount;
+                $shipping_amount += $h->shipping_amount;
                 $delv[$h->id] = $h;
             }
             $product_tax = round(($amount - $discount) * ($tax->rate / 100));
-            $total_amount = $amount - $discount + $product_tax;
+            $total_amount = $amount - $discount + $product_tax + $shipping_amount;
         ?>
         <div class="row">
             <div class="col-md-6">
@@ -59,6 +61,12 @@
                     <label>Tax (<?=$tax->name?>)</label>
                     <?php echo form_input('product_tax_disp', number_format($product_tax), 'class="form-control" required="required" readonly'); ?>
                     <input type="hidden" name="product_tax" value="<?=$product_tax?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Total Biaya Pengiriman</label>
+                    <?php echo form_input('shipping_amount_disp', number_format($shipping_amount), 'class="form-control" required="required" readonly'); ?>
+                    <input type="hidden" name="shipping_amount" value="<?=$shipping_amount?>">
                 </div>
 
                 <div class="form-group">

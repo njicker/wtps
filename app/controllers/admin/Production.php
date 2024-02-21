@@ -169,6 +169,7 @@ class Production extends MY_Controller
             $header['id'] = $this->input->post('id');
             $header['reff_doc'] = $this->input->post('reff_doc');
             $header['status_doc'] = $this->input->post('status_doc');
+            $header['division'] = $this->input->post('division');
 
             $detail = array();
             $detail_raw = array();

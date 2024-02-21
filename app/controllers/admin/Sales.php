@@ -41,6 +41,7 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('biller', lang('biller'), 'required');
         $this->form_validation->set_rules('sale_status', lang('sale_status'), 'required');
         $this->form_validation->set_rules('payment_status', lang('payment_status'), 'required');
+        $this->form_validation->set_rules('division', 'Divisi', 'required');
 
         if ($this->form_validation->run() == true) {
             // $reference = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('so');
@@ -73,6 +74,7 @@ class Sales extends MY_Controller
             $staff_note       = $this->sma->clear_tags($this->input->post('staff_note'));
             $quote_id         = $this->input->post('quote_id') ? $this->input->post('quote_id') : null;
             $salesman_id      = $this->input->post('salesman_id');
+            $division         = $this->input->post('division');
 
             $total            = 0;
             $product_tax      = 0;
@@ -197,6 +199,7 @@ class Sales extends MY_Controller
                 'created_by'          => $this->session->userdata('user_id'),
                 'hash'                => hash('sha256', microtime() . mt_rand()),
                 'salesman_id'         => $salesman_id,
+                'division'            => $division,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
@@ -931,6 +934,7 @@ class Sales extends MY_Controller
         $this->form_validation->set_rules('biller', lang('biller'), 'required');
         $this->form_validation->set_rules('sale_status', lang('sale_status'), 'required');
         $this->form_validation->set_rules('payment_status', lang('payment_status'), 'required');
+        $this->form_validation->set_rules('division', 'Divisi', 'required');
 
         if ($this->form_validation->run() == true) {
             $reference = $this->input->post('reference_no');
@@ -954,7 +958,8 @@ class Sales extends MY_Controller
             $biller           = !empty($biller_details->company) && $biller_details->company != '-' ? $biller_details->company : $biller_details->name;
             $note             = $this->sma->clear_tags($this->input->post('note'));
             $staff_note       = $this->sma->clear_tags($this->input->post('staff_note'));
-            $salesman_id       = $this->sma->clear_tags($this->input->post('salesman_id'));
+            $salesman_id      = $this->input->post('salesman_id');
+            $division         = $this->input->post('division');
 
             $total            = 0;
             $product_tax      = 0;
@@ -1074,6 +1079,7 @@ class Sales extends MY_Controller
                 'updated_by'          => $this->session->userdata('user_id'),
                 'updated_at'          => date('Y-m-d H:i:s'),
                 'salesman_id'         => $salesman_id,
+                'division'            => $division,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
@@ -2885,6 +2891,7 @@ class Sales extends MY_Controller
                 'amount' => $this->input->post('amount'),
                 'discount' => $this->input->post('discount'),
                 'product_tax' => $this->input->post('product_tax'),
+                'shipping_amount' => $this->input->post('shipping_amount'),
                 'total_amount' => $this->input->post('total_amount'),
                 'total_paid' => 0,
                 'status_payment' => $this->input->post('status_payment'),
@@ -2908,7 +2915,7 @@ class Sales extends MY_Controller
             }
             $existInvoice = false;
             foreach($listDelv as $delv){
-                if($delv->invoice_id != ""){
+                if($delv->invoice_id != "" && $delv->invoice_id != 0){
                     $existInvoice = true;
                 }
             }
@@ -2934,6 +2941,11 @@ class Sales extends MY_Controller
         $this->sma->checkPermissions(false, true);
         $this->data['payments'] = $this->sales_model->getInvoicePaymentsByInvoiceID($id);
         $this->data['inv']      = $this->sales_model->getInvoicesByID($id);
+        $this->data['payment_method'] = array();
+        $method = $this->site->getAccountBank();
+        foreach($method as $method){
+            $this->data['payment_method'][$method->no_account] = $method->account_desc;
+        }
         $this->load->view($this->theme . 'sales/payments_invoice', $this->data);
     }
 
@@ -3194,10 +3206,23 @@ class Sales extends MY_Controller
             if (!empty($_POST['val'])) {
                 if ($this->input->post('form_action') == 'delete') {
                     $this->sma->checkPermissions('delete_invoice');
+                    $err = false;
                     foreach ($_POST['val'] as $id) {
-                        $this->sales_model->deleteInvoice($id);
+                        $inv = $this->sales_model->getInvoicesByID($id);
+                        if($inv->status_payment == "paid" || $inv->status_payment == "partial"){
+                            $err = true;
+                            break;
+                        }
                     }
-                    $this->session->set_flashdata('message', 'Berhasil hapus invoice');
+                    if(!$err){
+                        foreach ($_POST['val'] as $id) {
+                            $this->sales_model->deleteInvoice($id);
+                        }
+                        $this->session->set_flashdata('message', 'Berhasil hapus invoice');
+                    }
+                    else {
+                        $this->session->set_flashdata('error', 'Gagal hapus invoice, karena sudah ada pembayaran');
+                    }
                     redirect($_SERVER['HTTP_REFERER']);
                 }
 

@@ -39,6 +39,7 @@ class Purchases extends MY_Controller
         $this->form_validation->set_rules('warehouse', $this->lang->line('warehouse'), 'required|is_natural_no_zero');
         $this->form_validation->set_rules('supplier', $this->lang->line('supplier'), 'required');
         $this->form_validation->set_rules('payment_term', 'Terms of Payment (TOP)', 'required');
+        $this->form_validation->set_rules('division', 'Divisi', 'required');
 
         $this->session->unset_userdata('csrf_token');
         if ($this->form_validation->run() == true) {
@@ -68,6 +69,7 @@ class Purchases extends MY_Controller
             $note             = $this->sma->clear_tags($this->input->post('note'));
             $payment_term     = $this->input->post('payment_term');
             $due_date         = $payment_term ? date('Y-m-d', strtotime('+' . $payment_term . ' days', strtotime($date))) : null;
+            $division         = $this->input->post('division');
 
             $total            = 0;
             $product_tax      = 0;
@@ -196,6 +198,7 @@ class Purchases extends MY_Controller
                 'created_by'                  => $this->session->userdata('user_id'),
                 'payment_term'                => $payment_term,
                 'due_date'                    => $due_date,
+                'division'                    => $division,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
@@ -773,6 +776,7 @@ class Purchases extends MY_Controller
                 'due_date'                    => $due_date,
                 'receive_date'                => $receive_date,
                 'supporting_reff_doc'         => $this->input->post('supporting_reff_doc'),
+                'division'                    => $this->input->post('division'),
             ];
             if ($date) {
                 $data['date'] = $date;
@@ -1426,6 +1430,11 @@ class Purchases extends MY_Controller
 
         $this->data['payments'] = $this->purchases_model->getPurchasePayments($id);
         $this->data['inv']      = $this->purchases_model->getPurchaseByID($id);
+        $this->data['payment_method'] = array();
+        $method = $this->site->getAccountBank();
+        foreach($method as $method){
+            $this->data['payment_method'][$method->no_account] = $method->account_desc;
+        }
         $this->load->view($this->theme . 'purchases/payments', $this->data);
     }
 
@@ -1482,6 +1491,12 @@ class Purchases extends MY_Controller
             if (!empty($_POST['val'])) {
                 if ($this->input->post('form_action') == 'delete') {
                     $this->sma->checkPermissions('delete');
+                    // validasi delete
+                    foreach ($_POST['val'] as $id) {
+                        $purchase = $this->purchases_model->getPurchaseByID($id);
+
+                    }
+                    // delete purchase
                     foreach ($_POST['val'] as $id) {
                         $this->purchases_model->deletePurchase($id);
                     }

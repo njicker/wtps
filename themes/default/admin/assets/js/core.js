@@ -878,25 +878,25 @@ $(document).ready(function () {
     });
 });
 $(document).ready(function () {
-    $(document).on('click', '.row_status', function (e) {
-        e.preventDefault;
-        var row = $(this).closest('tr');
-        var id = row.attr('id');
-        if (row.hasClass('invoice_link')) {
-            $('#myModal').modal({ remote: site.base_url + 'sales/update_status/' + id });
-            $('#myModal').modal('show');
-        } else if (row.hasClass('purchase_link')) {
-            $('#myModal').modal({ remote: site.base_url + 'purchases/update_status/' + id });
-            $('#myModal').modal('show');
-        } else if (row.hasClass('quote_link')) {
-            $('#myModal').modal({ remote: site.base_url + 'quotes/update_status/' + id });
-            $('#myModal').modal('show');
-        } else if (row.hasClass('transfer_link')) {
-            $('#myModal').modal({ remote: site.base_url + 'transfers/update_status/' + id });
-            $('#myModal').modal('show');
-        }
-        return false;
-    });
+    // $(document).on('click', '.row_status', function (e) {
+    //     e.preventDefault;
+    //     var row = $(this).closest('tr');
+    //     var id = row.attr('id');
+    //     if (row.hasClass('invoice_link')) {
+    //         $('#myModal').modal({ remote: site.base_url + 'sales/update_status/' + id });
+    //         $('#myModal').modal('show');
+    //     } else if (row.hasClass('purchase_link')) {
+    //         $('#myModal').modal({ remote: site.base_url + 'purchases/update_status/' + id });
+    //         $('#myModal').modal('show');
+    //     } else if (row.hasClass('quote_link')) {
+    //         $('#myModal').modal({ remote: site.base_url + 'quotes/update_status/' + id });
+    //         $('#myModal').modal('show');
+    //     } else if (row.hasClass('transfer_link')) {
+    //         $('#myModal').modal({ remote: site.base_url + 'transfers/update_status/' + id });
+    //         $('#myModal').modal('show');
+    //     }
+    //     return false;
+    // });
 });
 /*
  $(window).scroll(function() {

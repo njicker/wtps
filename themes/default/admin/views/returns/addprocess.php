@@ -169,8 +169,15 @@ foreach ($warehouses as $warehouse) {
                                 } ?>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <?= lang('shipping', 'reshipping'); ?>
+                                <label>Biaya Pengiriman</label>
                                 <?php echo form_input('shipping', '', 'class="form-control input-tip" id="reshipping"'); ?>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Divisi</label>
+                                <?php echo form_input('division', $sale_hdr->division, 'class="form-control input-tip" id="division" readonly'); ?>
                             </div>
                         </div>
 
@@ -213,9 +220,10 @@ foreach ($warehouses as $warehouse) {
                                     <table id="reTable" class="table items table-striped table-bordered table-condensed table-hover sortable_table">
                                         <thead>
                                         <tr>
-                                            <th class="col-md-5"><?= lang('product') . ' (' . lang('code') . ' - ' . lang('name') . ')'; ?></th>
+                                            <th class="col-md-4"><?= lang('product') . ' (' . lang('code') . ' - ' . lang('name') . ')'; ?></th>
                                             <th class="col-md-2">Batch Produk</th>
-                                            <th class="col-md-2"><?= lang('net_unit_price'); ?></th>
+                                            <th class="col-md-2"><?= lang('unit_price'); ?></th>
+                                            <th class="col-md-1"><?= lang('discount'); ?></th>
                                             <th class="col-md-1">UoM</th>
                                             <th class="col-md-1">Qty Delv</th>
                                             <th class="col-md-1">Qty Retur</th>
@@ -260,8 +268,12 @@ foreach ($warehouses as $warehouse) {
                                                         <input type="text" class="form-control" name="product_batch[]" value="<?=$dtl->product_batch?>" readonly/>
                                                     </td>
                                                     <td>
-                                                        <input type="text" class="form-control" name="unit_price[]" value="<?=number_format($sale_dtl[$dtl->product_id]->net_unit_price)?>" readonly/>
-                                                        <input type="hidden" class="form-control" name="real_unit_price[]" value="<?=$sale_dtl[$dtl->product_id]->net_unit_price?>" readonly/>
+                                                        <input type="text" class="form-control" name="unit_price[]" value="<?=number_format($sale_dtl[$dtl->product_id]->real_unit_price)?>" readonly/>
+                                                        <input type="hidden" class="form-control" name="real_unit_price[]" value="<?=$sale_dtl[$dtl->product_id]->real_unit_price?>" readonly/>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" value="<?=number_format($sale_dtl[$dtl->product_id]->discount)?>" readonly/>
+                                                        <input type="hidden" class="form-control" name="product_discount[]" value="<?=$sale_dtl[$dtl->product_id]->discount?>" readonly/>
                                                     </td>
                                                     <td>
                                                         <input type="text" class="form-control" name="unit_code[]" value="<?=$dtl->unit_code?>" readonly/>

@@ -171,6 +171,12 @@
                                 <td style="text-align:right"><?=$this->sma->formatMoney($total_disc)?></td>
                             </tr>
                             <?php } ?>
+                            <?php if($inv->shipping_amount > 0){ ?>
+                            <tr>
+                                <td colspan="6" style="text-align:right">Biaya Pengiriman</td>
+                                <td style="text-align:right"><?=$this->sma->formatMoney($inv->shipping_amount)?></td>
+                            </tr>
+                            <?php } ?>
                             <?php if($inv->product_tax > 0){ ?>
                             <tr>
                                 <td colspan="6" style="text-align:right">PPN</td>

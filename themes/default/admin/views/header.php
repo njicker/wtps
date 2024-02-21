@@ -980,6 +980,21 @@
                                             <i class="fa fa-users"></i><span class="text"> <?= lang('staff_report'); ?></span>
                                         </a>
                                     </li>
+                                    <li id="reports_accounting">
+                                        <a href="<?= admin_url('reports/accounting') ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?= lang('accounting_report'); ?></span>
+                                        </a>
+                                    </li>
+                                    <li id="reports_chart_hpp">
+                                        <a href="<?= admin_url('reports/chart_hpp') ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?= lang('chart_hpp_report'); ?></span>
+                                        </a>
+                                    </li>
+                                    <li id="reports_invoices">
+                                        <a href="<?= admin_url('reports/invoices') ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?= lang('invoices_report'); ?></span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <?php if ($Owner && file_exists(APPPATH . 'controllers' . DIRECTORY_SEPARATOR . 'shop' . DIRECTORY_SEPARATOR . 'Shop.php')) {

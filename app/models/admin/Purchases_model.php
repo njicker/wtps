@@ -23,10 +23,34 @@ class Purchases_model extends CI_Model
     public function addPayment($data = [])
     {
         if ($this->db->insert('payments', $data)) {
+            $pay_id = $this->db->insert_id();
             if ($this->site->getReference('ppay') == $data['reference_no']) {
                 $this->site->updateReference('ppay');
             }
             $this->site->syncPurchasePayments($data['purchase_id']);
+            // Accounting
+            $pur = $this->getPurchaseByID($data['purchase_id']);
+            $dataAcc = [];
+            $method = $this->site->getAccountByPaidMethod($data['paid_by']);
+            $type_amount = "credit";
+            $amount = $data['amount'];
+            $type = "PAY";
+            $acc = [
+                'no_source' => $pur->reference_no,
+                'type_source' => $type,
+                'loc_source' => 'header',
+                'id_source' => $pay_id,
+                'division' => $pur->division,
+                'no_account' => $method->no_account,
+                'type_amount' => $type_amount,
+                'amount' => $amount,
+                'note' => $data['reference_no'],
+                'note_query' => 'field=amount',
+                "created_by" => $this->session->userdata('user_id'),
+            ];
+            $dataAcc[] = $acc;
+            $this->site->postAccounting($dataAcc, false);
+
             return true;
         }
         return false;
@@ -50,19 +74,22 @@ class Purchases_model extends CI_Model
     public function addPurchase($data, $items)
     {
         $this->db->trans_start();
+        $type = 'PO';
         if ($this->db->insert('purchases', $data)) {
+            $dataAcc = array();
             $purchase_id = $this->db->insert_id();
-            if ($this->site->getReference('po') == $data['reference_no']) {
-                $this->site->updateReference('po');
-            }
-            if ($this->site->getReference('rep') == $data['return_purchase_ref']) {
-                $this->site->updateReference('rep');
-            }
+            // if ($this->site->getReference('po') == $data['reference_no']) {
+            //     $this->site->updateReference('po');
+            // }
+            // if ($this->site->getReference('rep') == $data['return_purchase_ref']) {
+            //     $this->site->updateReference('rep');
+            // }
             $item_movement = array();
             foreach ($items as $item) {
                 $item['purchase_id'] = $purchase_id;
                 $item['option_id']   = !empty($item['option_id']) && is_numeric($item['option_id']) ? $item['option_id'] : null;
                 $this->db->insert('purchase_items', $item);
+                $pur_item_id = $this->db->insert_id();
                 if ($this->Settings->update_cost) {
                     $this->db->update('products', ['cost' => $item['base_unit_cost']], ['id' => $item['product_id']]);
                     if ($item['option_id']) {
@@ -88,6 +115,26 @@ class Purchases_model extends CI_Model
                     $this->site->submitMovementItem($item_movement, false);
                     $this->updateAVCO(['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'quantity' => $item['quantity'], 'cost' => $item['base_unit_cost'] ?? $item['real_unit_cost']]);
                 }
+                $no_account = "2130101";
+                $type_amount = "debit";
+                $amount = $item['quantity'] * $item['real_unit_cost'];
+                $acc = [
+                    'no_source' => $data['reference_no'],
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $pur_item_id,
+                    'division' => $data['division'],
+                    'no_account' => $no_account,
+                    'type_amount' => $type_amount,
+                    'amount' => $amount,
+                    'note' => $item['product_code']." - ".$item['product_name'],
+                    'note_query' => 'calc=quantity*real_unit_cost',
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $dataAcc[] = $acc;
+                if($item['discount'] > 0){
+                    // add acc discount
+                }
             }
 
             if ($data['status'] == 'returned') {
@@ -97,9 +144,24 @@ class Purchases_model extends CI_Model
             if ($data['status'] == 'received' || $data['status'] == 'returned') {
                 $this->site->syncQuantity(null, $purchase_id);
             }
-
-            $type = 'PO';
+            // Referensi
             $this->site->updateReff($type, $data['date']);
+            // Accounting
+            if($data['order_tax'] > 0){
+                $no_account = "1170700";
+                $type_amount = "debit";
+                $amount = $data['order_tax'];
+
+                $acc['loc_source'] = 'header';
+                $acc['id_source'] = $purchase_id;
+                $acc['no_account'] = $no_account;
+                $acc['type_amount'] = $type_amount;
+                $acc['amount'] = $amount;
+                $acc['note'] = "Pajak Pembelian";
+                $acc['note_query'] = "field=order_tax";
+                $dataAcc[] = $acc;
+            }
+            $this->site->postAccounting($dataAcc, null);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -187,6 +249,14 @@ class Purchases_model extends CI_Model
         $this->site->log('Payment', ['model' => $opay]);
         if ($this->db->delete('payments', ['id' => $id])) {
             $this->site->syncPurchasePayments($opay->purchase_id);
+
+            // Accounting
+            $edit['type_source'] = 'PAY';
+            $edit['loc_source'] = 'header';
+            $edit['id_source'] = $id;
+            $dataAcc = [];
+            $this->site->postAccounting($dataAcc, $edit);
+
             return true;
         }
         return false;
@@ -212,6 +282,10 @@ class Purchases_model extends CI_Model
             }
             $this->site->syncQuantity(null, null, $purchase_items);
         }
+        // Accounting
+        $dataAcc = [];
+        $edit['no_source'] = $purchase->reference_no;
+        $this->site->postAccounting($dataAcc, $edit);
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
             log_message('error', 'An errors has been occurred while adding the sale (Delete:Purchases_model.php)');
@@ -466,7 +540,7 @@ class Purchases_model extends CI_Model
         return false;
     }
 
-    public function getPurcahseItemByID($id)
+    public function getPurchaseItemByID($id)
     {
         $q = $this->db->get_where('purchase_items', ['id' => $id], 1);
         if ($q->num_rows() > 0) {
@@ -482,6 +556,17 @@ class Purchases_model extends CI_Model
             return $q->row();
         }
         return false;
+    }
+
+    public function getPurchaseItemByPurchaseID($purchase_id)
+    {
+        $q = $this->db->get_where('purchase_items', ['purchase_id' => $purchase_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
     }
 
     public function getPurchaseByID($id)
@@ -579,7 +664,7 @@ class Purchases_model extends CI_Model
                 $item['return_id'] = $return_id;
                 $this->db->insert('return_purchase_items', $item);
 
-                if ($purchase_item = $this->getPurcahseItemByID($item['purchase_item_id'])) {
+                if ($purchase_item = $this->getPurchaseItemByID($item['purchase_item_id'])) {
                     if ($purchase_item->quantity == $item['quantity']) {
                         $this->db->delete('purchase_items', ['id' => $item['purchase_item_id']]);
                     } else {
@@ -637,6 +722,7 @@ class Purchases_model extends CI_Model
     public function updatePurchase($id, $data, $items = [], $mode = "")
     {
         $this->db->trans_start();
+        $type = 'PO';
         $opurchase = $this->getPurchaseByID($id);
         $oitems    = $this->getAllPurchaseItems($id);
         $receive_date = $data['receive_date'];
@@ -649,6 +735,8 @@ class Purchases_model extends CI_Model
             unset($data['attachment']);
         }
         if ($this->db->update('purchases', $data, ['id' => $id]) && $this->db->delete('purchase_items', ['purchase_id' => $id])) {
+            $dataAcc = array();
+            $editAcc = false;
             $purchase_id = $id;
             foreach ($items as $item) {
                 $receive_quantity = $item['receive_quantity'];
@@ -656,6 +744,7 @@ class Purchases_model extends CI_Model
                 $item['purchase_id'] = $id;
                 $item['option_id']   = !empty($item['option_id']) && is_numeric($item['option_id']) ? $item['option_id'] : null;
                 $this->db->insert('purchase_items', $item);
+                $pur_item_id = $this->db->insert_id();
                 if ($data['status'] == 'received' || $data['status'] == 'partial') {
                     $this->updateAVCO(['product_id' => $item['product_id'], 'warehouse_id' => $item['warehouse_id'], 'quantity' => $item['quantity'], 'cost' => $item['real_unit_cost']]);
                     if($receive_quantity <= 0){
@@ -679,6 +768,37 @@ class Purchases_model extends CI_Model
                         "attachment" => $attachment,
                     ];
                     $this->site->submitMovementItem($item_movement, false);
+
+                    $no_account = "1150200";
+                    $type_amount = "debit";
+                    $amount = $receive_quantity * $item['real_unit_cost'];
+                    $note_query = 'calc=receive_quantity*real_unit_cost#type=receive_purchase';
+                    $note = $supporting_reff_doc;
+                }
+                else { // edit purchase
+                    $editAcc = true;
+                    $no_account = "2130101";
+                    $type_amount = "debit";
+                    $amount = $item['quantity'] * $item['real_unit_cost'];
+                    $note_query = 'calc=quantity*real_unit_cost';
+                    $note = $item['product_code']." - ".$item['product_name'];
+                }
+                $acc = [
+                    'no_source' => $data['reference_no'],
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $pur_item_id,
+                    'division' => $data['division'],
+                    'no_account' => $no_account,
+                    'type_amount' => $type_amount,
+                    'amount' => $amount,
+                    'note' => $note,
+                    'note_query' => $note_query,
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $dataAcc[] = $acc;
+                if($editAcc && $item['discount'] > 0){
+                    // add acc discount
                 }
             }
             $this->site->syncQuantity(null, null, $oitems);
@@ -689,6 +809,12 @@ class Purchases_model extends CI_Model
                 }
             }
             $this->site->syncPurchasePayments($id);
+            //Accounting
+            $edit = false;
+            if($editAcc){
+                $edit['no_source'] = $data['reference_no'];
+            }
+            $this->site->postAccounting($dataAcc, $edit);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -763,6 +889,12 @@ class Purchases_model extends CI_Model
             if($this->db->update('purchase_items', ['quantity_balance' => $qty, 'quantity_received' => $qty_rcv], ['id' => $pur->id])){
                 $this->db->update('item_movement', ['flag_delete' => 'X'], ['id' => $itm->id]);
             }
+            $edit['type_source'] = 'PO';
+            $edit['no_account'] = '1150200';
+            $edit['note'] = $itm->supporting_reff_doc;
+            // var_dump($edit);exit;
+            $dataAcc = [];
+            $this->site->postAccounting($dataAcc, $edit);
         }
         // var_dump($err);exit;
         $rtn = (object)array(
@@ -774,6 +906,17 @@ class Purchases_model extends CI_Model
             return $rtn;
         }
         $this->site->syncQuantity(null, $purchase_id);
+
+        $pur_item = $this->getPurchaseItemByPurchaseID($purchase_id);
+        $quantity_received = 0;
+        foreach($pur_item as $item){
+            $quantity_received += $item->quantity_received;
+        }
+        $status = "partial";
+        if($quantity_received == 0){
+            $status = "pending";
+        }
+        $this->db->update('purchases', ['status' => $status], ['id' => $purchase_id]);
         // $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
             $this->db->trans_rollback();

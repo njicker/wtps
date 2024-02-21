@@ -639,3 +639,6 @@ $lang['login_to_your_account']      = 'Silakan login ke akun Anda.';
 $lang['forgot_password_successful'] = 'Email telah dikirim dengan instruksi kata sandi reset';
 $lang['accounting']                        = 'Accounting';
 $lang['journal']                        = 'Jurnal Umum';
+$lang['accounting_report']                        = 'Laporan Accounting';
+$lang['chart_hpp_report']                        = 'Grafik Harga Pokok Produksi';
+$lang['invoices_report']                        = 'Laporan Tagihan';

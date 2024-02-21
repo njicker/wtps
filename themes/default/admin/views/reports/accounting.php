@@ -6,7 +6,7 @@
 </style>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-heart"></i><?= lang('sales_report'); ?> <?php
+        <h2 class="blue"><i class="fa-fw fa fa-heart"></i><?= lang('purchases_report'); ?> <?php
             if ($this->input->post('start_date')) {
                 echo 'Dari ' . $this->input->post('start_date') . ' sampai ' . $this->input->post('end_date');
             }
@@ -19,8 +19,8 @@
 
                 <p class="introtext"><?= lang('customize_report'); ?></p>
 
-                <div id="form">
-                    <?php echo admin_form_open('reports/sales'); ?>
+                <!-- <div id="form">
+                    <?php echo admin_form_open('reports/purchases'); ?>
                     <div class="row">
                         <div class="col-sm-4">
                             <div class="form-group">
@@ -37,27 +37,23 @@
                         <div class="col-sm-12 col-xs-12">
                             <?php 
                                 $rad = array();
-                                $rad['salesman'] = "";
+                                $rad['supplier'] = "";
                                 $rad['detail'] = "";
                                 if(isset($_POST['type'])){
-                                    $rad['customer'] = $_POST['type'] == "customer" ? "checked" : "";
-                                    $rad['salesman'] = $_POST['type'] == "salesman" ? "checked" : "";
+                                    $rad['supplier'] = $_POST['type'] == "supplier" ? "checked" : "";
                                     $rad['detail'] = $_POST['type'] == "detail" ? "checked" : "";
                                 }
                                 else {
-                                    $rad['customer'] = "checked";
+                                    $rad['supplier'] = "checked";
                                 }
                             ?>
                             <div class="form-group">
                                 <label>Tipe Laporan</label><br/>
                                 <span class="rad-type">
-                                    <input type="radio" name="type" value="customer" <?=$rad['customer']?>> Per Customer
+                                    <input type="radio" name="type" value="supplier" <?=$rad['supplier']?>> Per Supplier
                                 </span>
                                 <span class="rad-type">
-                                    <input type="radio" name="type" value="salesman" <?=$rad['salesman']?>> Per Salesman
-                                </span>
-                                <span class="rad-type">
-                                    <input type="radio" name="type" value="detail" <?=$rad['detail']?>> Detail Penjualan
+                                    <input type="radio" name="type" value="detail" <?=$rad['detail']?>> Detail Pembelian
                                 </span>
                             </div>
                         </div>
@@ -69,7 +65,7 @@
                     <?php echo form_close(); ?>
 
                 </div>
-                <div class="clearfix"></div>
+                <div class="clearfix"></div> -->
 
                 <div class="col-sm-12 col-xs-12" id="show-data">
                     <div id="wdr-component"></div>
@@ -82,90 +78,30 @@
     let showPivot = <?=$pivot ? 1 : 0?>;
     let type = "<?=!isset($_POST['type']) ? "" : $_POST['type']?>";
     let rowPivot = {
-        customer : [
+        general : [
+            // {
+            //     uniqueName: "no_account",
+            //     caption: "No Akun"
+            // },
             {
-                uniqueName: "company",
-                caption: "Customer"
+                uniqueName: "group_account_desc",
+                caption: "Grup Akun"
             },
             {
-                uniqueName: "product_full",
-                caption: "Produk"
+                uniqueName: "account_desc",
+                caption: "Deskripsi"
             },
-            {
-                uniqueName: "net_unit_price",
-                caption: "Harga"
-            }
-        ],
-        salesman : [
-            {
-                uniqueName: "salesman",
-                caption: "Salesman"
-            },
-            {
-                uniqueName: "product_full",
-                caption: "Produk"
-            },
-            {
-                uniqueName: "net_unit_price",
-                caption: "Harga"
-            }
-        ],
-        detail : [
-            {
-                uniqueName: "date",
-                caption: "Tanggal"
-            },
-            {
-                uniqueName: "reference_no",
-                caption: "Nomer Faktur"
-            },
-            {
-                uniqueName: "company",
-                caption: "Customer"
-            },
-            {
-                uniqueName: "product_full",
-                caption: "Produk"
-            },
-            {
-                uniqueName: "net_unit_price",
-                caption: "Harga"
-            }
-        ],
+            // {
+            //     uniqueName: "amount",
+            //     caption: "Amount"
+            // }
+        ]
     }
     // console.log(showPivot);
     if(showPivot)
     {
-        let dataPivot = JSON.parse('<?=$pivot?>');
-        let data = [
-            {
-                company: {
-                    type: "string"
-                },
-                salesman: {
-                    type: "string"
-                },
-                reference_no: {
-                    type: "string"
-                },
-                date: {
-                    type: "date string"
-                },
-                product_full: {
-                    type: "string"
-                },
-                net_unit_price: {
-                    type: "number"
-                },
-                quantity: {
-                    type: "number"
-                },
-                subtotal: {
-                    type: "number"
-                }
-            }
-        ];
-        data.push(...dataPivot);
+        let data = JSON.parse('<?=$pivot?>');
+        // data.push(...dataPivot);
         // console.log(data);
         const pivot = new WebDataRocks({
             container: "#wdr-component",
@@ -177,16 +113,10 @@
                     data: data
                 },
                 slice: {
-                    rows: rowPivot[type],
+                    rows: rowPivot.general,
                     measures: [
                         {
-                            uniqueName: "quantity",
-                            aggregation: "sum",
-                            format: "sum_qty",
-                            caption: "Qty"
-                        },
-                        {
-                            uniqueName: "subtotal",
+                            uniqueName: "amount",
                             aggregation: "sum",
                             format: "sum_price",
                             caption: "Amount"
@@ -194,11 +124,6 @@
                     ]
                 },
                 formats: [
-                    {
-                        name: "sum_qty",
-                        decimalPlaces: 0,
-                        thousandsSeparator: "."
-                    },
                     {
                         name: "sum_price",
                         decimalPlaces: 0,
@@ -208,7 +133,7 @@
                 ],
                 options: {
                     grid: {
-                        type: "classic"
+                        type: "compact"
                     }
                 }
             }

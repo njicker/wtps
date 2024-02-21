@@ -37,6 +37,7 @@ class Returns_model extends CI_Model
             if($this->db->insert('purchases', $pur_header)){
                 $pur_id = $this->db->insert_id();
 
+                $dataAcc = array();
                 foreach ($items as $dtl) {
                     $pur_dtl = [
                         "purchase_id" => $pur_id,
@@ -63,6 +64,7 @@ class Returns_model extends CI_Model
                     if($this->db->insert('purchase_items', $pur_dtl)){
                         $dtl['return_id'] = $return_id;
                         $this->db->insert('return_items', $dtl);
+                        $dtl_id = $this->db->insert_id();
                         $this->site->syncQuantityBatch($dtl['product_id'], $dtl['product_batch']);
                         $item_movement = [
                             "warehouse_id" => $dtl['warehouse_id'],
@@ -80,9 +82,39 @@ class Returns_model extends CI_Model
                             "created_by" => $this->session->userdata('user_id'),
                         ];
                         $this->site->submitMovementItem($item_movement, false);
+
+                        $no_account = "1150100";
+                        $type_amount = "debit";
+                        $amount = $dtl["quantity"] * $dtl['net_unit_price'];
+                        $acc = [
+                            'no_source' => $data['reference_no'],
+                            'type_source' => 'RET',
+                            'loc_source' => 'detail',
+                            'id_source' => $dtl_id,
+                            'division' => $data['division'],
+                            'no_account' => $no_account,
+                            'type_amount' => $type_amount,
+                            'amount' => $amount,
+                            'note' => $dtl['product_code']." - ".$dtl['product_name'],
+                            'note_query' => 'calc=quantity*net_unit_price',
+                            "created_by" => $this->session->userdata('user_id'),
+                        ];
+                        $dataAcc[] = $acc;
+                        if($data['item_discount'] > 0){
+                            $no_account = "6190102";
+                            $type_amount = "credit";
+                            $amount = $data['item_discount'];
+
+                            $acc['no_account'] = $no_account;
+                            $acc['type_amount'] = $type_amount;
+                            $acc['amount'] = $amount;
+                            $acc['note_query'] = 'field=item_discount';
+                            $dataAcc[] = $acc;
+                        }
                     }
                 }
-                
+
+                $this->site->postAccounting($dataAcc, false);
             }
 
             // foreach ($items as $item) {
@@ -124,9 +156,13 @@ class Returns_model extends CI_Model
     {
         $this->db->trans_start();
         $this->resetSaleActions($id);
-        $this->site->log('Return', ['model' => $this->getReturnByID($id), 'items' => $this->getReturnItems($id)]);
+        $ret = $this->getReturnByID($id);
+        $this->site->log('Return', ['model' => $ret, 'items' => $this->getReturnItems($id)]);
         $this->db->delete('return_items', ['return_id' => $id]);
         $this->db->delete('returns', ['id' => $id]);
+        $editAcc['no_source'] = $ret->reference_no;
+        $dataAcc = array();
+        $this->site->postAccounting($dataAcc, $editAcc);
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
             log_message('error', 'An errors has been occurred while adding the sale (Delete:Returns_model.php)');

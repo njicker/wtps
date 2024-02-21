@@ -15,10 +15,11 @@
         }
         function inv(x){
             // console.log(x);
-            if(x != null){
+            let rtn = "";
+            if(x != null && x != 0){
                 return '<div class="text-center"><span class="label label-success">Invoice</span></div>';
             }
-            return x;
+            return rtn;
         }
         // console.log(fld);
         oTable = $('#DOData').dataTable({

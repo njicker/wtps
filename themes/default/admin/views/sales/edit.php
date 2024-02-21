@@ -190,6 +190,17 @@ $allow_discount = ($Owner || $Admin || $this->session->userdata('allow_discount'
                                 ?>
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Divisi</label>
+                                <?php 
+                                    $div['mie'] = 'Mie';
+                                    $div['soun'] = 'Soun';
+                                    echo form_dropdown('division', $div, ($inv->division ?? ''), 'id="sldivision" required="required" class="form-control input-tip select" style="width:100%;"');
+                                ?>
+                            </div>
+                        </div>
+
                         <div class="clearfix"></div>
                         <div class="col-md-12">
                             <div class="panel panel-warning">

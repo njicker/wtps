@@ -3126,6 +3126,7 @@ class Reports extends MY_Controller
             $this->data['type'] = $this->input->post('type');
             $this->data['start_date'] = $this->input->post('start_date');
             $this->data['end_date'] = $this->input->post('end_date');
+            // var_dump($this->reports_model->getReportSales($start_date, $end_date));exit;
             $this->data['pivot'] = json_encode($this->reports_model->getReportSales($start_date, $end_date));
         }
         $bc                         = [['link' => base_url(), 'page' => lang('home')], ['link' => '#', 'page' => lang('reports')], ['link' => admin_url('reports/sales'), 'page' => lang('sales_report')]];
@@ -3155,5 +3156,81 @@ class Reports extends MY_Controller
         $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('purchases_report')]];
         $meta                     = ['page_title' => lang('purchases_report'), 'bc' => $bc];
         $this->page_construct('reports/purchases_new', $meta, $this->data);
+    }
+
+    public function accounting()
+    {
+        $this->sma->checkPermissions('accounting');
+        $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        // if(isset($_POST['submit_report']))
+        // {
+        //     $start_date = $this->input->post('start_date');
+        //     $end_date = $this->input->post('end_date');
+        //     if($start_date != ""){
+        //         $start_date = $this->sma->fsd($start_date);
+        //     }
+        //     if($end_date != ""){
+        //         $end_date = $this->sma->fsd($end_date);
+        //     }
+        //     $this->data['type'] = $this->input->post('type');
+        //     $this->data['start_date'] = $this->input->post('start_date');
+        //     $this->data['end_date'] = $this->input->post('end_date');
+        //     $this->data['pivot'] = json_encode($this->reports_model->getReportPurchases($start_date, $end_date));
+        // }
+        $this->data['pivot'] = json_encode($this->reports_model->getReportAccounting());
+        $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('accounting_report')]];
+        $meta                     = ['page_title' => lang('accounting_report'), 'bc' => $bc];
+        $this->page_construct('reports/accounting', $meta, $this->data);
+    }
+
+    public function chart_hpp()
+    {
+        $this->sma->checkPermissions('accounting');
+        $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        if(isset($_POST['submit_report']))
+        {
+            $start_date = $this->input->post('start_date');
+            $end_date = $this->input->post('end_date');
+            $product_id = $this->input->post('product_id');
+            if($start_date != ""){
+                $start_date = $this->sma->fsd($start_date);
+            }
+            if($end_date != ""){
+                $end_date = $this->sma->fsd($end_date);
+            }
+            $this->data['product_id'] = $this->input->post('product_id');
+            $this->data['start_date'] = $this->input->post('start_date');
+            $this->data['end_date'] = $this->input->post('end_date');
+            $this->data['chart'] = json_encode($this->reports_model->getChartHPP($product_id, $start_date, $end_date));
+        }
+        $param['type'] = 'combo';
+        $this->data['products'] = $this->site->getListProducts($param);
+        $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('chart_hpp_report')]];
+        $meta                     = ['page_title' => lang('chart_hpp_report'), 'bc' => $bc];
+        $this->page_construct('reports/chart_hpp', $meta, $this->data);
+    }
+
+    public function invoices()
+    {
+        $this->sma->checkPermissions('invoices');
+        $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        if(isset($_POST['submit_report']))
+        {
+            $start_date = $this->input->post('start_date');
+            $end_date = $this->input->post('end_date');
+            if($start_date != ""){
+                $start_date = $this->sma->fsd($start_date);
+            }
+            if($end_date != ""){
+                $end_date = $this->sma->fsd($end_date);
+            }
+            $this->data['type'] = $this->input->post('type');
+            $this->data['start_date'] = $this->input->post('start_date');
+            $this->data['end_date'] = $this->input->post('end_date');
+            $this->data['pivot'] = json_encode($this->reports_model->getReportInvoices($this->data['type'], $start_date, $end_date));
+        }
+        $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('invoices_report')]];
+        $meta                     = ['page_title' => lang('invoices_report'), 'bc' => $bc];
+        $this->page_construct('reports/invoices', $meta, $this->data);
     }
 }

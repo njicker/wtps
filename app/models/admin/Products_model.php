@@ -1268,7 +1268,7 @@ class Products_model extends CI_Model
                                 "quantity" => $dtl['qty'] * ($dtl['type_item'] == 'raw' ? -1 : 1),
                                 "unit_code" => $dtl['unit_code'],
                                 "movement_type" => $dtl['type_item'] == 'raw' ? 'out' : 'in',
-                                "product_batch" => '',
+                                "product_batch" => $dtl['product_batch'],
                                 "movement_status" => 'good',
                                 "reff_type" => 'production',
                                 "reff_no" => $dtl['reff_doc'],
@@ -1292,11 +1292,31 @@ class Products_model extends CI_Model
                     //     return false;
                     // }
                     // else {
+                        $dataAcc = [];
+                        $type = "PROD";
                         $raw_cost = 0;
                         $prm["reff_doc"] = $header["reff_doc"];
                         $hsl_dtl = $this->getProductionDetail($prm);
                         foreach($hsl_dtl as $dtl){
                             $raw_cost += $dtl->product_total_cost;
+
+                            $no_account = "1150200";
+                            $type_amount = "credit";
+                            $amount = $dtl->product_total_cost;
+                            $acc = [
+                                'no_source' => $dtl->reff_doc,
+                                'type_source' => $type,
+                                'loc_source' => 'detail',
+                                'id_source' => $dtl->id,
+                                'division' => $header['division'],
+                                'no_account' => $no_account,
+                                'type_amount' => $type_amount,
+                                'amount' => $amount,
+                                'note' => $dtl->product_code,
+                                'note_query' => 'type=product_total_cost',
+                                "created_by" => $this->session->userdata('user_id'),
+                            ];
+                            $dataAcc[] = $acc;
                         }
                         // get overahead cost
                         $overhead_cost = $this->site->calcExpenseCost('overhead', $header['division']);
@@ -1311,6 +1331,8 @@ class Products_model extends CI_Model
                         ];
 
                         $this->db->update("production", $upd, ["reff_doc" => $header["reff_doc"]]);
+                        // Accounting
+                        $this->site->postAccounting($dataAcc, false);
                         $this->db->trans_complete();
                         if ($this->db->trans_status() === false) {
                             log_message('error', 'An errors has been occurred while adding the sale (Add:Purchases_model.php)');
@@ -1328,7 +1350,7 @@ class Products_model extends CI_Model
     public function finishProduction($header, $detail, $detail_raw){
         $err = false;
         $this->db->trans_start();
-        
+        $type = "PROD";
         if(count($detail_raw) > 0){
             foreach($detail_raw as $dtl){
                 if(!$this->site->syncPurchaseQty($dtl, false, "production", "X")){
@@ -1374,6 +1396,33 @@ class Products_model extends CI_Model
             $raw = $this->getProductionDetail($param);
             foreach($raw as $raw){
                 $raw_cost += $raw->product_total_cost;
+
+                // Accounting
+                $dataAcc = [];
+                $no_account = "1150200";
+                $type_amount = "credit";
+                $amount = $raw->product_total_cost;
+                $acc = [
+                    'no_source' => $raw->reff_doc,
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $raw->id,
+                    'division' => $header['division'],
+                    'no_account' => $no_account,
+                    'type_amount' => $type_amount,
+                    'amount' => $amount,
+                    'note' => $raw->product_code,
+                    'note_query' => 'type=product_total_cost',
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $dataAcc[] = $acc;
+                $edit = [
+                    'no_source' => $raw->reff_doc,
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $raw->id,
+                ];
+                $this->site->postAccounting($dataAcc, $edit);
             }
             $total_cost = $raw_cost + $hdr->overhead_cost + $hdr->labour_cost;
             $this->db->update('production', ['raw_cost' => $raw_cost, 'total_cost' => $total_cost], ['reff_doc' => $header->reff_doc]);
@@ -1398,6 +1447,7 @@ class Products_model extends CI_Model
             if($this->db->insert('purchases', $pur_header)){
                 $pur_id = $this->db->insert_id();
 
+                $dataAcc = [];
                 // insert purchase items
                 $upd = 0;
                 $total_product = 0;
@@ -1442,6 +1492,7 @@ class Products_model extends CI_Model
                         $dtl_id = $this->db->insert_id();
                         $dtl["purchase_id"] = $dtl_id;
                         if($this->db->insert("production_items", $dtl)){
+                            $prod_item_id = $this->db->insert_id();
                             if($this->site->syncProductQty($dtl['product_id'], $dtl['warehouse_id'], $dtl["reff_doc"])){
                                 $upd++;
                                 $item_movement = [
@@ -1461,9 +1512,29 @@ class Products_model extends CI_Model
                                 ];
                                 $this->site->submitMovementItem($item_movement, true);
                             }
+
+                            $no_account = "1150100";
+                            $type_amount = "debit";
+                            $amount = $dtl["product_total_cost"];
+                            $acc = [
+                                'no_source' => $dtl["reff_doc"],
+                                'type_source' => $type,
+                                'loc_source' => 'detail',
+                                'id_source' => $prod_item_id,
+                                'division' => $header['division'],
+                                'no_account' => $no_account,
+                                'type_amount' => $type_amount,
+                                'amount' => $amount,
+                                'note' => $dtl["product_code"],
+                                'note_query' => 'type=product_total_cost',
+                                "created_by" => $this->session->userdata('user_id'),
+                            ];
+                            $dataAcc[] = $acc;
                         }
                     }
                 }
+                // Accounting
+                $this->site->postAccounting($dataAcc, false);
 
                 // var_dump($upd);exit;
                 if($upd != count($detail)){
@@ -1510,6 +1581,7 @@ class Products_model extends CI_Model
 
     public function rejectProduction($header, $detail){
         $err = false;
+        $type = 'PROD';
         // update header
         if($this->db->update('production', ['status_doc' => $header['status_doc'], 'note' => $header['note']], ['id' => $header["id"]])){
             foreach($detail as $dtl){
@@ -1551,6 +1623,14 @@ class Products_model extends CI_Model
                     }
                 }
                 $this->site->syncProductQty($dtl->product_id, $dtl->warehouse_id);
+                $edit = [
+                    'no_source' => $dtl->reff_doc,
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $dtl->id,
+                ];
+                $dataAcc = [];
+                $this->site->postAccounting($dataAcc, $edit);
             }
             $data['reff_type'] = "production";
             $data['reff_no'] = $header['reff_doc'];

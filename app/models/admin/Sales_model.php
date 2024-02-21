@@ -14,6 +14,7 @@ class Sales_model extends CI_Model
         // Simulate stock
         $this->db->trans_start();
         $err = false;
+        $type = 'SJ';
         foreach($dtl as $dtls){
             if(!$this->site->syncPurchaseQty($dtls, true, "sales")){
                 $this->session->set_flashdata('error', 'Stock '.$dtls['product_code'].' tidak mencukupi');
@@ -32,6 +33,7 @@ class Sales_model extends CI_Model
             // if ($this->site->getReference('do') == $data['do_reference_no']) {
             //     $this->site->updateReference('do');
             // }
+            $dataAcc = array();
             $items = array();
             foreach($dtl as $dtls){
                 $dtls['delivery_id'] = $delivery_id;
@@ -39,16 +41,35 @@ class Sales_model extends CI_Model
                     $err = true;
                     break;
                 }
-                else {
-                    $items[] = [
-                        "product_id" => $dtls['product_id'],
-                        "quantity" => $dtls['qty'],
-                        "product_batch" => $dtls['product_batch']
-                    ];
-                }
+                $items[] = [
+                    "product_id" => $dtls['product_id'],
+                    "quantity" => $dtls['qty'],
+                    "product_batch" => $dtls['product_batch']
+                ];
+                $sale = $this->getInvoiceByID($data['sale_id']);
+                // $product_base = $this->site->getHargaModal($dtl['product_id'], $dtl['product_batch']);
+                $no_account = "1159900";
+                $type_amount = "debit";
+                $amount = $dtls['qty'] * ($dtls['unit_price'] - $dtls['product_discount']);
+                $division = $sale->division;
+                $acc = [
+                    'no_source' => $data['do_reference_no'],
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $dtls['delivery_id']."-".$dtls['seq'],
+                    'division' => $division,
+                    'no_account' => $no_account,
+                    'type_amount' => $type_amount,
+                    'amount' => $amount,
+                    'note' => $dtls['product_code']." - ".$dtls['product_desc'],
+                    'note_query' => 'calc=qty*(unit_price-product_discount)',
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $dataAcc[] = $acc;
             }
-            // var_dump($err);exit;
-// var_dump($dtl);exit;
+            // Accounting
+            $this->site->postAccounting($dataAcc, false);
+
             if(!$err){
                 // $items = $this->getSaleItemBySaleID($data["sale_id"]);
                 // dari pengiriman
@@ -56,6 +77,7 @@ class Sales_model extends CI_Model
                     // $cost = $this->site->costing($items);
                     // $this->site->syncPurchaseItems($cost);
                     // $this->site->syncQuantity(null, null, null, null, $delivery_id);
+                    $dataAcc = [];
                     foreach($dtl as $dtl){
                         if(!$this->site->syncPurchaseQty($dtl, false, "sales")){
                             $err = true;
@@ -389,6 +411,20 @@ class Sales_model extends CI_Model
                         $data[] = $row;
                     }
                 }
+            }
+            
+            return $data;
+        }
+        return $data;
+    }
+
+    public function getDeliveryByInvoiceID($invoice_id)
+    {
+        $data = array();
+        $q = $this->db->get_where('deliveries', ['invoice_id' => $invoice_id]);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $hdr) {
+                $data[] = $hdr;
             }
             
             return $data;
@@ -1168,14 +1204,112 @@ class Sales_model extends CI_Model
 
     public function addInvoice($data, $delv_id){
         $this->db->trans_start();
+        $type = 'INV';
+        $sale = $this->getInvoiceByID($data['sale_id']);
+        $dataAcc = array();
         if($this->db->insert('invoices', $data)){
             $invoice_id = $this->db->insert_id();
             foreach($delv_id as $id){
                 $this->db->update('deliveries', ['invoice_id' => $invoice_id], ['id' => $id]);
-            }
 
-            $type = 'INV';
+                // detail
+                $delv = $this->getDeliveryByID($id);
+                $delvItem = $this->getDeliveryItemByDelvID($id);
+                foreach($delvItem as $item){
+                    // Barang jadi
+                    $no_account = "1150100";
+                    $type_amount = "credit";
+                    $amount = $item->qty * ($item->unit_price - $item->product_discount);
+                    $acc = [
+                        'no_source' => $delv->do_reference_no,
+                        'type_source' => 'SJ',
+                        'loc_source' => 'detail',
+                        'id_source' => $item->delivery_id."-".$item->seq,
+                        'division' => $sale->division,
+                        'no_account' => $no_account,
+                        'type_amount' => $type_amount,
+                        'amount' => $amount,
+                        'note' => $item->product_code." - ".$item->product_desc,
+                        'note_query' => 'calc=qty*(unit_price-product_discount)',
+                        "created_by" => $this->session->userdata('user_id'),
+                    ];
+                    $dataAcc[] = $acc;
+                    // Barang jadi dalam perjalanan
+                    $no_account = "1159900";
+                    $type_amount = "credit";
+                    $acc['no_account'] = $no_account;
+                    $acc['type_amount'] = $type_amount;
+                    $dataAcc[] = $acc;
+                    // Diskon
+                    if($item->product_discount > 0){
+                        $no_account = "6190102";
+                        $type_amount = "debit";
+                        $amount = $item->qty * $item->product_discount;
+                        $acc['no_account'] = $no_account;
+                        $acc['type_amount'] = $type_amount;
+                        $acc['amount'] = $amount;
+                        $acc['note_query'] = 'calc=qty*product_discount';
+                        $dataAcc[] = $acc;
+                    }
+                }
+            }
             $this->site->updateReff($type, $data['doc_date']);
+            // Accounting
+            // Total
+            $no_account = "1130100";
+            $type_amount = "debit";
+            $amount = $data['total_amount'];
+            $acc = [
+                'no_source' => $data['reff_doc'],
+                'type_source' => $type,
+                'loc_source' => 'header',
+                'id_source' => $invoice_id,
+                'division' => $sale->division,
+                'no_account' => $no_account,
+                'type_amount' => $type_amount,
+                'amount' => $amount,
+                'note' => $data['reff_sale_doc'],
+                'note_query' => 'field=total_amount',
+                "created_by" => $this->session->userdata('user_id'),
+            ];
+            $dataAcc[] = $acc;
+            // Diskon
+            if($data['discount'] > 0){
+                $no_account = "6190103";
+                $type_amount = "debit";
+                $amount = $data['discount'];
+
+                $acc['no_account'] = $no_account;
+                $acc['type_amount'] = $type_amount;
+                $acc['amount'] = $amount;
+                $acc['note_query'] = 'field=discount';
+                $dataAcc[] = $acc;
+            }
+            // Shipping Amount
+            if($data['shipping_amount'] > 0){
+                $no_account = "4610400";
+                $type_amount = "debit";
+                $amount = $data['shipping_amount'];
+
+                $acc['no_account'] = $no_account;
+                $acc['type_amount'] = $type_amount;
+                $acc['amount'] = $amount;
+                $acc['note_query'] = 'field=shipping_amount';
+                $dataAcc[] = $acc;
+            }
+            // Tax
+            if($data['product_tax'] > 0){
+                $no_account = "2180700";
+                $type_amount = "debit";
+                $amount = $data['product_tax'];
+
+                $acc['no_account'] = $no_account;
+                $acc['type_amount'] = $type_amount;
+                $acc['amount'] = $amount;
+                $acc['note_query'] = 'field=product_tax';
+                $dataAcc[] = $acc;
+            }
+            $this->site->postAccounting($dataAcc, false);
 
             $this->db->trans_complete();
             if ($this->db->trans_status() === false) {
@@ -1207,6 +1341,7 @@ class Sales_model extends CI_Model
     public function addPaymentInvoice($data = [], $customer_id = null)
     {
         if ($this->db->insert('payments', $data)) {
+            $pay_id = $this->db->insert_id();
             if ($this->site->getReference('pay') == $data['reference_no']) {
                 $this->site->updateReference('pay');
             }
@@ -1219,6 +1354,29 @@ class Sales_model extends CI_Model
                 $customer = $this->site->getCompanyByID($customer_id);
                 $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount - $data['amount'])], ['id' => $customer_id]);
             }
+            // Accounting
+            $inv = $this->getInvoicesByID($data['invoice_id']);
+            $sale = $this->getInvoiceByID($data['sale_id']);
+            $dataAcc = [];
+            $method = $this->site->getAccountByPaidMethod($data['paid_by']);
+            $type_amount = "debit";
+            $amount = $data['amount'];
+            $type = "PAY";
+            $acc = [
+                'no_source' => $inv->reff_doc,
+                'type_source' => $type,
+                'loc_source' => 'header',
+                'id_source' => $pay_id,
+                'division' => $sale->division,
+                'no_account' => $method->no_account,
+                'type_amount' => $type_amount,
+                'amount' => $amount,
+                'note' => $data['reference_no'],
+                'note_query' => 'field=amount',
+                "created_by" => $this->session->userdata('user_id'),
+            ];
+            $dataAcc[] = $acc;
+            $this->site->postAccounting($dataAcc, false);
             return true;
         }
         return false;
@@ -1239,6 +1397,14 @@ class Sales_model extends CI_Model
                 $customer = $this->site->getCompanyByID($sale->customer_id);
                 $this->db->update('companies', ['deposit_amount' => ($customer->deposit_amount + $opay->amount)], ['id' => $customer->id]);
             }
+
+            // Accounting
+            $edit['type_source'] = 'PAY';
+            $edit['loc_source'] = 'header';
+            $edit['id_source'] = $id;
+            $dataAcc = [];
+            $this->site->postAccounting($dataAcc, $edit);
+
             return true;
         }
         return false;
@@ -1305,8 +1471,33 @@ class Sales_model extends CI_Model
 
     public function deleteInvoice($id)
     {
-        $this->site->log('Invoices', ['model' => $this->getInvoicesByID($id)]);
+        $dataAcc = array();
+        $inv = $this->getInvoicesByID($id);
+        $this->site->log('Invoices', ['model' => $inv]);
         if ($this->db->delete('invoices', ['id' => $id])) {
+            $delv = $this->getDeliveryByInvoiceID($id);
+            foreach($delv as $delv){
+                $this->db->update('deliveries', ['invoice_id' => null], ['id' => $delv->id]);
+
+                $delvItem = $this->getDeliveryItemByDelvID($delv->id);
+                foreach($delvItem as $item){
+                    $edit = [
+                        'no_source' => $delv->do_reference_no,
+                        'type_source' => 'SJ',
+                        'loc_source' => 'detail',
+                        'type_amount' => 'credit',
+                        'id_source' => $item->delivery_id."-".$item->seq,
+                    ];
+                    $this->site->postAccounting($dataAcc, $edit);
+                }
+            }
+            $edit = [
+                'no_source' => $inv->reff_doc,
+                'type_source' => 'INV',
+                'loc_source' => 'header',
+                'id_source' => $inv->id,
+            ];
+            $this->site->postAccounting($dataAcc, $edit);
             return true;
         }
         return false;

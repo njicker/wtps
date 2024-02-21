@@ -85,6 +85,7 @@ class Returns extends MY_Controller
             $staff_note       = $this->sma->clear_tags($this->input->post('staff_note'));
             $shipping         = $this->input->post('shipping') ? $this->input->post('shipping') : 0;
             $delv_id          = $this->input->post('delv_id');
+            $division          = $this->input->post('division');
 
             $total            = 0;
             $total_qty        = 0;
@@ -220,6 +221,7 @@ class Returns extends MY_Controller
                 'hash'              => hash('sha256', microtime() . mt_rand()),
                 'delv_id'           => $delv_id,
                 'shipping'          => $shipping,
+                'division'          => $division,
             ];
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;

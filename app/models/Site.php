@@ -1713,6 +1713,8 @@ class Site extends CI_Model
             );
         }
         $this->db->insert('item_movement', $data);
+        $id = $this->db->insert_id();
+        return $id;
     }
 
     public function deleteMovementItemByDoc($data){
@@ -1915,5 +1917,97 @@ class Site extends CI_Model
             return $q->row()->$field;
         }
         return false;
+    }
+
+    public function postAccounting($data, $edit = null){
+        if($edit){
+            $this->deleteAccByParam($edit);
+        }
+        if(count($data) > 0){
+            return $this->insertAccBatch($data);
+        }
+        return true;
+    }
+
+    public function deleteAccByParam($param){
+        if($this->db->delete('accounting', $param)){
+            return true;
+        }
+        return false;
+    }
+
+    public function insertAccBatch($data){
+        if($this->db->insert_batch('accounting', $data)){
+            return true;
+        }
+        return false;
+    }
+
+    public function getPayMethod($param = array()){
+        $this->db->select("*");
+        $this->db->from("payment_method");
+        $this->db->where($param);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getAccountBank(){
+        $this->db->select("*");
+        $this->db->from("account_journal");
+        $this->db->where('flag_delete', '');
+        $this->db->where('group_account_id', '1');
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getAccountByPaidMethod($no_account){
+        $this->db->select("*");
+        $this->db->from("account_journal");
+        $this->db->where('no_account', $no_account);
+        $this->db->limit(1);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function getHargaModal($product_id, $product_batch){
+        $this->db->select("*");
+        $this->db->from("purchase_items");
+        $this->db->where('product_id', $product_id);
+        $this->db->where('product_batch', $product_batch);
+        $this->db->limit(1);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return false;
+    }
+
+    public function getListProducts($param = []){
+        $data = [];
+
+        $this->db->where($param);
+        $q = $this->db->get("products");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[$row->id] = $row;
+            }
+        }
+        return $data;
     }
 }

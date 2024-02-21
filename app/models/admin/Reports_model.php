@@ -685,26 +685,29 @@ class Reports_model extends CI_Model
     {
         $this->db
             ->select('companies.company, sale_items.product_name, sale_items.product_code, sales.reference_no,
-            sale_items.net_unit_price, sale_items.quantity, sale_items.subtotal, sales.date, sales.salesman_id,
+            sale_items.net_unit_price, delivery_item.qty as quantity, sales.date, sales.salesman_id,
             users.first_name, users.last_name')
-            ->join('sales', 'sales.id = sale_items.sale_id', 'left')
+            ->join('delivery_item', 'deliveries.id = delivery_item.delivery_id', 'inner')
+            ->join('sales', 'sales.id = deliveries.sale_id', 'left')
+            ->join('sale_items', 'sales.id = sale_items.sale_id AND sale_items.product_id = delivery_item.product_id', 'left')
             ->join('companies', 'sales.customer_id = companies.id', 'left')
             ->join('users', 'sales.salesman_id = users.id', 'left');
             if($start_date != "" && $end_date != ""){
-                $this->db->where('date >=', $start_date)->where('date <=', $end_date);
+                $this->db->where('deliveries.date >=', $start_date)->where('deliveries.date <=', $end_date);
             }
             else if($start_date != ""){
-                $this->db->where('date(date)', $start_date);
+                $this->db->where('date(deliveries.date)', $start_date);
             }
             else if($end_date != ""){
-                $this->db->where('date(date)', $end_date);
+                $this->db->where('date(deliveries.date)', $end_date);
             }
-        $q = $this->db->get('sale_items');
+        $q = $this->db->get('deliveries');
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 // var_dump($row);exit;
                 $row->product_full = $row->product_code." - ".$row->product_name;
                 $row->salesman = $row->first_name." ".$row->last_name;
+                $row->subtotal = $row->quantity * $row->net_unit_price;
                 $row->net_unit_price = number_format($row->net_unit_price, 0, ",", ".");
                 $data[] = $row;
             }
@@ -736,6 +739,154 @@ class Reports_model extends CI_Model
                 // var_dump($row);exit;
                 $row->product_full = $row->product_code." - ".$row->product_name;
                 $row->net_unit_cost = number_format($row->net_unit_cost, 0, ",", ".");
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getReportAccounting($start_date = "", $end_date = "")
+    {
+        $this->db
+            ->select('accounting.no_account, account_journal.account_desc, account_journal.group_account_id, 
+            account_journal.group_account_desc,accounting.amount, accounting.type_amount')
+            ->join('account_journal', 'accounting.no_account = account_journal.no_account', 'inner');
+            if($start_date != "" && $end_date != ""){
+                $this->db->where('accounting.created_at >=', $start_date)->where('accounting.created_at <=', $end_date);
+            }
+            else if($start_date != ""){
+                $this->db->where('date(accounting.created_at)', $start_date);
+            }
+            else if($end_date != ""){
+                $this->db->where('date(accounting.created_at)', $end_date);
+            }
+        $this->db->order_by('account_journal.group_account_id');
+        $q = $this->db->get('accounting');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $row->amount = $row->amount * ($row->type_amount == "credit" ? -1 : 1);
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getChartHPP($product_id, $start_date = "", $end_date = "")
+    {
+        $this->db
+            ->select('production.created_date, production_items.product_code, production_items.product_unit_cost')
+            ->join('production', 'production.reff_doc = production_items.reff_doc', 'inner');
+            if($product_id != ""){
+                $this->db->where('product_id', $product_id);
+            }
+            if($start_date != "" && $end_date != ""){
+                $this->db->where('production.created_date >=', $start_date)->where('production.created_date <=', $end_date);
+            }
+            else if($start_date != ""){
+                $this->db->where('date(production.created_date)', $start_date);
+            }
+            else if($end_date != ""){
+                $this->db->where('date(production.created_date)', $end_date);
+            }
+            $this->db->order_by('created_date');
+        $q = $this->db->get('production_items');
+        if ($q->num_rows() > 0) {
+            $data = [
+                "day" => [],
+                "cost" => [],
+                "avg" => [],
+                "min" => 0,
+                "max" => 0,
+            ];
+            $sum = 0;
+            $min = 0;
+            $max = 0;
+            foreach (($q->result()) as $row) {
+                $data['day'][] = date("d-M-y", strtotime($row->created_date));
+                $data['cost'][] = (int)$row->product_unit_cost;
+                if($min == 0 || $min > $row->product_unit_cost){
+                    $min = $row->product_unit_cost;
+                }
+                if($max == 0 || $max < $row->product_unit_cost){
+                    $max = $row->product_unit_cost;
+                }
+                $sum += $row->product_unit_cost;
+            }
+            $avg = (int) ($sum / count($data['cost']));
+            for($i = 0; $i < count($data['cost']); $i++){
+                $data['avg'][] = $avg;
+            }
+            $data['min'] = (int) ($min - 20000);
+            $data['max'] = (int) ($max + 20000);
+            return $data;
+        }
+        return false;
+    }
+
+    public function getReportInvoices($status, $start_date, $end_date)
+    {
+        if($status == 'outstanding'){
+            $this->db->where('status_payment !=', 'paid');
+        }
+        else if($status == 'paid'){
+            $this->db->where('status_payment', 'paid');
+        }
+        if($start_date != "" && $end_date != ""){
+            $this->db->where('doc_date >=', $start_date)->where('doc_date <=', $end_date);
+        }
+        else if($start_date != ""){
+            $this->db->where('doc_date', $start_date);
+        }
+        else if($end_date != ""){
+            $this->db->where('doc_date', $end_date);
+        }
+        if($status == 'outstanding'){
+            $this->db->order_by('due_date, doc_date');
+        }
+        else {
+            $this->db->order_by('doc_date');
+        }
+        $q = $this->db->get('invoices');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                // var_dump($row);exit;
+                if($status == 'outstanding'){
+                    $group_due = "1-7";
+                    $date1=date_create($row->due_date);
+                    $date2=date_create();
+                    $diff=date_diff($date1,$date2);
+                    $selisih = $diff->format("%R%a");
+                    if($selisih <= 0){
+                        $group_due = 'Belum jatuh tempo';
+                    }
+                    else if($selisih > 30){
+                        $group_due = '30-60';
+                    }
+                    else if($selisih > 21){
+                        $group_due = '22-30';
+                    }
+                    else if($selisih > 14){
+                        $group_due = '15-21';
+                    }
+                    else if($selisih > 7){
+                        $group_due = '8-14';
+                    }
+                    $row->group_due = $group_due;
+                }
+                else if($status == 'all'){
+                    if($row->status_payment == 'paid'){
+                        $row->status = 'Lunas';
+                    }
+                    else if($row->status_payment == 'partial'){
+                        $row->status = 'Sebagian';
+                    }
+                    else if($row->status_payment == 'pending'){
+                        $row->status = 'Belum dibayar';
+                    }
+                }
+                $row->doc_date = date("d-M-Y", strtotime($row->doc_date));
                 $data[] = $row;
             }
             return $data;

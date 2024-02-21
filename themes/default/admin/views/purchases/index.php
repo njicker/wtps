@@ -119,14 +119,14 @@
                                 <i class="fa fa-file-pdf-o"></i> <?=lang('combine_to_pdf')?>
                             </a>
                         </li>
-                        <li class="divider"></li>
+                        <!-- <li class="divider"></li>
                         <li>
                             <a href="#" class="bpo" title="<b><?=lang('delete_purchases')?></b>"
                                 data-content="<p><?=lang('r_u_sure')?></p><button type='button' class='btn btn-danger' id='delete' data-action='delete'><?=lang('i_m_sure')?></a> <button class='btn bpo-close'><?=lang('no')?></button>"
                                 data-html="true" data-placement="left">
                                 <i class="fa fa-trash-o"></i> <?=lang('delete_purchases')?>
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </li>
                 <?php if (!empty($warehouses)) {

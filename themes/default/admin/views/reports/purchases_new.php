@@ -148,6 +148,7 @@
         // console.log(data);
         const pivot = new WebDataRocks({
             container: "#wdr-component",
+            beforetoolbarcreated: customizeToolbar,
             toolbar: true,
             width: '100%',            
             report: {
@@ -195,5 +196,17 @@
     }
     else {
         $("#show-data").hide();
+    }
+
+    function customizeToolbar(toolbar) {
+        // Get all tabs from the toolbar
+        const tabs = toolbar.getTabs();
+        toolbar.getTabs = function() {
+            // Delete the first tab
+            delete tabs[0];
+            delete tabs[1];
+            delete tabs[2];
+            return tabs;
+        }
     }
 </script>

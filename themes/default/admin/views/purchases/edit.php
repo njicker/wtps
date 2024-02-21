@@ -268,6 +268,16 @@
                             </div>
                         <?php
                         } ?>
+                        <div class="col-md-4" <?php if($mode == "received"){ echo "style='display:none;'"; }?> >
+                            <div class="form-group">
+                                <label>Divisi</label>
+                                <?php 
+                                    $div['mie'] = 'Mie';
+                                    $div['soun'] = 'Soun';
+                                    echo form_dropdown('division', $div, ($purchase->division ?? ''), 'id="sldivision" required="required" class="form-control input-tip select" style="width:100%;"');
+                                ?>
+                            </div>
+                        </div>
 
                         <div class="col-md-12">
                             <div class="panel panel-warning">
