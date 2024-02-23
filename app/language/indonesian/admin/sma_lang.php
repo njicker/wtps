@@ -642,3 +642,4 @@ $lang['journal']                        = 'Jurnal Umum';
 $lang['accounting_report']                        = 'Laporan Accounting';
 $lang['chart_hpp_report']                        = 'Grafik Harga Pokok Produksi';
 $lang['invoices_report']                        = 'Laporan Tagihan';
+$lang['group_account']                        = 'Grup Akun';

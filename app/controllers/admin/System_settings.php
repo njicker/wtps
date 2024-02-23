@@ -2993,4 +2993,89 @@ class system_settings extends MY_Controller
             $this->sma->send_json(['error' => 1, 'msg' => 'Gagal hapus Akun Jurnal']);
         }
     }
+
+    public function getGroupAccount()
+    {
+        $this->load->library('datatables');
+        $this->datatables
+            ->select('group_account.id, group_desc, sub_account.name')
+            ->from('group_account')
+            ->join('sub_account', 'group_account.id_sub_account = sub_account.id', 'left')
+            ->add_column('Actions', "<div class=\"text-center\"><a href='" . admin_url('system_settings/edit_group_account/$1') . "' data-toggle='modal' data-target='#myModal' class='tip' title='".lang('edit_group_account')."'><i class=\"fa fa-edit\"></i></a> <a href='#' class='tip po' title='<b>".lang('delete_group_account')."</b>' data-content=\"<p>" . lang('r_u_sure') . "</p><a class='btn btn-danger po-delete' href='" . admin_url('system_settings/delete_group_account/$1') . "'>" . lang('i_m_sure') . "</a> <button class='btn po-close'>" . lang('no') . "</button>\"  rel='popover'><i class=\"fa fa-trash-o\"></i></a></div>", 'group_account.id');
+
+        echo $this->datatables->generate();
+    }
+
+    public function group_account()
+    {
+        $this->data['error'] = validation_errors() ? validation_errors() : $this->session->flashdata('error');
+        $bc                  = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('system_settings'), 'page' => lang('system_settings')], ['link' => '#', 'page' => lang("group_account")]];
+        $meta                = ['page_title' => lang("group_account"), 'bc' => $bc];
+        $this->page_construct('settings/group_account', $meta, $this->data);
+    }
+
+    public function add_group_account()
+    {
+        $this->form_validation->set_rules('group_desc', lang('group_account_desc'), 'required|min_length[3]');
+        $this->form_validation->set_rules('id_sub_account', lang('sub_account'), 'trim|required');
+
+        if ($this->form_validation->run() == true) {
+            $data = [
+                'group_account_desc' => $this->input->post('group_account_desc'),
+                'id_sub_account' => $this->input->post('id_sub_account'),
+            ];
+        } elseif ($this->input->post('add_group_account')) {
+            $this->session->set_flashdata('error', validation_errors());
+            admin_redirect('system_settings/group_account');
+        }
+
+        if ($this->form_validation->run() == true && $this->settings_model->addGroupAccount($data)) {
+            $this->session->set_flashdata('message', 'Berhasil menambahkan Grup Akun');
+            admin_redirect('system_settings/group_account');
+        } else {
+            $this->data['error']    = validation_errors() ? validation_errors() : $this->session->flashdata('error');
+            $this->data['modal_js'] = $this->site->modal_js();
+            $this->data['sub_account'] = $this->settings_model->getAllSubAccount();
+            $this->load->view($this->theme . 'settings/add_group_account', $this->data);
+        }
+    }
+
+    public function edit_group_account($id = null)
+    {
+        $this->form_validation->set_rules('id', lang('id'), 'trim|required');
+        $this->form_validation->set_rules('group_desc', lang('group_account_desc'), 'required|min_length[3]');
+        $this->form_validation->set_rules('id_sub_account', lang('sub_account'), 'trim|required');
+
+        if ($this->form_validation->run() == true) {
+            $id = $this->input->post('id');
+            $data = [
+                'group_desc' => $this->input->post('group_desc'),
+                'id_sub_account' => $this->input->post('id_sub_account'),
+            ];
+        } elseif ($this->input->post('edit_group_account')) {
+            $this->session->set_flashdata('error', validation_errors());
+            admin_redirect('system_settings/group_account');
+        }
+
+        if ($this->form_validation->run() == true && $this->settings_model->updateGroupAccount($id, $data)) {
+            $this->session->set_flashdata('message', 'Berhasil update Grup Akun');
+            admin_redirect('system_settings/group_account');
+        } else {
+            $this->data['error']    = validation_errors() ? validation_errors() : $this->session->flashdata('error');
+            $this->data['grup'] = $this->settings_model->getGroupAccountByID($id);
+            $this->data['sub_account'] = $this->settings_model->getAllSubAccount();
+            $this->data['modal_js'] = $this->site->modal_js();
+            $this->load->view($this->theme . 'settings/edit_group_account', $this->data);
+        }
+    }
+
+    public function delete_group_account($id = null)
+    {
+        if ($this->settings_model->deleteGroupAccount($id)) {
+            $this->sma->send_json(['error' => 0, 'msg' => 'Berhasil hapus Grup Akun']);
+        }
+        else {
+            $this->sma->send_json(['error' => 1, 'msg' => 'Gagal hapus Grup Akun']);
+        }
+    }
 }

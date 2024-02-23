@@ -1614,14 +1614,14 @@ class Sales extends MY_Controller
         echo $this->datatables->generate();
     }
 
-    public function getSales($warehouse_id = null)
+    public function getSales($status = "")
     {
         $this->sma->checkPermissions('index');
 
-        if ((!$this->Owner || !$this->Admin) && !$warehouse_id) {
-            $user         = $this->site->getUser();
-            $warehouse_id = $user->warehouse_id;
-        }
+        // if ((!$this->Owner || !$this->Admin) && !$warehouse_id) {
+        //     $user         = $this->site->getUser();
+        //     $warehouse_id = $user->warehouse_id;
+        // }
         $detail_link       = anchor('admin/sales/view/$1', '<i class="fa fa-file-text-o"></i> ' . lang('sale_details'));
         $duplicate_link    = anchor('admin/sales/add?sale_id=$1', '<i class="fa fa-plus-circle"></i> ' . lang('duplicate_sale'));
         $payments_link     = anchor('admin/sales/payments/$1', '<i class="fa fa-money"></i> ' . lang('view_payments'), 'data-toggle="modal" data-target="#myModal"');
@@ -1655,12 +1655,21 @@ class Sales extends MY_Controller
         //$action = '<div class="text-center">' . $detail_link . ' ' . $edit_link . ' ' . $email_link . ' ' . $delete_link . '</div>';
 
         $this->load->library('datatables');
-        if ($warehouse_id) {
+        if ($status == "complete") {
             $this->datatables
                 ->select("{$this->db->dbprefix('sales')}.id as id, DATE_FORMAT({$this->db->dbprefix('sales')}.date, '%Y-%m-%d %T') as date, reference_no, biller, {$this->db->dbprefix('sales')}.customer, sale_status, grand_total, paid, (grand_total-paid) as balance, payment_status, {$this->db->dbprefix('sales')}.attachment, return_id")
                 ->from('sales')
-                ->where('warehouse_id', $warehouse_id);
-        } else {
+                ->where('sale_status', 'complete')
+                ->where('payment_status', 'paid');
+        }
+        else if($status == "ongoing"){
+            $this->datatables
+                ->select("{$this->db->dbprefix('sales')}.id as id, DATE_FORMAT({$this->db->dbprefix('sales')}.date, '%Y-%m-%d %T') as date, reference_no, biller, {$this->db->dbprefix('sales')}.customer, sale_status, grand_total, paid, (grand_total-paid) as balance, payment_status, {$this->db->dbprefix('sales')}.attachment, return_id")
+                ->from('sales')
+                ->where('sale_status !=', 'complete')
+                ->or_where('payment_status !=', 'paid');
+        }
+        else {
             $this->datatables
                 ->select("{$this->db->dbprefix('sales')}.id as id, DATE_FORMAT({$this->db->dbprefix('sales')}.date, '%Y-%m-%d %T') as date, reference_no, biller, {$this->db->dbprefix('sales')}.customer, sale_status, grand_total, paid, (grand_total-paid) as balance, payment_status, {$this->db->dbprefix('sales')}.attachment, return_id")
                 ->from('sales');
@@ -1754,20 +1763,21 @@ class Sales extends MY_Controller
         $this->page_construct('sales/gift_cards', $meta, $this->data);
     }
 
-    public function index($warehouse_id = null)
+    public function index($status = "")
     {
         $this->sma->checkPermissions();
 
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
-        if ($this->Owner || $this->Admin || !$this->session->userdata('warehouse_id')) {
-            $this->data['warehouses']   = $this->site->getAllWarehouses();
-            $this->data['warehouse_id'] = $warehouse_id;
-            $this->data['warehouse']    = $warehouse_id ? $this->site->getWarehouseByID($warehouse_id) : null;
-        } else {
-            $this->data['warehouses']   = null;
-            $this->data['warehouse_id'] = $this->session->userdata('warehouse_id');
-            $this->data['warehouse']    = $this->session->userdata('warehouse_id') ? $this->site->getWarehouseByID($this->session->userdata('warehouse_id')) : null;
-        }
+        // if ($this->Owner || $this->Admin || !$this->session->userdata('warehouse_id')) {
+        //     $this->data['warehouses']   = $this->site->getAllWarehouses();
+        //     $this->data['warehouse_id'] = $warehouse_id;
+        //     $this->data['warehouse']    = $warehouse_id ? $this->site->getWarehouseByID($warehouse_id) : null;
+        // } else {
+        //     $this->data['warehouses']   = null;
+        //     $this->data['warehouse_id'] = $this->session->userdata('warehouse_id');
+        //     $this->data['warehouse']    = $this->session->userdata('warehouse_id') ? $this->site->getWarehouseByID($this->session->userdata('warehouse_id')) : null;
+        // }
+        $this->data['status'] = $status;
 
         $bc   = [['link' => base_url(), 'page' => lang('home')], ['link' => '#', 'page' => lang('sales')]];
         $meta = ['page_title' => lang('sales'), 'bc' => $bc];

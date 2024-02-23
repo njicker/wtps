@@ -786,7 +786,7 @@ class Settings_model extends CI_Model
     public function deleteAccountJournal($no_account)
     {
         $this->db->where('no_account', $no_account);
-        if ($this->db->update('account_journal', ['flag_delete' => 'X'])) {
+        if ($this->db->update('account_journal', ['flag_delete' => 'X'], ['no_account' => $no_account])) {
             return true;
         }
         return false;
@@ -801,6 +801,53 @@ class Settings_model extends CI_Model
                 $data[] = $row;
             }
             return $data;
+        }
+        return false;
+    }
+
+    public function getAllSubAccount()
+    {
+        $q = $this->db->get('sub_account');
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function addGroupAccount($data)
+    {
+        if ($this->db->insert('group_account', $data)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function updateGroupAccount($id, $data = [])
+    {
+        $this->db->where('id', $id);
+        if ($this->db->update('group_account', $data)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function deleteGroupAccount($id)
+    {
+        $this->db->where('id', $id);
+        if ($this->db->delete('group_account', ['id' => $id])) {
+            return true;
+        }
+        return false;
+    }
+
+    public function getGroupAccountByID($id)
+    {
+        $q = $this->db->get_where('group_account', ['id' => $id], 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
         }
         return false;
     }

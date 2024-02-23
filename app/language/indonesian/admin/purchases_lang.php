@@ -126,3 +126,5 @@ $lang['calculate_unit_cost']                 = 'Hitung Biaya Unit';
 $lang['purchase_already_paid']               = 'Status pembayaran sudah dibayar untuk pembelian';
 $lang['payment_sent']                        = 'Pembayaran Terkirim';
 $lang['update_supplier_email']               = 'Silakan perbarui alamat email pemasok';
+$lang['ongoing']                             = 'Diproses';
+$lang['complete']                            = 'Komplit';

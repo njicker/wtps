@@ -452,7 +452,7 @@
                                 </a>
                                 <ul>
                                     <li id="purchases_index">
-                                        <a class="submenu" href="<?= admin_url('purchases'); ?>">
+                                        <a class="submenu" href="<?= admin_url('purchases/index/ongoing'); ?>">
                                             <i class="fa fa-star"></i>
                                             <span class="text"> <?= lang('purchases'); ?></span>
                                         </a>
@@ -508,7 +508,7 @@
                                 </a>
                                 <ul>
                                     <li id="sales_index">
-                                        <a class="submenu" href="<?= admin_url('sales'); ?>">
+                                        <a class="submenu" href="<?= admin_url('sales/index/ongoing'); ?>">
                                             <i class="fa fa-shopping-cart"></i>
                                             <span class="text"> Daftar Penjualan</span>
                                         </a>
@@ -738,8 +738,8 @@
                                             </a>
                                         </li>
                                         <?php if (POS) {
-                                    ?>
-                                        <li id="pos_settings">
+                                        ?>
+                                        <!-- <li id="pos_settings">
                                             <a href="<?= admin_url('pos/settings') ?>">
                                                 <i class="fa fa-th-large"></i><span class="text"> <?= lang('pos_settings'); ?></span>
                                             </a>
@@ -758,9 +758,9 @@
                                             <a href="<?= admin_url('pos/add_printer') ?>">
                                                 <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_printer'); ?></span>
                                             </a>
-                                        </li>
+                                        </li> -->
                                         <?php
-                                } ?>
+                                        } ?>
                                         <!-- <li id="system_settings_change_logo">
                                             <a href="<?= admin_url('system_settings/change_logo') ?>" data-toggle="modal" data-target="#myModal">
                                                 <i class="fa fa-upload"></i><span class="text"> <?= lang('change_logo'); ?></span>
@@ -786,11 +786,11 @@
                                                 <i class="fa fa-folder-open"></i><span class="text"> <?= lang('categories'); ?></span>
                                             </a>
                                         </li>
-                                        <li id="system_settings_expense_categories">
+                                        <!-- <li id="system_settings_expense_categories">
                                             <a href="<?= admin_url('system_settings/expense_categories') ?>">
                                                 <i class="fa fa-folder-open"></i><span class="text"> <?= lang('expense_categories'); ?></span>
                                             </a>
-                                        </li>
+                                        </li> -->
                                         <li id="system_settings_units">
                                             <a href="<?= admin_url('system_settings/units') ?>">
                                                 <i class="fa fa-wrench"></i><span class="text"> <?= lang('units'); ?></span>
@@ -801,11 +801,11 @@
                                                 <i class="fa fa-th-list"></i><span class="text"> <?= lang('brands'); ?></span>
                                             </a>
                                         </li>
-                                        <li id="system_settings_variants">
+                                        <!-- <li id="system_settings_variants">
                                             <a href="<?= admin_url('system_settings/variants') ?>">
                                                 <i class="fa fa-tags"></i><span class="text"> <?= lang('variants'); ?></span>
                                             </a>
-                                        </li>
+                                        </li> -->
                                         <li id="system_settings_tax_rates">
                                             <a href="<?= admin_url('system_settings/tax_rates') ?>">
                                                 <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('tax_rates'); ?></span>
@@ -814,6 +814,11 @@
                                         <li id="system_settings_warehouses">
                                             <a href="<?= admin_url('system_settings/warehouses') ?>">
                                                 <i class="fa fa-building-o"></i><span class="text"> <?= lang('warehouses'); ?></span>
+                                            </a>
+                                        </li>
+                                        <li id="system_settings_group_account">
+                                            <a href="<?= admin_url('system_settings/group_account') ?>">
+                                                <i class="fa fa-folder-open"></i><span class="text"> Grup Akun</span>
                                             </a>
                                         </li>
                                         <li id="system_settings_account_journal">
@@ -1215,7 +1220,7 @@
                                 </a>
                                 <ul>
                                     <li id="purchases_index">
-                                        <a class="submenu" href="<?= admin_url('purchases'); ?>">
+                                        <a class="submenu" href="<?= admin_url('purchases/index/ongoing'); ?>">
                                             <i class="fa fa-star"></i><span class="text"> <?= lang('list_purchases'); ?></span>
                                         </a>
                                     </li>

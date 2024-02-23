@@ -146,6 +146,25 @@
         ];
         data.push(...dataPivot);
         // console.log(data);
+        let title = "Laporan Tagihan Pembelian";
+        let start_date = '<?=$_POST['start_date'] != "" ? date("d-M-Y", strtotime($this->sma->fsd($_POST['start_date']))) : "" ?>';
+        let end_date = '<?=$_POST['end_date'] != "" ? date("d-M-Y", strtotime($this->sma->fsd($_POST['end_date']))) : "" ?>';
+        let type = "<?=$_POST['type'] != "" ? $_POST['type'] : ""?>";
+        if(type == "supplier"){
+            title += " per Supplier";
+        }
+        else if(type == "detail") {
+            title += " Detail";
+        }
+        if(start_date != "" && end_date != ""){
+            title += " Periode " + start_date + " s/d " + end_date;
+        }
+        else if(start_date != ""){
+            title += " Tanggal " + start_date;
+        }
+        else if(end_date != ""){
+            title += " Tanggal " + end_date;
+        }
         const pivot = new WebDataRocks({
             container: "#wdr-component",
             beforetoolbarcreated: customizeToolbar,
@@ -187,7 +206,8 @@
                 ],
                 options: {
                     grid: {
-                        type: "classic"
+                        type: "classic",
+                        title: title
                     }
                 }
             }

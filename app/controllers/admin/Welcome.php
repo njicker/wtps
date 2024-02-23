@@ -19,6 +19,7 @@ class Welcome extends MY_Controller
 
         $this->load->library('form_validation');
         $this->load->admin_model('db_model');
+        $this->load->admin_model('reports_model');
     }
 
     public function download($file)
@@ -93,6 +94,9 @@ class Welcome extends MY_Controller
         $this->data['chatData']  = $this->db_model->getChartData();
         $this->data['stock']     = $this->db_model->getStockValue();
         $this->data['bs']        = $this->db_model->getBestSeller();
+        $start_date = date("Y-m-d", strtotime("-30 days"));
+        $end_date = date("Y-m-d");
+        $this->data['chart']['FG0001']     = json_encode($this->reports_model->getChartHPP("20", $start_date, $end_date));
         $lmsdate                 = date('Y-m-d', strtotime('first day of last month')) . ' 00:00:00';
         $lmedate                 = date('Y-m-d', strtotime('last day of last month')) . ' 23:59:59';
         $this->data['lmbs']      = $this->db_model->getBestSeller($lmsdate, $lmedate);

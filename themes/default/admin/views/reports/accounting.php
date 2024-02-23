@@ -6,7 +6,7 @@
 </style>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-heart"></i><?= lang('purchases_report'); ?> <?php
+        <h2 class="blue"><i class="fa-fw fa fa-heart"></i><?= lang('accounting_report'); ?> <?php
             if ($this->input->post('start_date')) {
                 echo 'Dari ' . $this->input->post('start_date') . ' sampai ' . $this->input->post('end_date');
             }
@@ -84,12 +84,20 @@
             //     caption: "No Akun"
             // },
             {
-                uniqueName: "group_account_desc",
+                uniqueName: "sub_group",
+                caption: "Sub Grup"
+            },
+            {
+                uniqueName: "sub_name",
+                caption: "Sub Akun"
+            },
+            {
+                uniqueName: "group_desc",
                 caption: "Grup Akun"
             },
             {
                 uniqueName: "account_desc",
-                caption: "Deskripsi"
+                caption: "Akun"
             },
             // {
             //     uniqueName: "amount",
@@ -101,6 +109,7 @@
     if(showPivot)
     {
         let data = JSON.parse('<?=$pivot?>');
+        let title = "Laporan Accounting per tanggal " + moment().format("DD-MMM-YYYY HH:mm:ss")
         // data.push(...dataPivot);
         // console.log(data);
         const pivot = new WebDataRocks({
@@ -133,7 +142,8 @@
                 ],
                 options: {
                     grid: {
-                        type: "compact"
+                        type: "classic",
+                        title: title
                     }
                 }
             }

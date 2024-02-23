@@ -45,6 +45,16 @@
 
             <div class="row" style="margin-bottom:15px;">
                 <div class="col-xs-6">
+                    <?php echo $this->lang->line('from'); ?>:<br/>
+                    <h2 style="margin-top:10px;"><?= $Settings->site_name; ?></h2>
+                    <?= $warehouse->name ?>
+
+                    <?php
+                    echo $warehouse->address;
+                    echo($warehouse->phone ? lang('tel') . ': ' . $warehouse->phone . '<br>' : '') . ($warehouse->email ? lang('email') . ': ' . $warehouse->email : '');
+                    ?>
+                </div>
+                <div class="col-xs-6">
                     <?php echo $this->lang->line('to'); ?>:
                     <h2 style="margin-top:10px;"><?= $supplier->company && $supplier->company != '-' ? $supplier->company : $supplier->name; ?></h2>
                     <?= $supplier->company                              && $supplier->company != '-' ? '' : 'Attn: ' . $supplier->name ?>
@@ -81,16 +91,6 @@
 
                     echo '</p>';
                     echo lang('tel') . ': ' . $supplier->phone . '<br />' . lang('email') . ': ' . $supplier->email;
-                    ?>
-                </div>
-                <div class="col-xs-6">
-                    <?php echo $this->lang->line('from'); ?>:<br/>
-                    <h2 style="margin-top:10px;"><?= $Settings->site_name; ?></h2>
-                    <?= $warehouse->name ?>
-
-                    <?php
-                    echo $warehouse->address;
-                    echo($warehouse->phone ? lang('tel') . ': ' . $warehouse->phone . '<br>' : '') . ($warehouse->email ? lang('email') . ': ' . $warehouse->email : '');
                     ?>
                 </div>
             </div>
@@ -144,14 +144,14 @@
                                 <?= ($row->expiry && $row->expiry != '0000-00-00') ? '<br>' . lang('expiry') . ': ' . $this->sma->hrsd($row->expiry) : ''; ?>
                             </td>
                             <?php if ($Settings->indian_gst) {
-                        ?>
-                            <td style="width: 80px; text-align:center; vertical-align:middle;"><?= $row->hsn_code ?: ''; ?></td>
+                            ?>
+                                <td style="width: 80px; text-align:center; vertical-align:middle;"><?= $row->hsn_code ?: ''; ?></td>
                             <?php
-                    } ?>
-                            <td style="width: 80px; text-align:center; vertical-align:middle;"><?= $this->sma->formatQuantity($row->unit_quantity) . ' ' . $row->product_unit_code; ?></td>
+                            } ?>
+                                <td style="width: 80px; text-align:center; vertical-align:middle;"><?= $this->sma->formatQuantity($row->unit_quantity) . ' ' . $units[$row->product_unit_code]; ?></td>
                             <?php
                             if ($inv->status == 'partial') {
-                                echo '<td style="text-align:center;vertical-align:middle;width:80px;">' . $this->sma->formatQuantity($row->quantity_received) . ' ' . $row->product_unit_code . '</td>';
+                                echo '<td style="text-align:center;vertical-align:middle;width:80px;">' . $this->sma->formatQuantity($row->quantity_received) . ' ' . $units[$row->product_unit_code] . '</td>';
                             }
                             ?>
                             <td style="text-align:right; width:100px;">

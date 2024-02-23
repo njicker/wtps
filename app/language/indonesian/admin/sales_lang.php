@@ -154,3 +154,5 @@ $lang['duplicate_sale']                  = 'Penjualan Duplikat';
 $lang['update_customer_email']           = 'Silakan perbarui alamat email pelanggan';
 $lang['no_vehicle']           = 'No. Polisi (Plat Mobil)';
 $lang['due_date']                          = 'Jatuh Tempo';
+$lang['ongoing']                             = 'Diproses';
+$lang['complete']                            = 'Komplit';

@@ -1269,14 +1269,14 @@ class Purchases extends MY_Controller
         echo $this->datatables->generate();
     }
 
-    public function getPurchases($warehouse_id = null)
+    public function getPurchases($status = null)
     {
         $this->sma->checkPermissions('index');
 
-        if ((!$this->Owner || !$this->Admin) && !$warehouse_id) {
-            $user         = $this->site->getUser();
-            $warehouse_id = $user->warehouse_id;
-        }
+        // if ((!$this->Owner || !$this->Admin) && !$warehouse_id) {
+        //     $user         = $this->site->getUser();
+        //     $warehouse_id = $user->warehouse_id;
+        // }
         $detail_link      = anchor('admin/purchases/view/$1', '<i class="fa fa-file-text-o"></i> ' . lang('purchase_details'));
         $delivery_link    = anchor('admin/purchases/view_received/$1', '<i class="fa fa-truck"></i> Daftar Terima Barang', 'data-toggle="modal" data-target="#myModal"');
         $payments_link    = anchor('admin/purchases/payments/$1', '<i class="fa fa-money"></i> ' . lang('view_payments'), 'data-toggle="modal" data-target="#myModal"');
@@ -1310,19 +1310,24 @@ class Purchases extends MY_Controller
         //$action = '<div class="text-center">' . $detail_link . ' ' . $edit_link . ' ' . $email_link . ' ' . $delete_link . '</div>';
 
         $this->load->library('datatables');
-        if ($warehouse_id) {
+        if ($status == "complete") {
             $this->datatables
                 ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
                 ->from('purchases')
-                ->where('warehouse_id', $warehouse_id)
-                ->where('status !=', 'received')
-                ->or_where('payment_status !=', 'paid');
-        } else {
+                ->where('status', 'received')
+                ->where('payment_status', 'paid');
+        }
+        else if($status == "ongoing") {
             $this->datatables
                 ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
                 ->from('purchases')
                 ->where('status !=', 'received')
-                ->or_where('payment_status !=', 'paid');
+                ->where('payment_status !=', 'paid');
+        }
+        else {
+            $this->datatables
+                ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
+                ->from('purchases');
         }
         $this->datatables->where('supplier_id !=', '999');
         // $this->datatables->where('status !=', 'returned');
@@ -1361,20 +1366,21 @@ class Purchases extends MY_Controller
 
     /* ------------------------------------------------------------------------- */
 
-    public function index($warehouse_id = null)
+    public function index($status = "")
     {
         $this->sma->checkPermissions();
 
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
-        if ($this->Owner || $this->Admin || !$this->session->userdata('warehouse_id')) {
-            $this->data['warehouses']   = $this->site->getAllWarehouses();
-            $this->data['warehouse_id'] = $warehouse_id;
-            $this->data['warehouse']    = $warehouse_id ? $this->site->getWarehouseByID($warehouse_id) : null;
-        } else {
-            $this->data['warehouses']   = null;
-            $this->data['warehouse_id'] = $this->session->userdata('warehouse_id');
-            $this->data['warehouse']    = $this->session->userdata('warehouse_id') ? $this->site->getWarehouseByID($this->session->userdata('warehouse_id')) : null;
-        }
+        // if ($this->Owner || $this->Admin || !$this->session->userdata('warehouse_id')) {
+        //     $this->data['warehouses']   = $this->site->getAllWarehouses();
+        //     $this->data['warehouse_id'] = $warehouse_id;
+        //     $this->data['warehouse']    = $warehouse_id ? $this->site->getWarehouseByID($warehouse_id) : null;
+        // } else {
+        //     $this->data['warehouses']   = null;
+        //     $this->data['warehouse_id'] = $this->session->userdata('warehouse_id');
+        //     $this->data['warehouse']    = $this->session->userdata('warehouse_id') ? $this->site->getWarehouseByID($this->session->userdata('warehouse_id')) : null;
+        // }
+        $this->data['status'] = $status;
 
         $bc   = [['link' => base_url(), 'page' => lang('home')], ['link' => '#', 'page' => lang('purchases')]];
         $meta = ['page_title' => lang('purchases'), 'bc' => $bc];
@@ -1404,6 +1410,11 @@ class Purchases extends MY_Controller
         $this->data['updated_by']      = $inv->updated_by ? $this->site->getUser($inv->updated_by) : null;
         $this->data['return_purchase'] = $inv->return_id ? $this->purchases_model->getPurchaseByID($inv->return_id) : null;
         $this->data['return_rows']     = $inv->return_id ? $this->purchases_model->getAllPurchaseItems($inv->return_id) : null;
+        $units = $this->site->getAllBaseUnits();
+        $this->data['units'] = array();
+        foreach($units as $unt){
+            $this->data['units'][$unt->code] = $unt->name;
+        }
 
         $this->load->view($this->theme . 'purchases/modal_view', $this->data);
     }

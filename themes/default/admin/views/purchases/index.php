@@ -6,7 +6,7 @@
             "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "<?=lang('all')?>"]],
             "iDisplayLength": <?=$Settings->rows_per_page?>,
             'bProcessing': true, 'bServerSide': true,
-            'sAjaxSource': '<?=admin_url('purchases/getPurchases' . ($warehouse_id ? '/' . $warehouse_id : ''))?>',
+            'sAjaxSource': '<?=admin_url('purchases/getPurchases' . ($status ? '/' . $status : ''))?>',
             'fnServerData': function (sSource, aoData, fnCallback) {
                 aoData.push({
                     "name": "<?=$this->security->get_csrf_token_name()?>",
@@ -95,8 +95,8 @@
 ?>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i
-                class="fa-fw fa fa-star"></i><?=lang('purchases') . ' (' . ($warehouse_id ? $warehouse->name : lang('all_warehouses')) . ')';?>
+        <h2 class="blue">
+            <i class="fa-fw fa fa-star"></i><?=lang('purchases') . ' (' . ($status ? lang($status) : 'Semua') . ')';?>
         </h2>
 
         <div class="box-icon">
@@ -129,22 +129,20 @@
                         </li> -->
                     </ul>
                 </li>
-                <?php if (!empty($warehouses)) {
-    ?>
-                    <li class="dropdown">
-                        <a data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="icon fa fa-building-o tip" data-placement="left" title="<?=lang('warehouses')?>"></i></a>
-                        <ul class="dropdown-menu pull-right tasks-menus" role="menu" aria-labelledby="dLabel">
-                            <li><a href="<?=admin_url('purchases')?>"><i class="fa fa-building-o"></i> <?=lang('all_warehouses')?></a></li>
-                            <li class="divider"></li>
-                            <?php
-                                foreach ($warehouses as $warehouse) {
-                                    echo '<li ' . ($warehouse_id && $warehouse_id == $warehouse->id ? 'class="active"' : '') . '><a href="' . admin_url('purchases/' . $warehouse->id) . '"><i class="fa fa-building"></i>' . $warehouse->name . '</a></li>';
-                                } ?>
-                        </ul>
-                    </li>
-                <?php
-}
-                ?>
+                <li class="dropdown">
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="icon fa fa-building-o tip" data-placement="left" title="<?=lang('status')?>"></i></a>
+                    <ul class="dropdown-menu pull-right tasks-menus" role="menu" aria-labelledby="dLabel">
+                        <li class="<?= $status == "" ? 'active' : '' ?>"><a href="<?=admin_url('purchases')?>">Semua</a></li>
+                        <li class="divider"></li>
+                        <li class="<?= $status == "ongoing" ? 'active' : '' ?>"><a href="<?=admin_url('purchases/index/ongoing')?>"><?=lang('ongoing')?></a></li>
+                        <li class="<?= $status == "complete" ? 'active' : '' ?>"><a href="<?=admin_url('purchases/index/complete')?>"><?=lang('complete')?></a></li>
+                        <?php
+                            // foreach ($warehouses as $warehouse) {
+                            //     echo '<li ' . ($warehouse_id && $warehouse_id == $warehouse->id ? 'class="active"' : '') . '><a href="' . admin_url('purchases/' . $warehouse->id) . '"><i class="fa fa-building"></i>' . $warehouse->name . '</a></li>';
+                            // } 
+                        ?>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

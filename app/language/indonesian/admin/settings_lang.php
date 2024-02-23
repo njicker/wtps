@@ -377,3 +377,7 @@ $lang['expense_type']                                                = 'Tipe Pen
 $lang['initial_capital']                                                = 'Modal Awal';
 $lang['work_days']                                                = 'Hari kerja per bulan';
 $lang['cost_method']                                                = 'Metode Perhitungan Biaya';
+$lang['add_group_account']                                                = 'Tambah Grup Akun';
+$lang['edit_group_account']                                                = 'Ubah Grup Akun';
+$lang['delete_group_account']                                                = 'Hapus Grup Akun';
+$lang['sub_account']                                                = 'Sub Akun';

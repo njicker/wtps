@@ -749,9 +749,12 @@ class Reports_model extends CI_Model
     public function getReportAccounting($start_date = "", $end_date = "")
     {
         $this->db
-            ->select('accounting.no_account, account_journal.account_desc, account_journal.group_account_id, 
-            account_journal.group_account_desc,accounting.amount, accounting.type_amount')
-            ->join('account_journal', 'accounting.no_account = account_journal.no_account', 'inner');
+            ->select('accounting.no_account, account_journal.account_desc, group_account.id as grup_id, 
+            group_account.group_desc,accounting.amount, accounting.type_amount, sub_account.id as sub_id, 
+            sub_account.name as sub_name, sub_account.sub_group')
+            ->join('account_journal', 'accounting.no_account = account_journal.no_account', 'inner')
+            ->join('group_account', 'group_account.id = account_journal.group_account_id', 'left')
+            ->join('sub_account', 'sub_account.id = group_account.id_sub_account', 'left');
             if($start_date != "" && $end_date != ""){
                 $this->db->where('accounting.created_at >=', $start_date)->where('accounting.created_at <=', $end_date);
             }
@@ -761,11 +764,14 @@ class Reports_model extends CI_Model
             else if($end_date != ""){
                 $this->db->where('date(accounting.created_at)', $end_date);
             }
-        $this->db->order_by('account_journal.group_account_id');
+        $this->db->order_by('sub_account.id, group_account.id');
         $q = $this->db->get('accounting');
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $row->amount = $row->amount * ($row->type_amount == "credit" ? -1 : 1);
+                $row->group_desc = $row->grup_id . " - " . $row->group_desc;
+                $row->sub_name = $row->sub_id . " - " . $row->sub_name;
+                $row->account_desc = $row->no_account . " - " . $row->account_desc;
                 $data[] = $row;
             }
             return $data;

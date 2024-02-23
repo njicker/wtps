@@ -1067,7 +1067,7 @@ class Transfers extends MY_Controller
         $this->data['transfer']       = $transfer;
         $this->data['tid']            = $transfer_id;
         $this->data['created_by']     = $this->site->getUser($transfer->created_by);
-        $this->data['updated_by']     = $this->site->getUser($transfer->updated_by);
+        $this->data['updated_by']     = isset($transfer->updated_by) ? $this->site->getUser($transfer->updated_by) : '';
         $this->load->view($this->theme . 'transfers/view', $this->data);
     }
 }

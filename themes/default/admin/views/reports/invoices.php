@@ -6,7 +6,7 @@
 </style>
 <div class="box">
     <div class="box-header">
-        <h2 class="blue"><i class="fa-fw fa fa-heart"></i><?= lang('invoices_report'); ?> <?php
+        <h2 class="blue"><i class="fa-fw fa fa-money"></i><?= lang('invoices_report'); ?> <?php
             if ($this->input->post('start_date')) {
                 echo 'Dari ' . $this->input->post('start_date') . ' sampai ' . $this->input->post('end_date');
             }

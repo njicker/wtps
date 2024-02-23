@@ -9,13 +9,13 @@
                 <i class="fa fa-print"></i> <?= lang('print'); ?>
             </button>
             <?php if ($logo) {
-    ?>
-            <div class="text-center" style="margin-bottom:20px;">
+            ?>
+            <!-- <div class="text-center" style="margin-bottom:20px;">
                 <img src="<?= base_url() . 'assets/uploads/logos/' . $Settings->logo; ?>"
                 alt="<?= $Settings->site_name; ?>">
-            </div>
+            </div> -->
             <?php
-} ?>
+            } ?>
             <div class="well well-sm">
                 <div class="row bold">
                     <div class="col-xs-4"><?= lang('date'); ?>: <?= $this->sma->hrld($transfer->date); ?>
