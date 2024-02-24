@@ -106,18 +106,23 @@ class Production extends MY_Controller
     }
 
     public function add_production(){
-        $this->sma->checkPermissions();
+        $this->sma->checkPermissions("add_production");
         $this->load->helper('security');
 
         $this->form_validation->set_rules('reff_doc', lang('batch_production'), 'required');
         $this->form_validation->set_rules('status_doc', lang('status'), 'required');
+        $this->form_validation->set_rules('doc_date', lang('date'), 'required');
         if ($this->form_validation->run() == true) {
             // $header['reff_doc'] = $this->input->post('reff_doc');
-            $batch = date("Ymd");
+            $doc_date = $this->sma->fsd($this->input->post('doc_date'));
+            $batch = date("Ymd", strtotime($doc_date));
+            // var_dump($doc_date, $batch); exit;
+
             $no_urut = $this->products_model->getCountProduction($batch);
             $no_urut++;
 
             $header['reff_doc'] = $batch . "-" . $no_urut;
+            $header['doc_date'] = $doc_date;
             $header['status_doc'] = $this->input->post('status_doc');
             $header['division'] = $this->input->post('division');
             $header['created_by'] = $this->session->userdata('user_id');
@@ -161,15 +166,17 @@ class Production extends MY_Controller
     }
 
     public function finish_production($id = null){
-        $this->sma->checkPermissions();
+        $this->sma->checkPermissions("finish_production");
 
         $this->form_validation->set_rules('reff_doc', lang('batch_production'), 'required');
         $this->form_validation->set_rules('status_doc', lang('status'), 'required');
+        $this->form_validation->set_rules('doc_date', lang('date'), 'required');
         if ($this->form_validation->run() == true) {
             $header['id'] = $this->input->post('id');
             $header['reff_doc'] = $this->input->post('reff_doc');
             $header['status_doc'] = $this->input->post('status_doc');
             $header['division'] = $this->input->post('division');
+            $header['doc_date'] = $this->input->post('doc_date');
 
             $detail = array();
             $detail_raw = array();

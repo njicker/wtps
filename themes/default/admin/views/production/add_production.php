@@ -83,8 +83,16 @@
                     <div class="col-sm-5">
                         <div class="form-group">
                             <div class="form-group all">
+                                <?= lang('date', 'date'); ?>
+                                <?= form_input('doc_date', ($_POST['doc_date'] ?? date("Y-m-d")), 'class="form-control date' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="doc_date" required="required"'); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <div class="form-group all">
                                 <?= lang('batch_production', 'batch_production'); ?>
-                                <?= form_input('reff_doc', ($_POST['reff_doc'] ?? (date("Ymd")."-[No Urut]")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="reff_doc" required="required" readonly'); ?>
+                                <?= form_input('reff_doc', ($_POST['reff_doc'] ?? ("[Tanggal]-[No Urut]")), 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="reff_doc" required="required" readonly'); ?>
                             </div>
                         </div>
                     </div>

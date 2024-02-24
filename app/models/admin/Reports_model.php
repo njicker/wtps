@@ -782,7 +782,7 @@ class Reports_model extends CI_Model
     public function getChartHPP($product_id, $start_date = "", $end_date = "")
     {
         $this->db
-            ->select('production.created_date, production_items.product_code, production_items.product_unit_cost')
+            ->select('production.doc_date, production_items.product_code, production_items.product_unit_cost')
             ->join('production', 'production.reff_doc = production_items.reff_doc', 'inner');
             if($product_id != ""){
                 $this->db->where('product_id', $product_id);
@@ -796,7 +796,7 @@ class Reports_model extends CI_Model
             else if($end_date != ""){
                 $this->db->where('date(production.created_date)', $end_date);
             }
-            $this->db->order_by('created_date');
+            $this->db->order_by('production.doc_date');
         $q = $this->db->get('production_items');
         if ($q->num_rows() > 0) {
             $data = [
@@ -810,7 +810,7 @@ class Reports_model extends CI_Model
             $min = 0;
             $max = 0;
             foreach (($q->result()) as $row) {
-                $data['day'][] = date("d-M-y", strtotime($row->created_date));
+                $data['day'][] = date("d-M-y", strtotime($row->doc_date));
                 $data['cost'][] = (int)$row->product_unit_cost;
                 if($min == 0 || $min > $row->product_unit_cost){
                     $min = $row->product_unit_cost;

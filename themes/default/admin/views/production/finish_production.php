@@ -79,6 +79,14 @@
                 echo admin_form_open_multipart('production/finish_production', $attrib);
                 ?>
                 <div class="row">
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <div class="form-group all">
+                                <?= lang('date', 'date'); ?>
+                                <?= form_input('doc_date', $header->doc_date, 'class="form-control' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="doc_date" required="required" readonly'); ?>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-5">
                         <div class="form-group">
                             <div class="form-group all">

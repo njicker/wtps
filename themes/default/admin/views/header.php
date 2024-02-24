@@ -570,12 +570,12 @@
                                         </a>
                                     </li>
 
-                                    <li id="storage_damage">
+                                    <!-- <li id="storage_damage">
                                         <a class="submenu" href="<?= admin_url('storage/damage'); ?>">
                                             <i class="fa fa-trash"></i>
                                             <span class="text"> Damage</span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
 
@@ -613,7 +613,7 @@
                                             <i class="fa fa-star-o"></i><span class="text"> <?= lang('list_transfers'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="transfers_add">
+                                    <!-- <li id="transfers_add">
                                         <a class="submenu" href="<?= admin_url('transfers/add'); ?>">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_transfer'); ?></span>
                                         </a>
@@ -622,7 +622,7 @@
                                         <a class="submenu" href="<?= admin_url('transfers/transfer_by_csv'); ?>">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_transfer_by_csv'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
 
@@ -638,11 +638,11 @@
                                             <i class="fa fa-random"></i><span class="text"> <?= lang('list_returns'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="returns_add">
+                                    <!-- <li id="returns_add">
                                         <a class="submenu" href="<?= admin_url('returns/add'); ?>">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_return'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->   
                                 </ul>
                             </li>
 
@@ -686,7 +686,7 @@
                                         </a>
                                     </li> -->
                                     <?php
-                            } ?>
+                                    } ?>
                                     <li id="billers_index">
                                         <a class="submenu" href="<?= admin_url('billers'); ?>">
                                             <i class="fa fa-users"></i><span class="text"> Bill To</span>
@@ -862,7 +862,7 @@
                                     <span class="chevron closed"></span>
                                 </a>
                                 <ul>
-                                    <li id="reports_index">
+                                    <!-- <li id="reports_index">
                                         <a href="<?= admin_url('reports') ?>">
                                             <i class="fa fa-bars"></i><span class="text"> <?= lang('overview_chart'); ?></span>
                                         </a>
@@ -871,7 +871,7 @@
                                         <a href="<?= admin_url('reports/warehouse_stock') ?>">
                                             <i class="fa fa-building"></i><span class="text"> <?= lang('warehouse_stock'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="reports_best_sellers">
                                         <a href="<?= admin_url('reports/best_sellers') ?>">
                                             <i class="fa fa-line-chart"></i><span class="text"> <?= lang('best_sellers'); ?></span>
@@ -879,11 +879,11 @@
                                     </li>
                                     <?php if (POS) {
                                 ?>
-                                    <li id="reports_register">
+                                    <!-- <li id="reports_register">
                                         <a href="<?= admin_url('reports/register') ?>">
                                             <i class="fa fa-th-large"></i><span class="text"> <?= lang('register_report'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
                             } ?>
                                     <li id="reports_quantity_alerts">
@@ -893,34 +893,34 @@
                                     </li>
                                     <?php if ($Settings->product_expiry) {
                                 ?>
-                                    <li id="reports_expiry_alerts">
+                                    <!-- <li id="reports_expiry_alerts">
                                         <a href="<?= admin_url('reports/expiry_alerts') ?>">
                                             <i class="fa fa-bar-chart-o"></i><span class="text"> <?= lang('product_expiry_alerts'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
                             } ?>
-                                    <li id="reports_products">
+                                    <!-- <li id="reports_products">
                                         <a href="<?= admin_url('reports/products') ?>">
                                             <i class="fa fa-barcode"></i><span class="text"> <?= lang('products_report'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="reports_adjustments">
+                                    </li> -->
+                                    <!-- <li id="reports_adjustments">
                                         <a href="<?= admin_url('reports/adjustments') ?>">
                                             <i class="fa fa-filter"></i><span class="text"> <?= lang('adjustments_report'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="reports_categories">
+                                    </li> -->
+                                    <!-- <li id="reports_categories">
                                         <a href="<?= admin_url('reports/categories') ?>">
                                             <i class="fa fa-folder-open"></i><span class="text"> <?= lang('categories_report'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="reports_brands">
+                                    </li> -->
+                                    <!-- <li id="reports_brands">
                                         <a href="<?= admin_url('reports/brands') ?>">
                                             <i class="fa fa-cubes"></i><span class="text"> <?= lang('brands_report'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="reports_daily_sales">
+                                    </li> -->
+                                    <!-- <li id="reports_daily_sales">
                                         <a href="<?= admin_url('reports/daily_sales') ?>">
                                             <i class="fa fa-calendar"></i><span class="text"> <?= lang('daily_sales'); ?></span>
                                         </a>
@@ -929,7 +929,7 @@
                                         <a href="<?= admin_url('reports/monthly_sales') ?>">
                                             <i class="fa fa-calendar"></i><span class="text"> <?= lang('monthly_sales'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="reports_sales">
                                         <a href="<?= admin_url('reports/sales') ?>">
                                             <i class="fa fa-heart"></i><span class="text"> <?= lang('sales_report'); ?></span>
@@ -945,12 +945,12 @@
                                             <i class="fa fa-area-chart"></i><span class="text"> <?= lang('tax_report'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="reports_profit_loss">
+                                    <!-- <li id="reports_profit_loss">
                                         <a href="<?= admin_url('reports/profit_loss') ?>">
                                             <i class="fa fa-money"></i><span class="text"> <?= lang('profit_and_loss'); ?></span>
                                         </a>
-                                    </li>
-                                    <li id="reports_daily_purchases">
+                                    </li> -->
+                                    <!-- <li id="reports_daily_purchases">
                                         <a href="<?= admin_url('reports/daily_purchases') ?>">
                                             <i class="fa fa-calendar"></i><span class="text"> <?= lang('daily_purchases'); ?></span>
                                         </a>
@@ -959,17 +959,17 @@
                                         <a href="<?= admin_url('reports/monthly_purchases') ?>">
                                             <i class="fa fa-calendar"></i><span class="text"> <?= lang('monthly_purchases'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="reports_purchases">
                                         <a href="<?= admin_url('reports/purchases') ?>">
                                             <i class="fa fa-star"></i><span class="text"> <?= lang('purchases_report'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="reports_expenses">
+                                    <!-- <li id="reports_expenses">
                                         <a href="<?= admin_url('reports/expenses') ?>">
                                             <i class="fa fa-star"></i><span class="text"> <?= lang('expenses_report'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <li id="reports_customer_report">
                                         <a href="<?= admin_url('reports/customers') ?>">
                                             <i class="fa fa-users"></i><span class="text"> <?= lang('customers_report'); ?></span>

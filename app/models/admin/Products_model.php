@@ -1430,7 +1430,7 @@ class Products_model extends CI_Model
             // insert header purchase_items
             $pur_header = [
                 "reference_no" => $header["reff_doc"],
-                "date" => date("Y-m-d H:i:s"),
+                "date" => date("Y-m-d H:i:s", strtotime($header['doc_date'])),
                 "supplier_id" => "999",
                 "supplier" => "own",
                 "warehouse_id" => "999",
@@ -1507,7 +1507,7 @@ class Products_model extends CI_Model
                                     "movement_status" => 'good',
                                     "reff_type" => 'production',
                                     "reff_no" => $dtl['reff_doc'],
-                                    "stock_date" => date("Y-m-d"),
+                                    "stock_date" => date("Y-m-d", strtotime($header['doc_date'])),
                                     "created_by" => $this->session->userdata('user_id'),
                                 ];
                                 $this->site->submitMovementItem($item_movement, true);
