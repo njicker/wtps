@@ -35,7 +35,7 @@
             <div class="form-group">
                 <?= lang('expense_type', 'expense_type'); ?>
                 <?php
-                $exp[''] = '';
+                $exp[''] = '-';
                 $exp['overhead'] = 'Biaya Overhead';
                 $exp['labour'] = 'Biaya Tenaga Kerja';
                 echo form_dropdown('expense_type', $exp, (isset($_POST['expense_type']) ? $_POST['expense_type'] : ''), 'id="expense_type" class="form-control input-tip select" style="width:100%;" ');

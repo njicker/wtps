@@ -864,7 +864,7 @@ class Purchases extends MY_Controller
                     'row'        => $row, 'tax_rate' => $tax_rate, 'units' => $units, 'options' => $options, ];
                 $c++;
             }
-
+            // echo json_encode($pr); exit;
             $this->data['inv_items']  = json_encode($pr);
             $this->data['id']         = $id;
             $this->data['suppliers']  = $this->site->getAllCompanies('supplier');
@@ -1322,7 +1322,7 @@ class Purchases extends MY_Controller
                 ->select("id, DATE_FORMAT(date, '%Y-%m-%d %T') as date, reference_no, supplier, status, grand_total, paid, (grand_total-paid) as balance, payment_status, attachment")
                 ->from('purchases')
                 ->where('status !=', 'received')
-                ->where('payment_status !=', 'paid');
+                ->or_where('payment_status !=', 'paid');
         }
         else {
             $this->datatables

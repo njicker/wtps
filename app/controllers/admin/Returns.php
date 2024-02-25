@@ -190,7 +190,8 @@ class Returns extends MY_Controller
                 krsort($products);
             }
 
-            $order_discount = $this->site->calculateDiscount($this->input->post('order_discount'), ($total + $product_tax), true);
+            // $order_discount = $this->site->calculateDiscount($this->input->post('order_discount'), ($total + $product_tax), true);
+            $order_discount = $total_qty / $this->input->post('total_all_qty') * $this->input->post('order_discount');
             $total_discount = $this->sma->formatDecimal(($order_discount + $product_discount), 4);
             $order_tax      = $this->site->calculateOrderTax($this->input->post('order_tax'), ($total + $product_tax - $order_discount));
             $total_tax      = $this->sma->formatDecimal(($product_tax + $order_tax), 4);
@@ -223,6 +224,7 @@ class Returns extends MY_Controller
                 'shipping'          => $shipping,
                 'division'          => $division,
             ];
+            // echo json_encode($data);exit;
             if ($this->Settings->indian_gst) {
                 $data['cgst'] = $total_cgst;
                 $data['sgst'] = $total_sgst;

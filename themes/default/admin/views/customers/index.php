@@ -43,7 +43,7 @@
 <?php if ($Owner || $GP['bulk_actions']) {
     echo admin_form_open('customers/customer_actions', 'id="action-form"');
 } ?>
-<div class="box">
+<div class="box" style="width: 80vw;">
     <div class="box-header">
         <h2 class="blue"><i class="fa-fw fa fa-users"></i><?= lang('customers'); ?></h2>
 
@@ -91,7 +91,7 @@
 
                 <p class="introtext"><?= lang('list_results'); ?></p>
 
-                <div class="table-responsive">
+                <div class="table-responsive" style="overflow: auto;">
                     <table id="CusData" cellpadding="0" cellspacing="0" border="0"
                            class="table table-bordered table-condensed table-hover table-striped">
                         <thead>

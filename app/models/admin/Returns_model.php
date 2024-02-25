@@ -78,7 +78,7 @@ class Returns_model extends CI_Model
                             "movement_status" => 'bad',
                             "reff_type" => 'return_delivery',
                             "reff_no" => $data['reference_no'],
-                            "stock_date" => date("Y-m-d"),
+                            "stock_date" => date("Y-m-d", strtotime($data['date'])),
                             "created_by" => $this->session->userdata('user_id'),
                         ];
                         $this->site->submitMovementItem($item_movement, false);
@@ -88,6 +88,7 @@ class Returns_model extends CI_Model
                         $amount = $dtl["quantity"] * $dtl['net_unit_price'];
                         $acc = [
                             'no_source' => $data['reference_no'],
+                            'doc_date' => date("Y-m-d", strtotime($data['date'])),
                             'type_source' => 'RET',
                             'loc_source' => 'detail',
                             'id_source' => $dtl_id,

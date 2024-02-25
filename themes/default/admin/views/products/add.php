@@ -132,7 +132,7 @@ if (!empty($variants)) {
                         ?>
 
                     </div>
-                    <div class="form-group all">
+                    <div class="form-group all"  style="display:none;">
                         <?= lang('brand', 'brand') ?>
                         <?php
                         $br[''] = '';

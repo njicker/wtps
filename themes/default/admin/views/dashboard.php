@@ -26,7 +26,7 @@ function row_status($x)
         $mpurchases[] = $month_sale->purchases;
         $mtax3[]      = $month_sale->ptax;
     } ?>
-    <div class="box" style="margin-bottom: 15px;">
+    <!-- <div class="box" style="margin-bottom: 15px;">
         <div class="box-header">
             <h2 class="blue"><i class="fa-fw fa fa-bar-chart-o"></i><?= lang('overview_chart'); ?></h2>
         </div>
@@ -40,6 +40,22 @@ function row_status($x)
                 </div>
             </div>
         </div>
+    </div> -->
+
+    <div class="box" style="margin-bottom: 15px;">
+        <div class="box-header">
+            <h2 class="blue"><i class="fa-fw fa fa-bar-chart-o"></i>Penjualan 30 hari terakhir</h2>
+        </div>
+        <div class="box-content">
+            <div class="row">
+                <div class="col-md-12">
+                    <p class="introtext">Laporan Penjualan semua produk</p>
+
+                    <div id="ov-chart-delivery" style="width:100%; height:450px;"></div>
+                    <p class="text-center"><?= lang('chart_lable_toggle'); ?></p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="box" style="margin-bottom: 15px;">
@@ -49,7 +65,7 @@ function row_status($x)
         <div class="box-content">
             <div class="row">
                 <div class="col-md-12">
-                    <p class="introtext">Produk (FG0001 - Mie Kering Tujuh Mangkok - Bal)</p>
+                    <p class="introtext">Produk (FG0001 - <?=$products['FG0001']->name?>)</p>
 
                     <div id="ov-chart-FG0001" style="width:100%; height:450px;"></div>
                     <p class="text-center"><?= lang('chart_lable_toggle'); ?></p>
@@ -680,7 +696,8 @@ function row_status($x)
                             color: Highcharts.getOptions().colors[3],
                             marker: {
                                 lineWidth: 1,
-                            }
+                            },
+                            lineColor: 'orange',
                         }
                     ]
                 });
@@ -689,95 +706,160 @@ function row_status($x)
                 // hide ov-chart-product
             }
 
-            $('#ov-chart').highcharts({
-                chart: {},
-                credits: {enabled: false},
-                title: {text: ''},
-                xAxis: {categories: <?= json_encode($months); ?>},
-                yAxis: {min: 0, title: ""},
-                tooltip: {
-                    shared: true,
-                    followPointer: true,
-                    formatter: function () {
-                        if (this.key) {
-                            return '<div class="tooltip-inner hc-tip" style="margin-bottom:0;">' + this.key + '<br><strong>' + currencyFormat(this.y) + '</strong> (' + formatNumber(this.percentage) + '%)';
-                        } else {
-                            var s = '<div class="well well-sm hc-tip" style="margin-bottom:0;"><h2 style="margin-top:0;">' + this.x + '</h2><table class="table table-striped"  style="margin-bottom:0;">';
-                            $.each(this.points, function () {
-                                s += '<tr><td style="color:{series.color};padding:0">' + this.series.name + ': </td><td style="color:{series.color};padding:0;text-align:right;"> <b>' +
-                                currencyFormat(this.y) + '</b></td></tr>';
-                            });
-                            s += '</table></div>';
-                            return s;
-                        }
-                    },
-                    useHTML: true, borderWidth: 0, shadow: false, valueDecimals: site.settings.decimals,
-                    style: {fontSize: '14px', padding: '0', color: '#000000'}
-                },
-                series: [{
+            let allProducts = JSON.parse('<?=json_encode($products)?>');
+            let showDataDelv = <?= $delivery ? 1 : 0 ?>;
+            if(showDataDelv){
+                let chart = JSON.parse('<?= $delivery ?>');
+                let series = [];
+                let idx = 0;
+                series.push({
                     type: 'column',
-                    name: '<?= lang('sp_tax'); ?>',
-                    data: [<?php
-                    echo implode(', ', $mtax1); ?>]
-                },
-                    {
-                        type: 'column',
-                        name: '<?= lang('order_tax'); ?>',
-                        data: [<?php
-                    echo implode(', ', $mtax2); ?>]
+                    name: 'Semua Produk',
+                    data: chart['all']
+                });
+                for(let a in chart){
+                    if(a != "all" && a != "date"){
+                        series.push({
+                            type: 'spline',
+                            name: allProducts[a]['name'],
+                            data: chart[a],
+                            marker: {
+                                lineWidth: 2,
+                                states: {
+                                    hover: {
+                                        lineWidth: 4
+                                    }
+                                },
+                                lineColor: Highcharts.getOptions().colors[idx],
+                                fillColor: 'white'
+                            }
+                        });
+                        idx++;
+                    }
+                }
+                // console.log(chart);
+                $('#ov-chart-delivery').highcharts({
+                    chart: {},
+                    credits: {enabled: false},
+                    title: {text: ''},
+                    xAxis: {categories: chart.date},
+                    yAxis: {min: 0, title: ""},
+                    tooltip: {
+                        shared: true,
+                        followPointer: true,
+                        formatter: function () {
+                            // console.log(this);
+                            if (this.key) {
+                                return '<div class="tooltip-inner hc-tip" style="margin-bottom:0;">' + this.key + '<br><strong>' + currencyFormat(this.y) + '</strong> (' + formatNumber(this.percentage) + '%)';
+                            } else {
+                                var s = '<div class="well well-sm hc-tip" style="margin-bottom:0;"><h2 style="margin-top:0;">' + this.x + '</h2><table class="table table-striped"  style="margin-bottom:0;">';
+                                $.each(this.points, function () {
+                                    s += '<tr><td style="color:{series.color};padding:0">' + this.series.name + ': </td><td style="color:{series.color};padding-lefy:80px;text-align:right;"> <b>' +
+                                    currencyFormat(this.y) + '</b></td></tr>';
+                                });
+                                s += '</table></div>';
+                                return s;
+                            }
+                        },
+                        useHTML: true, borderWidth: 0, shadow: false, valueDecimals: 0,
+                        style: {fontSize: '14px', padding: '0', color: '#000000'}
                     },
-                    {
-                        type: 'column',
-                        name: '<?= lang('sales'); ?>',
-                        data: [<?php
-                    echo implode(', ', $msales); ?>]
-                    }, {
-                        type: 'spline',
-                        name: '<?= lang('purchases'); ?>',
-                        data: [<?php
-                    echo implode(', ', $mpurchases); ?>],
-                        marker: {
-                            lineWidth: 2,
-                            states: {
-                                hover: {
-                                    lineWidth: 4
-                                }
-                            },
-                            lineColor: Highcharts.getOptions().colors[3],
-                            fillColor: 'white'
-                        }
-                    }, {
-                        type: 'spline',
-                        name: '<?= lang('pp_tax'); ?>',
-                        data: [<?php
-                    echo implode(', ', $mtax3); ?>],
-                        marker: {
-                            lineWidth: 2,
-                            states: {
-                                hover: {
-                                    lineWidth: 4
-                                }
-                            },
-                            lineColor: Highcharts.getOptions().colors[3],
-                            fillColor: 'white'
-                        }
-                    }, {
-                        type: 'pie',
-                        name: '<?= lang('stock_value'); ?>',
-                        data: [
-                            ['', 0],
-                            ['', 0],
-                            ['<?= lang('stock_value_by_price'); ?>', <?php echo $stock->stock_by_price; ?>],
-                            ['<?= lang('stock_value_by_cost'); ?>', <?php echo $stock->stock_by_cost; ?>],
-                        ],
-                        center: [80, 42],
-                        size: 80,
-                        showInLegend: false,
-                        dataLabels: {
-                            enabled: false
-                        }
-                    }]
-            });
+                    series: series
+                });
+            }
+            else {
+                // hide ov-chart-product
+            }
+
+            // $('#ov-chart').highcharts({
+            //     chart: {},
+            //     credits: {enabled: false},
+            //     title: {text: ''},
+            //     xAxis: {categories: <?= json_encode($months); ?>},
+            //     yAxis: {min: 0, title: ""},
+            //     tooltip: {
+            //         shared: true,
+            //         followPointer: true,
+            //         formatter: function () {
+            //             if (this.key) {
+            //                 return '<div class="tooltip-inner hc-tip" style="margin-bottom:0;">' + this.key + '<br><strong>' + currencyFormat(this.y) + '</strong> (' + formatNumber(this.percentage) + '%)';
+            //             } else {
+            //                 var s = '<div class="well well-sm hc-tip" style="margin-bottom:0;"><h2 style="margin-top:0;">' + this.x + '</h2><table class="table table-striped"  style="margin-bottom:0;">';
+            //                 $.each(this.points, function () {
+            //                     s += '<tr><td style="color:{series.color};padding:0">' + this.series.name + ': </td><td style="color:{series.color};padding:0;text-align:right;"> <b>' +
+            //                     currencyFormat(this.y) + '</b></td></tr>';
+            //                 });
+            //                 s += '</table></div>';
+            //                 return s;
+            //             }
+            //         },
+            //         useHTML: true, borderWidth: 0, shadow: false, valueDecimals: site.settings.decimals,
+            //         style: {fontSize: '14px', padding: '0', color: '#000000'}
+            //     },
+            //     series: [{
+            //         type: 'column',
+            //         name: '<?= lang('sp_tax'); ?>',
+            //         data: [<?php
+            //         echo implode(', ', $mtax1); ?>]
+            //     },
+            //         {
+            //             type: 'column',
+            //             name: '<?= lang('order_tax'); ?>',
+            //             data: [<?php
+            //         echo implode(', ', $mtax2); ?>]
+            //         },
+            //         {
+            //             type: 'column',
+            //             name: '<?= lang('sales'); ?>',
+            //             data: [<?php
+            //         echo implode(', ', $msales); ?>]
+            //         }, {
+            //             type: 'spline',
+            //             name: '<?= lang('purchases'); ?>',
+            //             data: [<?php
+            //         echo implode(', ', $mpurchases); ?>],
+            //             marker: {
+            //                 lineWidth: 2,
+            //                 states: {
+            //                     hover: {
+            //                         lineWidth: 4
+            //                     }
+            //                 },
+            //                 lineColor: Highcharts.getOptions().colors[3],
+            //                 fillColor: 'white'
+            //             }
+            //         }, {
+            //             type: 'spline',
+            //             name: '<?= lang('pp_tax'); ?>',
+            //             data: [<?php
+            //         echo implode(', ', $mtax3); ?>],
+            //             marker: {
+            //                 lineWidth: 2,
+            //                 states: {
+            //                     hover: {
+            //                         lineWidth: 4
+            //                     }
+            //                 },
+            //                 lineColor: Highcharts.getOptions().colors[3],
+            //                 fillColor: 'white'
+            //             }
+            //         }, {
+            //             type: 'pie',
+            //             name: '<?= lang('stock_value'); ?>',
+            //             data: [
+            //                 ['', 0],
+            //                 ['', 0],
+            //                 ['<?= lang('stock_value_by_price'); ?>', <?php echo $stock->stock_by_price; ?>],
+            //                 ['<?= lang('stock_value_by_cost'); ?>', <?php echo $stock->stock_by_cost; ?>],
+            //             ],
+            //             center: [80, 42],
+            //             size: 80,
+            //             showInLegend: false,
+            //             dataLabels: {
+            //                 enabled: false
+            //             }
+            //         }]
+            // });
         });
     </script>
 

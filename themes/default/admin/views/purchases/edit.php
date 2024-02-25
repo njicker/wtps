@@ -19,7 +19,7 @@
             }
         });
         <?php if ($inv) {
-    ?>
+        ?>
         localStorage.setItem('podate', '<?= date($dateFormats['php_ldate'], strtotime($inv->date))?>');
         localStorage.setItem('posupplier', '<?=$inv->supplier_id?>');
         localStorage.setItem('poref', '<?=$inv->reference_no?>');
@@ -35,7 +35,7 @@
         }
         localStorage.setItem('poitems', JSON.stringify(<?=$inv_items; ?>));
         <?php
-} ?>
+        } ?>
 
         <?php if ($Owner || $Admin) {
         ?>
@@ -196,7 +196,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <?= lang('podate', 'podate'); ?>
-                                    <?php echo form_input('date', ($_POST['date'] ?? $this->sma->hrld($purchase->date)), 'class="form-control input-tip datetime" id="podate" required="required" readonly'); ?>
+                                    <?php echo form_input('date', ($_POST['date'] ?? $this->sma->hrld($purchase->date)), 'class="form-control input-tip" id="podate" required="required" readonly'); ?>
                                 </div>
                             </div>
                         <?php

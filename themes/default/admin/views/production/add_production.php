@@ -84,7 +84,7 @@
                         <div class="form-group">
                             <div class="form-group all">
                                 <?= lang('date', 'date'); ?>
-                                <?= form_input('doc_date', ($_POST['doc_date'] ?? date("Y-m-d")), 'class="form-control date' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="doc_date" required="required"'); ?>
+                                <?= form_input('doc_date', ($_POST['doc_date'] ?? date("d/m/Y")), 'class="form-control date' . ($Settings->use_code_for_slug ? '' : ' gen_slug') . '" id="doc_date" required="required"'); ?>
                             </div>
                         </div>
                     </div>

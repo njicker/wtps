@@ -55,7 +55,7 @@ class Transfers_model extends CI_Model
                             "movement_status" => 'good',
                             "reff_type" => 'transfer',
                             "reff_no" => $data['transfer_no'],
-                            "stock_date" => date("Y-m-d"),
+                            "stock_date" => date("Y-m-d", strtotime($data['date'])),
                             "created_by" => $this->session->userdata('user_id'),
                         ];
                         $this->site->submitMovementItem($item_movement, false);

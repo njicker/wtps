@@ -71,6 +71,7 @@
         tax_rates = <?php echo json_encode($tax_rates); ?>, poitems = {},
         audio_success = new Audio('<?= $assets ?>sounds/sound2.mp3'),
         audio_error = new Audio('<?= $assets ?>sounds/sound3.mp3');
+    let mode = "";
     $(document).ready(function () {
         <?php if ($this->input->get('supplier')) {
         ?>
@@ -543,10 +544,10 @@
                             <div class="col-sm-8">
                                 <?php
                                 $tr[''] = '';
-                                                foreach ($tax_rates as $tax) {
-                                                    $tr[$tax->id] = $tax->name;
-                                                }
-                                                echo form_dropdown('ptax', $tr, '', 'id="ptax" class="form-control pos-input-tip" style="width:100%;"'); ?>
+                                foreach ($tax_rates as $tax) {
+                                    $tr[$tax->id] = $tax->name;
+                                }
+                                echo form_dropdown('ptax', $tr, '', 'id="ptax" class="form-control pos-input-tip" style="width:100%;"'); ?>
                             </div>
                         </div>
                     <?php

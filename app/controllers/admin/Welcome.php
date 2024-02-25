@@ -94,9 +94,22 @@ class Welcome extends MY_Controller
         $this->data['chatData']  = $this->db_model->getChartData();
         $this->data['stock']     = $this->db_model->getStockValue();
         $this->data['bs']        = $this->db_model->getBestSeller();
+        $prm['type'] = 'combo';
+        $products = $this->site->getListProducts($prm);
+        $product_id = 0;
+        $this->data['products'] = array();
+        if($products){
+            foreach($products as $prod){
+                if($prod == "FG0001"){
+                    $product_id = $prod->id;
+                }
+                $this->data['products'][$prod->code] = $prod;
+            }
+        }
         $start_date = date("Y-m-d", strtotime("-30 days"));
-        $end_date = date("Y-m-d");
-        $this->data['chart']['FG0001']     = json_encode($this->reports_model->getChartHPP("20", $start_date, $end_date));
+        $end_date = date("Y-m-d", strtotime("+1 days"));
+        $this->data['chart']['FG0001']     = json_encode($this->reports_model->getChartHPP($product_id, $start_date, $end_date));
+        $this->data['delivery']  = json_encode($this->db_model->getLatestDelivery($start_date, $end_date));
         $lmsdate                 = date('Y-m-d', strtotime('first day of last month')) . ' 00:00:00';
         $lmedate                 = date('Y-m-d', strtotime('last day of last month')) . ' 23:59:59';
         $this->data['lmbs']      = $this->db_model->getBestSeller($lmsdate, $lmedate);

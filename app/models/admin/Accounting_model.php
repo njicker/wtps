@@ -26,6 +26,7 @@ class Accounting_model extends CI_Model
                 $amount = $d['amount'];
                 $acc = [
                     'no_source' => $header['no_journal'],
+                    'doc_date' => date("Y-m-d", strtotime($header['doc_date'])),
                     'type_source' => $type,
                     'loc_source' => 'detail',
                     'id_source' => $dtl_id,
@@ -55,7 +56,7 @@ class Accounting_model extends CI_Model
     public function editJournal($id, $header, $detail){
         $this->db->trans_start();
         $type = 'RFP';
-        if($this->db->update('journal', $header, ['id', $id])){
+        if($this->db->update('journal', $header, ['id' => $id])){
             if($this->db->delete('journal_items', ['journal_id' => $id]))
             {
                 $dataAcc = array();
@@ -69,6 +70,7 @@ class Accounting_model extends CI_Model
                     $amount = $d['amount'];
                     $acc = [
                         'no_source' => $header['no_journal'],
+                        'doc_date' => date("Y-m-d", strtotime($header['doc_date'])),
                         'type_source' => $type,
                         'loc_source' => 'detail',
                         'id_source' => $dtl_id,

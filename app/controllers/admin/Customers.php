@@ -25,7 +25,7 @@ class Customers extends MY_Controller
     {
         $this->sma->checkPermissions(false, true);
 
-        $this->form_validation->set_rules('email', lang('email_address'), 'is_unique[companies.email]');
+        // $this->form_validation->set_rules('email', lang('email_address'), 'is_unique[companies.email]');
 
         if ($this->form_validation->run('companies/add') == true) {
             $cg   = $this->site->getCustomerGroupByID($this->input->post('customer_group'));
@@ -389,7 +389,7 @@ class Customers extends MY_Controller
 
         $company_details = $this->companies_model->getCompanyByID($id);
         if ($this->input->post('email') != $company_details->email) {
-            $this->form_validation->set_rules('code', lang('email_address'), 'is_unique[companies.email]');
+            // $this->form_validation->set_rules('code', lang('email_address'), 'is_unique[companies.email]');
         }
 
         if ($this->form_validation->run('companies/add') == true) {
