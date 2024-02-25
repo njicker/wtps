@@ -123,7 +123,7 @@
                                 <td style="text-align:center; width:40px; vertical-align:middle;"><?= $r; ?></td>
                                 <td><?= $row->product_code . ' - ' . $row->product_desc ?></td>
                                 <td style="text-align:center"><?= $this->sma->formatQuantity($row->qty); ?></td>
-                                <td style="text-align:center"><?= $row->unit_code ?></td>
+                                <td style="text-align:center"><?= $units[$row->unit_code] ?></td>
                                 <td style="text-align:center"><?= $row->product_batch; ?></td>
                             </tr>
                         <?php $r++; $total_qty += $row->qty; } ?>

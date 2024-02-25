@@ -121,7 +121,7 @@
                                 <td style="text-align:center; width:40px; vertical-align:middle;"><?= $r; ?></td>
                                 <td><?= $row->product_code . ' - ' . $row->product_name ?></td>
                                 <td style="text-align:center"><?= $this->sma->formatQuantity($row->unit_quantity); ?></td>
-                                <td style="text-align:center"><?= ($row->product_unit_code) ?></td>
+                                <td style="text-align:center"><?= ($units[$row->product_unit_code]) ?></td>
                                 <td style="text-align:right"><?= $this->sma->formatMoney(ceil($row->real_unit_cost)); ?></td>
                                 <td style="text-align:right"><?= $row->discount > 0 ? $this->sma->formatMoney($row->discount) : '' ?></td>
                                 <td style="text-align:right"><?= $this->sma->formatMoney($row->subtotal) ?></td>

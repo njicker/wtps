@@ -1802,6 +1802,11 @@ class Sales extends MY_Controller
         $this->data['rows']        = $this->sales_model->getAllInvoiceItems($id);
         $this->data['return_sale'] = $inv->return_id ? $this->sales_model->getInvoiceByID($inv->return_id) : null;
         $this->data['return_rows'] = $inv->return_id ? $this->sales_model->getAllInvoiceItems($inv->return_id) : null;
+        $units = $this->site->getAllBaseUnits();
+        $this->data['units'] = array();
+        foreach($units as $unt){
+            $this->data['units'][$unt->code] = $unt->name;
+        }
 
         $this->load->view($this->theme . 'sales/modal_view', $this->data);
     }
@@ -2816,6 +2821,11 @@ class Sales extends MY_Controller
         // $this->data['rows']       = $this->sales_model->getAllInvoiceItemsWithDetails($deli->sale_id);
         $this->data['rows']       = $this->sales_model->getDeliveryItemByDelvID($deli->id);
         $this->data['user']       = $this->site->getUser($deli->created_by);
+        $units = $this->site->getAllBaseUnits();
+        $this->data['units'] = array();
+        foreach($units as $unt){
+            $this->data['units'][$unt->code] = $unt->name;
+        }
         $this->data['page_title'] = lang('delivery_order');
         $this->load->view($this->theme . 'sales/view_delivery', $this->data);
     }
@@ -3092,6 +3102,11 @@ class Sales extends MY_Controller
         // $this->data['warehouse']   = $this->site->getWarehouseByID($inv->warehouse_id);
         $this->data['inv']         = $inv;
         $this->data['sale']          = $this->sales_model->getInvoiceByID($inv->sale_id);
+        $units = $this->site->getAllBaseUnits();
+        $this->data['units'] = array();
+        foreach($units as $unt){
+            $this->data['units'][$unt->code] = $unt->name;
+        }
 
         $listDelv = $this->sales_model->getListDeliveryInvoiceByInvID($id);
         $row = array();
