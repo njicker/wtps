@@ -177,7 +177,7 @@ class Production extends MY_Controller
             $header['status_doc'] = $this->input->post('status_doc');
             $header['division'] = $this->input->post('division');
             $header['doc_date'] = $this->input->post('doc_date');
-
+            
             $detail = array();
             $detail_raw = array();
             for($i = 0; $i < count($_POST['product_id']); $i++){
@@ -192,7 +192,7 @@ class Production extends MY_Controller
                     'type_item' => $_POST['type_item'][$i],
                     'warehouse_id' => $_POST['warehouse_id'][$i],
                     'purchase_id' => "",
-                    'expired_date' => date("Y-m-d", strtotime("+1 year")),
+                    'expired_date' => date("Y-m-d", strtotime("+1 year", strtotime($header['doc_date']))),
                 ];
                 $detail[] = $tmp;
             }

@@ -1272,7 +1272,7 @@ class Products_model extends CI_Model
                                 "movement_status" => 'good',
                                 "reff_type" => 'production',
                                 "reff_no" => $dtl['reff_doc'],
-                                "stock_date" => date("Y-m-d"),
+                                "stock_date" => date("Y-m-d", strtotime($header['doc_date'])),
                                 "created_by" => $this->session->userdata('user_id'),
                             ];
                             $this->site->submitMovementItem($item_movement, false);
@@ -1292,7 +1292,7 @@ class Products_model extends CI_Model
                     //     return false;
                     // }
                     // else {
-                        $dataAcc = [];
+                        $dataAcc = array();
                         $type = "PROD";
                         $raw_cost = 0;
                         $prm["reff_doc"] = $header["reff_doc"];
@@ -1305,6 +1305,7 @@ class Products_model extends CI_Model
                             $amount = $dtl->product_total_cost;
                             $acc = [
                                 'no_source' => $dtl->reff_doc,
+                                'doc_date' => date("Y-m-d", strtotime($header['doc_date'])),
                                 'type_source' => $type,
                                 'loc_source' => 'detail',
                                 'id_source' => $dtl->id,
@@ -1373,7 +1374,7 @@ class Products_model extends CI_Model
                     "movement_status" => 'good',
                     "reff_type" => 'production',
                     "reff_no" => $dtl['reff_doc'],
-                    "stock_date" => date("Y-m-d"),
+                    "stock_date" => date("Y-m-d", strtotime($header['doc_date'])),
                     "created_by" => $this->session->userdata('user_id'),
                 ];
                 $a = $this->site->submitMovementItem($item_movement, false);
@@ -1398,12 +1399,13 @@ class Products_model extends CI_Model
                 $raw_cost += $raw->product_total_cost;
 
                 // Accounting
-                $dataAcc = [];
+                $dataAcc = array();
                 $no_account = "1150200";
                 $type_amount = "credit";
                 $amount = $raw->product_total_cost;
                 $acc = [
                     'no_source' => $raw->reff_doc,
+                    'doc_date' => date("Y-m-d", strtotime($header['doc_date'])),
                     'type_source' => $type,
                     'loc_source' => 'detail',
                     'id_source' => $raw->id,
@@ -1447,7 +1449,7 @@ class Products_model extends CI_Model
             if($this->db->insert('purchases', $pur_header)){
                 $pur_id = $this->db->insert_id();
 
-                $dataAcc = [];
+                $dataAcc = array();
                 // insert purchase items
                 $upd = 0;
                 $total_product = 0;
@@ -1518,6 +1520,7 @@ class Products_model extends CI_Model
                             $amount = $dtl["product_total_cost"];
                             $acc = [
                                 'no_source' => $dtl["reff_doc"],
+                                'doc_date' => date("Y-m-d", strtotime($header['doc_date'])),
                                 'type_source' => $type,
                                 'loc_source' => 'detail',
                                 'id_source' => $prod_item_id,
@@ -1629,7 +1632,7 @@ class Products_model extends CI_Model
                     'loc_source' => 'detail',
                     'id_source' => $dtl->id,
                 ];
-                $dataAcc = [];
+                $dataAcc = array();
                 $this->site->postAccounting($dataAcc, $edit);
             }
             $data['reff_type'] = "production";

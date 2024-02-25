@@ -54,6 +54,7 @@ class Sales_model extends CI_Model
                 $division = $sale->division;
                 $acc = [
                     'no_source' => $data['do_reference_no'],
+                    'doc_date' => date("Y-m-d", strtotime($data['date'])),
                     'type_source' => $type,
                     'loc_source' => 'detail',
                     'id_source' => $dtls['delivery_id']."-".$dtls['seq'],
@@ -77,7 +78,6 @@ class Sales_model extends CI_Model
                     // $cost = $this->site->costing($items);
                     // $this->site->syncPurchaseItems($cost);
                     // $this->site->syncQuantity(null, null, null, null, $delivery_id);
-                    $dataAcc = [];
                     foreach($dtl as $dtl){
                         if(!$this->site->syncPurchaseQty($dtl, false, "sales")){
                             $err = true;
@@ -95,7 +95,7 @@ class Sales_model extends CI_Model
                             "movement_status" => 'good',
                             "reff_type" => 'delivery',
                             "reff_no" => $data['do_reference_no'],
-                            "stock_date" => date("Y-m-d"),
+                            "stock_date" => date("Y-m-d", strtotime($data['date'])),
                             "created_by" => $this->session->userdata('user_id'),
                         ];
                         $this->site->submitMovementItem($item_movement, false);
@@ -1222,6 +1222,7 @@ class Sales_model extends CI_Model
                     $amount = $item->qty * ($item->unit_price - $item->product_discount);
                     $acc = [
                         'no_source' => $delv->do_reference_no,
+                        'doc_date' => date("Y-m-d", strtotime($data['doc_date'])),
                         'type_source' => 'SJ',
                         'loc_source' => 'detail',
                         'id_source' => $item->delivery_id."-".$item->seq,
@@ -1261,6 +1262,7 @@ class Sales_model extends CI_Model
             $amount = $data['total_amount'];
             $acc = [
                 'no_source' => $data['reff_doc'],
+                'doc_date' => date("Y-m-d", strtotime($header['doc_date'])),
                 'type_source' => $type,
                 'loc_source' => 'header',
                 'id_source' => $invoice_id,
@@ -1357,13 +1359,14 @@ class Sales_model extends CI_Model
             // Accounting
             $inv = $this->getInvoicesByID($data['invoice_id']);
             $sale = $this->getInvoiceByID($data['sale_id']);
-            $dataAcc = [];
+            $dataAcc = array();
             $method = $this->site->getAccountByPaidMethod($data['paid_by']);
             $type_amount = "debit";
             $amount = $data['amount'];
             $type = "PAY";
             $acc = [
                 'no_source' => $inv->reff_doc,
+                'doc_date' => date("Y-m-d", strtotime($data['date'])),
                 'type_source' => $type,
                 'loc_source' => 'header',
                 'id_source' => $pay_id,
@@ -1402,7 +1405,7 @@ class Sales_model extends CI_Model
             $edit['type_source'] = 'PAY';
             $edit['loc_source'] = 'header';
             $edit['id_source'] = $id;
-            $dataAcc = [];
+            $dataAcc = array();
             $this->site->postAccounting($dataAcc, $edit);
 
             return true;
@@ -1499,6 +1502,37 @@ class Sales_model extends CI_Model
             ];
             $this->site->postAccounting($dataAcc, $edit);
             return true;
+        }
+        return false;
+    }
+
+    public function getReturnByDelvID($delv_id)
+    {
+        $this->db->select("*");
+        $this->db->from("returns");
+        $this->db->where_in('delv_id', $delv_id);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return false;
+    }
+
+    public function getReturnItemsByDelvID($delv_id)
+    {
+        $this->db->select("return_items.*, returns.delv_id");
+        $this->db->from("returns");
+        $this->db->join('return_items', 'returns.id=return_items.return_id');
+        $this->db->where_in('returns.delv_id', $delv_id);
+        $q = $this->db->get();
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
         }
         return false;
     }

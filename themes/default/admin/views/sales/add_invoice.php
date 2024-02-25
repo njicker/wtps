@@ -1,4 +1,9 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<style>
+    .coret{
+        text-decoration: line-through;
+    }
+</style>
 <div class="box">
     <div class="box-header">
         <h2 class="blue"><i class="fa-fw fa fa-plus"></i>Tambah Invoice</h2>
@@ -16,6 +21,13 @@
             $shipping_amount = 0;
             foreach($header as $h){
                 $hdr = $h;
+                foreach($retur as $retrn){
+                    if($retrn->delv_id == $h->id){
+                        $h->amount -= ($retrn->total + $retrn->product_discount);
+                        $h->discount -= $retrn->order_discount;
+                        $h->product_discount -= $retrn->product_discount;
+                    }
+                }
                 $amount += $h->amount;
                 $discount += $h->discount + $h->product_discount;
                 $shipping_amount += $h->shipping_amount;
@@ -136,8 +148,20 @@
                         $ttl_ordis = 0;
                         $ttl_netamt = 0;
                         foreach($detail as $dtl){
-                            $ttl_amount += $dtl->unit_price * $dtl->qty;
-                            $ttl_discp += $dtl->product_discount * $dtl->qty;
+                            $qty_retur = 0;
+                            foreach($returItems as $ret){
+                                if($dtl->delivery_id == $ret->delv_id && $dtl->product_code == $ret->product_code
+                                    && $dtl->product_batch == $ret->product_batch){
+                                    $qty_retur += $ret->quantity;
+                                    $dtl->discount -= $ret->item_discount;
+                                }
+                            }
+                            $offset_qty = $dtl->qty - $qty_retur;
+                            $ttl_amount += $dtl->unit_price * $offset_qty;
+                            $ttl_discp += $dtl->product_discount * $offset_qty;
+                            $dtl->total_price = $ttl_amount - $ttl_discp;
+                            $dtl->net_amount = $dtl->total_price - $dtl->discount;
+
                             $ttl_price += $dtl->total_price;
                             $ttl_ordis += $dtl->discount;
                             $ttl_netamt += $dtl->net_amount;
@@ -148,7 +172,7 @@
                                 <input type="hidden" name="delv_id[]" value="<?=$dtl->delivery_id?>"/>
                             </td>
                             <td>
-                                <?=number_format($dtl->qty)?>
+                                <?=number_format($offset_qty)?> <?= $qty_retur > 0 ? "(<span class='coret'>" . number_format($dtl->qty) . "</span>)" : "" ?>
                             </td>
                             <td>
                                 <?=$dtl->unit_code?>
@@ -157,10 +181,10 @@
                                 <?=number_format($dtl->unit_price)?>
                             </td>
                             <td>
-                                <?=number_format($dtl->unit_price * $dtl->qty)?>
+                                <?=number_format($dtl->unit_price * $offset_qty)?>
                             </td>
                             <td>
-                                <?=number_format($dtl->product_discount * $dtl->qty)?>
+                                <?=number_format($dtl->product_discount * $offset_qty)?>
                             </td>
                             <td>
                                 <?=number_format($dtl->total_price)?>
@@ -186,7 +210,7 @@
                             <td><?=number_format($ttl_discp)?></td>
                             <td><?=number_format($ttl_price)?></td>
                             <td><?=number_format($ttl_ordis)?></td>
-                            <td><?=number_format($ttl_netamt)?></td>
+                            <td class="total_net"><?=number_format($ttl_netamt)?></td>
                             <td></td>
                         </tr>
                     </tfoot>

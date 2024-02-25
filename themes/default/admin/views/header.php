@@ -796,11 +796,11 @@
                                                 <i class="fa fa-wrench"></i><span class="text"> <?= lang('units'); ?></span>
                                             </a>
                                         </li>
-                                        <li id="system_settings_brands">
+                                        <!-- <li id="system_settings_brands">
                                             <a href="<?= admin_url('system_settings/brands') ?>">
                                                 <i class="fa fa-th-list"></i><span class="text"> <?= lang('brands'); ?></span>
                                             </a>
-                                        </li>
+                                        </li> -->
                                         <!-- <li id="system_settings_variants">
                                             <a href="<?= admin_url('system_settings/variants') ?>">
                                                 <i class="fa fa-tags"></i><span class="text"> <?= lang('variants'); ?></span>
@@ -872,11 +872,11 @@
                                             <i class="fa fa-building"></i><span class="text"> <?= lang('warehouse_stock'); ?></span>
                                         </a>
                                     </li> -->
-                                    <li id="reports_best_sellers">
+                                    <!-- <li id="reports_best_sellers">
                                         <a href="<?= admin_url('reports/best_sellers') ?>">
                                             <i class="fa fa-line-chart"></i><span class="text"> <?= lang('best_sellers'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php if (POS) {
                                 ?>
                                     <!-- <li id="reports_register">

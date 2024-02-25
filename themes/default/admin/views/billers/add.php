@@ -1,4 +1,9 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<style>
+    .disp_none{
+        display: none;
+    }
+</style>
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
         <div class="modal-header">
@@ -88,36 +93,36 @@
                         <?= lang('country', 'country'); ?>
                         <?php echo form_input('country', '', 'class="form-control" id="country"'); ?>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('bcf1', 'cf1'); ?>
                         <?php echo form_input('cf1', '', 'class="form-control" id="cf1"'); ?>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('bcf2', 'cf2'); ?>
                         <?php echo form_input('cf2', '', 'class="form-control" id="cf2"'); ?>
 
                     </div>
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('bcf3', 'cf3'); ?>
                         <?php echo form_input('cf3', '', 'class="form-control" id="cf3"'); ?>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('bcf4', 'cf4'); ?>
                         <?php echo form_input('cf4', '', 'class="form-control" id="cf4"'); ?>
 
                     </div>
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('bcf5', 'cf5'); ?>
                         <?php echo form_input('cf5', '', 'class="form-control" id="cf5"'); ?>
 
                     </div>
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('bcf6', 'cf6'); ?>
                         <?php echo form_input('cf6', '', 'class="form-control" id="cf6"'); ?>
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="form-group">
+                    <div class="form-group disp_none">
                         <?= lang('invoice_footer', 'invoice_footer'); ?>
                         <?php echo form_textarea('invoice_footer', '', 'class="form-control skip" id="invoice_footer" style="height:100px;"'); ?>
                     </div>

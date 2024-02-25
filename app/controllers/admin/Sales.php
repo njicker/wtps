@@ -2930,6 +2930,12 @@ class Sales extends MY_Controller
                 $this->session->set_flashdata('error', 'Delivery sudah ada invoice');
                 admin_redirect('sales/deliveries');
             }
+            $this->data['retur'] = $this->sales_model->getReturnByDelvID($delv_id);
+            $listReturItems = $this->sales_model->getReturnItemsByDelvID($delv_id);
+            $this->data['returItems'] = array();
+            if($listReturItems){
+                $this->data['returItems'] = $listReturItems;
+            }
 
             unset($param);
             // $param["delivery_id"] = $delv_id;

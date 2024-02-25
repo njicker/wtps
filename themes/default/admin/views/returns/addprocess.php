@@ -247,8 +247,12 @@ foreach ($warehouses as $warehouse) {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach($detail as $dtl){ ?>
+                                            <?php 
+                                            $total_qty = 0;
+                                            foreach($detail as $dtl){ 
+                                            ?>
                                             <?php
+                                                $total_qty = $dtl->qty;
                                                 $qty = $dtl->qty;
                                                 if(isset($return_dtl_hist[$dtl->product_id."#".$dtl->product_batch])){
                                                     foreach($return_dtl_hist[$dtl->product_id."#".$dtl->product_batch] as $hist){
@@ -309,6 +313,29 @@ foreach ($warehouses as $warehouse) {
                             <div class="col-md-12">
                                 <div class="col-md-6">
                                     <div class="form-group">
+                                        <?= lang('tax', 'tax') ?>
+                                        <?php
+                                        $tr[''] = '';
+                                        foreach ($tax_rates as $tax) {
+                                            $tr[$tax->id] = $tax->name;
+                                        }
+                                        echo form_dropdown('order_tax_id', $tr, $sale_hdr->order_tax_id, 'id="order_tax_id" class="form-control input-tip" style="width:100%;" disabled'); 
+                                        ?>
+                                        <input type="hidden" name="order_tax" value="<?=$sale_hdr->order_tax_id?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <?= lang('order_discount', 'order_discount') ?>
+                                        <?php echo form_input('order_discount_disp', number_format($header->discount), 'class="form-control input-tip" id="rediscount" readonly'); ?>
+                                        <input type="hidden" name="order_discount" value="<?=$header->discount?>">
+                                        <input type="hidden" name="total_all_qty" value="<?=$total_qty?>">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <div class="form-group">
                                         <?= lang('return_note', 'renote'); ?>
                                         <?php echo form_textarea('note', (isset($_POST['note']) ? $_POST['note'] : ''), 'class="form-control" id="renote" style="margin-top: 10px; height: 100px;"'); ?>
                                     </div>
@@ -329,7 +356,7 @@ foreach ($warehouses as $warehouse) {
                         </div>
                     </div>
                 </div>
-                <div id="bottom-total" class="well well-sm" style="margin-bottom: 0;">
+                <!-- <div id="bottom-total" class="well well-sm" style="margin-bottom: 0;">
                     <table class="table table-bordered table-condensed totals" style="margin-bottom:0;">
                         <tr class="warning">
                             <td><?= lang('items') ?> <span class="totals_val pull-right" id="titems">0</span></td>
@@ -347,7 +374,7 @@ foreach ($warehouses as $warehouse) {
                             <td><?= lang('grand_total') ?> <span class="totals_val pull-right" id="gtotal">0.00</span></td>
                         </tr>
                     </table>
-                </div>
+                </div> -->
 
                 <?php echo form_close(); ?>
 

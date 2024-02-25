@@ -54,6 +54,12 @@ $(document).ready(function () {
     // If there is any item in localStorage
     if (localStorage.getItem('poitems')) {
         loadItems();
+        if(mode != "received"){
+            $(".rec_con").hide();
+        }
+        else {
+            $(".edit_con").hide();
+        }
     }
 
     // clear localStorage and reload
@@ -235,6 +241,12 @@ $(document).ready(function () {
         $('#potax2').change(function () {
             localStorage.setItem('potax2', $(this).val());
             loadItems();
+            if(mode != "received"){
+                $(".rec_con").hide();
+            }
+            else {
+                $(".edit_con").hide();
+            }
             return;
         });
     }
@@ -251,6 +263,12 @@ $(document).ready(function () {
                 localStorage.removeItem('podiscount');
                 localStorage.setItem('podiscount', pod);
                 loadItems();
+                if(mode != "received"){
+                    $(".rec_con").hide();
+                }
+                else {
+                    $(".edit_con").hide();
+                }
                 return;
             } else {
                 $(this).val(old_podiscount);
@@ -272,6 +290,12 @@ $(document).ready(function () {
         } else {
             localStorage.setItem('poitems', JSON.stringify(poitems));
             loadItems();
+            if(mode != "received"){
+                $(".rec_con").hide();
+            }
+            else {
+                $(".edit_con").hide();
+            }
             return;
         }
     });
@@ -352,8 +376,18 @@ $(document).ready(function () {
             });
         }
 
+        let unit_id = 0;
+        let unit_name = "";
+        if(item.units.length > 0){
+            unit_id = item.units[0].id;
+            unit_name = item.units[0].name;
+        }
+        else {
+            unit_id = item.units.id;
+            unit_name = item.units.name;
+        }
         uopt = $('<select id="punit" name="punit" class="form-control select" />');
-        $('<option />', { value: item.units.id, text: item.units.name, selected: true }).appendTo(uopt);
+        $('<option />', { value: unit_id, text: unit_name, selected: true }).appendTo(uopt);
         // $.each(item.units, function () {
         //     if (this.id == item.row.unit) {
         //         $('<option />', { value: this.id, text: this.name, selected: true }).appendTo(uopt);
@@ -518,6 +552,12 @@ $(document).ready(function () {
         localStorage.setItem('poitems', JSON.stringify(poitems));
         $('#prModal').modal('hide');
         loadItems();
+        if(mode != "received"){
+            $(".rec_con").hide();
+        }
+        else {
+            $(".edit_con").hide();
+        }
         return;
     });
 
@@ -561,6 +601,9 @@ $(document).ready(function () {
             if(mode != "received"){
                 $(".rec_con").hide();
             }
+            else {
+                $(".edit_con").hide();
+            }
         });
 
     var old_received;
@@ -594,6 +637,12 @@ $(document).ready(function () {
             poitems[item_id].row.new_received = new_received;
             localStorage.setItem('poitems', JSON.stringify(poitems));
             loadItems();
+            if(mode != "received"){
+                $(".rec_con").hide();
+            }
+            else {
+                $(".edit_con").hide();
+            }
             $(".rquantity").prop("readonly", true)
         });
 
@@ -617,6 +666,12 @@ $(document).ready(function () {
             poitems[item_id].row.cost = new_cost;
             localStorage.setItem('poitems', JSON.stringify(poitems));
             loadItems();
+            if(mode != "received"){
+                $(".rec_con").hide();
+            }
+            else {
+                $(".edit_con").hide();
+            }
         });
 
     $(document).on('click', '#removeReadonly', function () {
@@ -778,7 +833,7 @@ function loadItems() {
                 (sel_opt != '' ? ' (' + sel_opt + ')' : '') +
                 ' <span class="label label-default">' +
                 item_supplier_part_no +
-                '</span></span> <i class="pull-right fa fa-edit tip edit" id="' +
+                '</span></span> <i class="pull-right fa fa-edit tip edit edit_con" id="' +
                 row_no +
                 '" data-item="' +
                 item_id +
@@ -1005,6 +1060,12 @@ function add_purchase_item(item) {
     poitems[item_id].order = new Date().getTime();
     localStorage.setItem('poitems', JSON.stringify(poitems));
     loadItems();
+    if(mode != "received"){
+        $(".rec_con").hide();
+    }
+    else {
+        $(".edit_con").hide();
+    }
     return true;
 }
 

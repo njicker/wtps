@@ -168,4 +168,83 @@ class Db_model extends CI_Model
         }
         return false;
     }
+
+    public function getLatestDelivery($start_date, $end_date)
+    {
+        // $this->db
+        //     ->select('date(deliveries.date), delivery_item.product_code, delivery_item.product_desc,
+        //     sum(delivery_item.qty) as qty')
+        //     ->join('delivery_item', 'deliveries.id = delivery_item.delivery_id', 'inner');
+        $where = "";
+        if($start_date != "" && $end_date != ""){
+            // $this->db->where('deliveries.date >=', $start_date)->where('deliveries.date <=', $end_date);
+            $where = "AND deliveries.date between '$start_date' and '$end_date'";
+        }
+        else if($start_date != ""){
+            // $this->db->where('date(deliveries.date)', $start_date);
+            $where = "AND date(deliveries.date) = '$start_date'";
+        }
+        else if($end_date != ""){
+            // $this->db->where('date(deliveries.date)', $end_date);
+            $where = "AND date(deliveries.date) = '$end_date'";
+        }
+        $que = "select date(deliveries.date) as date, delivery_item.product_code, delivery_item.product_desc,
+        sum(delivery_item.qty) as qty
+        from sma_deliveries as deliveries
+        inner join sma_delivery_item as delivery_item on deliveries.id = delivery_item.delivery_id
+        where 1=1 $where
+        group by date(deliveries.date), delivery_item.product_code
+        order by deliveries.date";
+        // $this->db->group_by(array('date(deliveries.date)', 'delivery_item.product_code'));
+        // $this->db->order_by('deliveries.date');
+        // $q = $this->db->get('deliveries');
+        $q = $this->db->query($que);
+        if ($q->num_rows() > 0) {
+            $all = array();
+            $data_prod = array();
+            $prod = array();
+            $data = [
+                'all' => [],
+                'date' => [],
+            ];
+            foreach (($q->result()) as $row) {
+                // var_dump($row);exit;
+                // $row->product_full = $row->product_code." - ".$row->product_name;
+                // $row->salesman = $row->first_name." ".$row->last_name;
+                // $row->subtotal = $row->quantity * $row->net_unit_price;
+                // $row->net_unit_price = number_format($row->net_unit_price, 0, ",", ".");
+                $row->date = date("d-M-Y", strtotime($row->date));
+                if(!isset($data_prod[$row->product_code."#".$row->date])){
+                    $data_prod[$row->product_code."#".$row->date] = 0;
+                }
+                $data_prod[$row->product_code."#".$row->date] = +$row->qty;
+                if(!in_array($row->date, $data['date'])){
+                    $data['date'][] = $row->date;
+                    $all[$row->date] = 0;
+                }
+                $all[$row->date] += $row->qty;
+                if(!in_array($row->product_code, $prod)){
+                    $prod[] = $row->product_code;
+                }
+                // $data[] = $row;
+            }
+            // var_dump($prod);exit;
+            foreach($all as $ida => $a){
+                $data['all'][] = $a;
+                foreach($prod as $prd){
+                    $qty = 0;
+                    if(!isset($data[$prd])){
+                        $data[$prd] = array();
+                    }
+                    if(isset($data_prod[$prd."#".$ida])){
+                        $qty = $data_prod[$prd."#".$ida];
+                    }
+                    $data[$prd][] = $qty;
+                }
+            }
+            // var_dump($data);exit;
+            return $data;
+        }
+        return false;
+    }
 }
