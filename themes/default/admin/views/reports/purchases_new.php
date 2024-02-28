@@ -176,6 +176,9 @@
                 },
                 slice: {
                     rows: rowPivot[type],
+                    expands: {
+                        expandAll : true
+                    },
                     measures: [
                         {
                             uniqueName: "quantity",

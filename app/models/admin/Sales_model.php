@@ -675,6 +675,7 @@ class Sales_model extends CI_Model
             $this->db->where('hide_pos !=', 1);
         }
         $this->db->where('type', 'combo');
+        $this->db->where('flag_delete', '');
         $this->db->limit($limit);
         $q = $this->db->get('products');
         if ($q->num_rows() > 0) {

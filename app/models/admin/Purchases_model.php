@@ -513,6 +513,7 @@ class Purchases_model extends CI_Model
         if($cf2 != ""){
             $this->db->where('cf2', $cf2);
         }
+        $this->db->where('flag_delete', '');
         $this->db->where("(name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR supplier1_part_no LIKE '%" . $term . "%' OR supplier2_part_no LIKE '%" . $term . "%' OR supplier3_part_no LIKE '%" . $term . "%' OR supplier4_part_no LIKE '%" . $term . "%' OR supplier5_part_no LIKE '%" . $term . "%' OR  concat(name, ' (', code, ')') LIKE '%" . $term . "%')");
         $this->db->limit($limit);
         $q = $this->db->get('products');

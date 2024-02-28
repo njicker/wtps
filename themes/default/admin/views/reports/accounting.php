@@ -123,6 +123,9 @@
                 },
                 slice: {
                     rows: rowPivot.general,
+                    expands: {
+                        expandAll : true
+                    },
                     measures: [
                         {
                             uniqueName: "amount",
