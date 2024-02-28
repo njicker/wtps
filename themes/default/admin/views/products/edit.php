@@ -236,7 +236,7 @@ if (!empty($variants)) {
                         </div>
                     <?php
                         } ?>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('alert_quantity', 'alert_quantity') ?>
                         <div
                             class="input-group"> <?= form_input('alert_quantity', (isset($_POST['alert_quantity']) ? $_POST['alert_quantity'] : ($product ? $this->sma->formatDecimal($product->alert_quantity) : '')), 'class="form-control tip" id="alert_quantity"') ?>

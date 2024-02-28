@@ -1522,6 +1522,7 @@ class Products extends MY_Controller
     {
         $this->sma->checkPermissions('index', true);
         $supplier = $this->input->get('supplier') ? $this->input->get('supplier') : null;
+        $status = !isset($_GET['status']) ? "" : $_GET['status'];
 
         if ((!$this->Owner || !$this->Admin) && !$warehouse_id) {
             $user         = $this->site->getUser();
@@ -1555,7 +1556,7 @@ class Products extends MY_Controller
         $this->load->library('datatables');
         if ($warehouse_id) {
             $this->datatables
-            ->select($this->db->dbprefix('products') . ".id as productid, {$this->db->dbprefix('products')}.image as image, {$this->db->dbprefix('products')}.code as code, {$this->db->dbprefix('products')}.name as name, {$this->db->dbprefix('brands')}.name as brand, {$this->db->dbprefix('categories')}.name as cname, cost as cost, price as price, COALESCE(wp.quantity, 0) as quantity, {$this->db->dbprefix('units')}.code as unit, wp.rack as rack, alert_quantity", false)
+            ->select($this->db->dbprefix('products') . ".id as productid, {$this->db->dbprefix('products')}.image as image, {$this->db->dbprefix('products')}.code as code, {$this->db->dbprefix('products')}.name as name, {$this->db->dbprefix('categories')}.name as cname, cost as cost, price as price, COALESCE(wp.quantity, 0) as quantity, {$this->db->dbprefix('units')}.code as unit, wp.rack as rack, alert_quantity", false)
             ->from('products');
             if ($this->Settings->display_all_products) {
                 $this->datatables->join("( SELECT product_id, quantity, rack from {$this->db->dbprefix('warehouses_products')} WHERE warehouse_id = {$warehouse_id}) wp", 'products.id=wp.product_id', 'left');
@@ -1570,12 +1571,22 @@ class Products extends MY_Controller
         // ->group_by("products.id");
         } else {
             $this->datatables
-                ->select($this->db->dbprefix('products') . ".id as productid, {$this->db->dbprefix('products')}.image as image, {$this->db->dbprefix('products')}.code as code, {$this->db->dbprefix('products')}.name as name, {$this->db->dbprefix('brands')}.name as brand, {$this->db->dbprefix('categories')}.name as cname, cost as cost, price as price, COALESCE(quantity, 0) as quantity, {$this->db->dbprefix('units')}.code as unit, '' as rack, alert_quantity", false)
+                ->select($this->db->dbprefix('products') . ".id as productid, {$this->db->dbprefix('products')}.image as image, {$this->db->dbprefix('products')}.code as code, {$this->db->dbprefix('products')}.name as name, {$this->db->dbprefix('categories')}.name as cname, cost as cost, price as price, COALESCE(quantity, 0) as quantity, {$this->db->dbprefix('units')}.code as unit, '' as rack, alert_quantity", false)
                 ->from('products')
                 ->join('categories', 'products.category_id=categories.id', 'left')
                 ->join('units', 'products.unit=units.id', 'left')
                 ->join('brands', 'products.brand=brands.id', 'left')
                 ->group_by('products.id');
+        }
+        if($status == "non_active"){
+            $this->datatables->group_start()
+                            ->where('flag_delete', 'X')
+                            ->group_end();
+        }
+        else if($status == ""){
+            $this->datatables->group_start()
+                            ->where('flag_delete', '')
+                            ->group_end();
         }
         if (!$this->Owner && !$this->Admin) {
             if (!$this->session->userdata('show_cost')) {
@@ -1585,15 +1596,15 @@ class Products extends MY_Controller
                 $this->datatables->unset_column('price');
             }
         }
-        if ($supplier) {
-            $this->datatables->group_start()
-            ->where('supplier1', $supplier)
-            ->or_where('supplier2', $supplier)
-            ->or_where('supplier3', $supplier)
-            ->or_where('supplier4', $supplier)
-            ->or_where('supplier5', $supplier)
-            ->group_end();
-        }
+        // if ($supplier) {
+        //     $this->datatables->group_start()
+        //     ->where('supplier1', $supplier)
+        //     ->or_where('supplier2', $supplier)
+        //     ->or_where('supplier3', $supplier)
+        //     ->or_where('supplier4', $supplier)
+        //     ->or_where('supplier5', $supplier)
+        //     ->group_end();
+        // }
         $this->datatables->add_column('Actions', $action, 'productid, image, code, name');
         echo $this->datatables->generate();
     }

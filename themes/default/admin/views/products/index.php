@@ -9,13 +9,16 @@
         text-align: right;
     }
     <?php
-} if ($Owner || $Admin || $this->session->userdata('show_price')) {
-        ?>
+    } 
+    if ($Owner || $Admin || $this->session->userdata('show_price')) {
+    ?>
     #PRData td:nth-child(8) {
         text-align: right;
     }
     <?php
-    } ?>
+    } 
+    $status = isset($_GET['status']) ? $_GET['status'] : "";
+    ?>
 </style>
 <script>
     var oTable;
@@ -25,7 +28,7 @@
             "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "<?= lang('all') ?>"]],
             "iDisplayLength": <?= $Settings->rows_per_page ?>,
             'bProcessing': true, 'bServerSide': true,
-            'sAjaxSource': '<?= admin_url('products/getProducts' . ($warehouse_id ? '/' . $warehouse_id : '') . ($supplier ? '?supplier=' . $supplier->id : '')) ?>',
+            'sAjaxSource': '<?= admin_url('products/getProducts' . ($warehouse_id ? '/' . $warehouse_id : '') . ($status != "" ? "?status=".$status : "")) ?>',
             'fnServerData': function (sSource, aoData, fnCallback) {
                 aoData.push({
                     "name": "<?= $this->security->get_csrf_token_name() ?>",
@@ -41,7 +44,7 @@
                 return nRow;
             },
             "aoColumns": [
-                {"bSortable": false, "mRender": checkbox}, {"bSortable": false,"mRender": img_hl}, null, null, null, null, <?php if ($Owner || $Admin) {
+                {"bSortable": false, "mRender": checkbox}, {"bSortable": false,"mRender": img_hl}, null, null, null, <?php if ($Owner || $Admin) {
         echo '{"mRender": currencyFormat}, {"mRender": currencyFormat},';
     } else {
         if ($this->session->userdata('show_cost')) {
@@ -59,12 +62,12 @@
         }).fnSetFilteringDelay().dtFilter([
             {column_number: 2, filter_default_label: "[<?=lang('code');?>]", filter_type: "text", data: []},
             {column_number: 3, filter_default_label: "[<?=lang('name');?>]", filter_type: "text", data: []},
-            {column_number: 4, filter_default_label: "[<?=lang('brand');?>]", filter_type: "text", data: []},
-            {column_number: 5, filter_default_label: "[<?=lang('category');?>]", filter_type: "text", data: []},
-            <?php $col = 5;
+            // {column_number: 4, filter_default_label: "[<?=lang('brand');?>]", filter_type: "text", data: []},
+            {column_number: 4, filter_default_label: "[<?=lang('category');?>]", filter_type: "text", data: []},
+            <?php $col = 4;
             if ($Owner || $Admin) {
-                echo '{column_number : 6, filter_default_label: "[' . lang('cost') . ']", filter_type: "text", data: [] },';
-                echo '{column_number : 7, filter_default_label: "[' . lang('price') . ']", filter_type: "text", data: [] },';
+                echo '{column_number : 5, filter_default_label: "[' . lang('cost') . ']", filter_type: "text", data: [] },';
+                echo '{column_number : 6, filter_default_label: "[' . lang('price') . ']", filter_type: "text", data: [] },';
                 $col += 2;
             } else {
                 if ($this->session->userdata('show_cost')) {
@@ -149,7 +152,7 @@
                 </li>
                 <?php if (!empty($warehouses)) {
                 ?>
-                    <li class="dropdown">
+                    <!-- <li class="dropdown">
                         <a data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="icon fa fa-building-o tip" data-placement="left" title="<?= lang('warehouses') ?>"></i></a>
                         <ul class="dropdown-menu pull-right tasks-menus" role="menu" aria-labelledby="dLabel">
                             <li><a href="<?= admin_url('products') ?>"><i class="fa fa-building-o"></i> <?= lang('all_warehouses') ?></a></li>
@@ -159,9 +162,18 @@
                                 echo '<li><a href="' . admin_url('products/' . $warehouse->id) . '"><i class="fa fa-building"></i>' . $warehouse->name . '</a></li>';
                             } ?>
                         </ul>
-                    </li>
+                    </li> -->
                 <?php
-            } ?>
+                } ?>
+                <li class="dropdown">
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#"><i class="icon fa fa-building-o tip" data-placement="left" title="Status"></i></a>
+                    <ul class="dropdown-menu pull-right tasks-menus" role="menu" aria-labelledby="dLabel">
+                        <li <?= $status == "all" ? 'class="active"' : '' ?>><a href="<?= admin_url('products') . "?status=all" ?>"><i class="fa fa-building-o"></i> Semua</a></li>
+                        <li class="divider"></li>
+                        <li <?= $status == "" ? 'class="active"' : '' ?>><a href="<?= admin_url('products') ?>"><i class="fa fa-building-o"></i> Aktif</a></li>
+                        <li <?= $status == "non_active" ? 'class="active"' : '' ?>><a href="<?= admin_url('products') . "?status=non_active" ?>"><i class="fa fa-building-o"></i> Tidak Aktif</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
@@ -180,7 +192,7 @@
                             <th style="min-width:40px; width: 40px; text-align: center;"><?php echo $this->lang->line('image'); ?></th>
                             <th><?= lang('code') ?></th>
                             <th><?= lang('name') ?></th>
-                            <th><?= lang('brand') ?></th>
+                            <!-- <th><?= lang('brand') ?></th> -->
                             <th><?= lang('category') ?></th>
                             <?php
                             if ($Owner || $Admin) {
@@ -204,7 +216,7 @@
                         </thead>
                         <tbody>
                         <tr>
-                            <td colspan="11" class="dataTables_empty"><?= lang('loading_data_from_server'); ?></td>
+                            <td colspan="10" class="dataTables_empty"><?= lang('loading_data_from_server'); ?></td>
                         </tr>
                         </tbody>
 
@@ -214,7 +226,7 @@
                                 <input class="checkbox checkft" type="checkbox" name="check"/>
                             </th>
                             <th style="min-width:40px; width: 40px; text-align: center;"><?php echo $this->lang->line('image'); ?></th>
-                            <th></th>
+                            <!-- <th></th> -->
                             <th></th>
                             <th></th>
                             <th></th>

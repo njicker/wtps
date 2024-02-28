@@ -258,11 +258,14 @@ class Products_model extends CI_Model
     public function deleteProduct($id)
     {
         $this->site->log('Product', ['model' => $this->getProductByID($id)]);
-        if ($this->db->delete('products', ['id' => $id]) && $this->db->delete('warehouses_products', ['product_id' => $id])) {
-            $this->db->delete('warehouses_products_variants', ['product_id' => $id]);
-            $this->db->delete('product_variants', ['product_id' => $id]);
-            $this->db->delete('product_photos', ['product_id' => $id]);
-            $this->db->delete('product_prices', ['product_id' => $id]);
+        // if ($this->db->delete('products', ['id' => $id]) && $this->db->delete('warehouses_products', ['product_id' => $id])) {
+        //     $this->db->delete('warehouses_products_variants', ['product_id' => $id]);
+        //     $this->db->delete('product_variants', ['product_id' => $id]);
+        //     $this->db->delete('product_photos', ['product_id' => $id]);
+        //     $this->db->delete('product_prices', ['product_id' => $id]);
+        //     return true;
+        // }
+        if($this->db->update('products', ['flag_delete' => 'X'], ['id' => $id])){
             return true;
         }
         return false;

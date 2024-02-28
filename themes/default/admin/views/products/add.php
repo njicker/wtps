@@ -240,7 +240,7 @@ if (!empty($variants)) {
                         </div>
                     <?php
                         } ?>
-                    <div class="form-group standard">
+                    <div class="form-group all">
                         <?= lang('alert_quantity', 'alert_quantity') ?>
                         <div
                             class="input-group"> <?= form_input('alert_quantity', ($_POST['alert_quantity'] ?? ($product ? $this->sma->formatQuantityDecimal($product->alert_quantity) : '')), 'class="form-control tip" id="alert_quantity"') ?>
@@ -455,7 +455,7 @@ if (!empty($variants)) {
                             <div class="form-group all">
                                 <?= lang('pcf1', 'cf1') ?>
                                 <?php
-                                    $dt[''] = '';
+                                    $dt[''] = '-';
                                     foreach($cf1 as $cf){
                                         $dt[$cf->code] = $cf->descr;
                                     }
@@ -469,7 +469,7 @@ if (!empty($variants)) {
                             <div class="form-group all">
                                 <?= lang('pcf2', 'cf2') ?>
                                 <?php
-                                    $dt2[''] = '';
+                                    $dt2[''] = '-';
                                     foreach($cf2 as $cf){
                                         $dt2[$cf->code] = $cf->descr;
                                     }
