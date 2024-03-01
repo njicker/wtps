@@ -32,6 +32,7 @@ class Purchases_model extends CI_Model
             $pur = $this->getPurchaseByID($data['purchase_id']);
             $dataAcc = array();
             $method = $this->site->getAccountByPaidMethod($data['paid_by']);
+            // Payment
             $type_amount = "credit";
             $amount = $data['amount'];
             $type = "PAY";
@@ -49,6 +50,12 @@ class Purchases_model extends CI_Model
                 'note_query' => 'field=amount',
                 "created_by" => $this->session->userdata('user_id'),
             ];
+            $dataAcc[] = $acc;
+            // Hutang Dagang
+            $acc['no_account'] = "2130101";
+            $acc['type'] = "PO";
+            $acc['amount'] = $amount;
+            $acc['type_amount'] = "debit";
             $dataAcc[] = $acc;
             $this->site->postAccounting($dataAcc, false);
 
@@ -148,56 +155,56 @@ class Purchases_model extends CI_Model
             }
             // Referensi
             $this->site->updateReff($type, $data['date']);
-            // Accounting
-            $no_account = "2130101";
-            $type_amount = "debit";
-            $amount = $data['grand_total'];
-            $acc = [
-                'no_source' => $data['reference_no'],
-                'doc_date' => date("Y-m-d", strtotime($data['date'])),
-                'type_source' => $type,
-                'loc_source' => 'header',
-                'id_source' => $purchase_id,
-                'division' => $data['division'],
-                'no_account' => $no_account,
-                'type_amount' => $type_amount,
-                'amount' => $amount,
-                'note' => 'Hutang Dagang',
-                'note_query' => 'field=grand_total',
-                "created_by" => $this->session->userdata('user_id'),
-            ];
-            $dataAcc[] = $acc;
+            // // Accounting
+            // $no_account = "2130101";
+            // $type_amount = "debit";
+            // $amount = $data['grand_total'];
+            // $acc = [
+            //     'no_source' => $data['reference_no'],
+            //     'doc_date' => date("Y-m-d", strtotime($data['date'])),
+            //     'type_source' => $type,
+            //     'loc_source' => 'header',
+            //     'id_source' => $purchase_id,
+            //     'division' => $data['division'],
+            //     'no_account' => $no_account,
+            //     'type_amount' => $type_amount,
+            //     'amount' => $amount,
+            //     'note' => 'Hutang Dagang',
+            //     'note_query' => 'field=grand_total',
+            //     "created_by" => $this->session->userdata('user_id'),
+            // ];
+            // $dataAcc[] = $acc;
 
-            if($data['order_tax'] > 0){
-                $no_account = "1170700";
-                $type_amount = "debit";
-                $amount = $data['order_tax'];
-
-                $acc['loc_source'] = 'header';
-                $acc['id_source'] = $purchase_id;
-                $acc['no_account'] = $no_account;
-                $acc['type_amount'] = $type_amount;
-                $acc['amount'] = $amount;
-                $acc['note'] = "Pajak Pembelian";
-                $acc['note_query'] = "field=order_tax";
-                $dataAcc[] = $acc;
-            }
-            // // Order Discount
-            // if(isset($data['order_discount']) && $data['order_discount'] > 0){
+            // if($data['order_tax'] > 0){
             //     $no_account = "1170700";
             //     $type_amount = "debit";
-            //     $amount = $data['order_discount'];
+            //     $amount = $data['order_tax'];
 
             //     $acc['loc_source'] = 'header';
             //     $acc['id_source'] = $purchase_id;
             //     $acc['no_account'] = $no_account;
             //     $acc['type_amount'] = $type_amount;
             //     $acc['amount'] = $amount;
-            //     $acc['note'] = "Diskon Pembelian";
-            //     $acc['note_query'] = "field=order_discount";
+            //     $acc['note'] = "Pajak Pembelian";
+            //     $acc['note_query'] = "field=order_tax";
             //     $dataAcc[] = $acc;
             // }
-            $this->site->postAccounting($dataAcc, null);
+            // // // Order Discount
+            // // if(isset($data['order_discount']) && $data['order_discount'] > 0){
+            // //     $no_account = "1170700";
+            // //     $type_amount = "debit";
+            // //     $amount = $data['order_discount'];
+
+            // //     $acc['loc_source'] = 'header';
+            // //     $acc['id_source'] = $purchase_id;
+            // //     $acc['no_account'] = $no_account;
+            // //     $acc['type_amount'] = $type_amount;
+            // //     $acc['amount'] = $amount;
+            // //     $acc['note'] = "Diskon Pembelian";
+            // //     $acc['note_query'] = "field=order_discount";
+            // //     $dataAcc[] = $acc;
+            // // }
+            // $this->site->postAccounting($dataAcc, null);
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === false) {
@@ -287,9 +294,10 @@ class Purchases_model extends CI_Model
             $this->site->syncPurchasePayments($opay->purchase_id);
 
             // Accounting
-            $edit['type_source'] = 'PAY';
-            $edit['loc_source'] = 'header';
-            $edit['id_source'] = $id;
+            // $edit['type_source'] = 'PAY';
+            // $edit['loc_source'] = 'header';
+            // $edit['id_source'] = $id;
+            $edit['note'] = $opay->reference_no;
             $dataAcc = array();
             $this->site->postAccounting($dataAcc, $edit);
 
@@ -762,6 +770,7 @@ class Purchases_model extends CI_Model
         $type = 'PO';
         $opurchase = $this->getPurchaseByID($id);
         $oitems    = $this->getAllPurchaseItems($id);
+        $tax_rate  = $this->getTaxRateByID($opurchase->order_tax_id);
         $receive_date = $data['receive_date'];
         unset($data['receive_date']);
         $supporting_reff_doc = $data['supporting_reff_doc'];
@@ -773,6 +782,8 @@ class Purchases_model extends CI_Model
         }
         if ($this->db->update('purchases', $data, ['id' => $id]) && $this->db->delete('purchase_items', ['purchase_id' => $id])) {
             $dataAcc = array();
+            $total_amount = 0;
+            $tax_amount = 0;
             $editAcc = false;
             $purchase_id = $id;
             foreach ($items as $item) {
@@ -828,6 +839,11 @@ class Purchases_model extends CI_Model
                         "created_by" => $this->session->userdata('user_id'),
                     ];
                     $dataAcc[] = $acc;
+                    $total_amount += $amount;
+                    // tax
+                    if($tax_rate->rate > 0){
+                        $tax_amount += ($amount * ($tax_rate->rate / 100));
+                    }
                 }
                 // else { // edit purchase
                 //     $editAcc = true;
@@ -850,11 +866,11 @@ class Purchases_model extends CI_Model
             }
             $this->site->syncPurchasePayments($id);
             //Accounting
-            if($mode != "received"){
-                $editAcc = true;
+            if($mode == "received"){
+                // $editAcc = true;
                 $no_account = "2130101";
-                $type_amount = "debit";
-                $amount = $data['grand_total'];
+                $type_amount = "credit";
+                $amount = $total_amount;
                 $acc = [
                     'no_source' => $data['reference_no'],
                     'doc_date' => date("Y-m-d", strtotime($data['date'])),
@@ -865,11 +881,18 @@ class Purchases_model extends CI_Model
                     'no_account' => $no_account,
                     'type_amount' => $type_amount,
                     'amount' => $amount,
-                    'note' => 'Hutang Dagang',
+                    'note' => $supporting_reff_doc,
                     'note_query' => 'field=grand_total',
                     "created_by" => $this->session->userdata('user_id'),
                 ];
                 $dataAcc[] = $acc;
+                // Pajak Pembelian
+                if($tax_amount > 0){
+                    $acc['no_account'] = "1170700";
+                    $acc['type_amount'] = "debit";
+                    $acc['amount'] = $tax_amount;
+                    $dataAcc[] = $acc;
+                }
             }
             $edit = false;
             if($editAcc){
@@ -951,7 +974,7 @@ class Purchases_model extends CI_Model
                 $this->db->update('item_movement', ['flag_delete' => 'X'], ['id' => $itm->id]);
             }
             $edit['type_source'] = 'PO';
-            $edit['no_account'] = '1150200';
+            // $edit['no_account'] = '1150200';
             $edit['note'] = $itm->supporting_reff_doc;
             // var_dump($edit);exit;
             $dataAcc = array();

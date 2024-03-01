@@ -530,7 +530,7 @@ class Sales extends MY_Controller
                     $photo                   = $this->upload->file_name;
                     $dlDetails['attachment'] = $photo;
                 }
-
+                // var_dump($dlDetails);exit;
                 $ins = $this->sales_model->addDelivery($dlDetails, $dtl);
             } elseif ($this->input->post('add_delivery')) {
                 if ($sale->shop) {
@@ -785,6 +785,11 @@ class Sales extends MY_Controller
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
+        }
+        $hdr = $this->sales_model->getDeliveryByID($id);
+        if($hdr->invoice_id){
+            $this->sma->send_json(['error' => 1, 'msg' => "Tidak bisa hapus delivery karena sudah ada invoice"]);
+            exit;
         }
 
         if ($this->sales_model->deleteDelivery($id)) {
@@ -1585,6 +1590,7 @@ class Sales extends MY_Controller
         <li>' . $detail_link . '</li>
         <li>' . $edit_link . '</li>
         <li>' . $pdf_link . '</li>
+        <li>' . $delete_link . '</li>
     </ul>
 </div></div>';
 

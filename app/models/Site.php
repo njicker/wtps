@@ -668,7 +668,10 @@ class Site extends CI_Model
         $orderby = empty($this->Settings->accounting_method) ? 'asc' : 'desc';
         // $this->db->select('id, purchase_id, quantity, quantity_balance, net_unit_cost, unit_cost, item_tax, base_unit_cost');
         $this->db->select('*');
-        $this->db->where('product_id', $product_id)->where('warehouse_id', $warehouse_id)->where('quantity_balance !=', 0);
+        $this->db->where('product_id', $product_id);
+        if($warehouse_id){
+            $this->db->where('warehouse_id', $warehouse_id)->where('quantity_balance !=', 0);
+        }
         if($product_batch != 'XXXX'){
             // var_dump($product_batch);exit;
             $this->db->where('product_batch', $product_batch);

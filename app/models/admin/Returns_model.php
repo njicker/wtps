@@ -12,6 +12,7 @@ class Returns_model extends CI_Model
     public function addReturn($data = [], $items = [])
     {
         $this->db->trans_start();
+        $type = 'RET';
         if ($this->db->insert('returns', $data)) {
             $return_id = $this->db->insert_id();
             if ($this->site->getReference('re') == $data['reference_no']) {
@@ -83,38 +84,102 @@ class Returns_model extends CI_Model
                         ];
                         $this->site->submitMovementItem($item_movement, false);
 
-                        $no_account = "1150100";
-                        $type_amount = "debit";
-                        $amount = $dtl["quantity"] * $dtl['net_unit_price'];
-                        $acc = [
-                            'no_source' => $data['reference_no'],
-                            'doc_date' => date("Y-m-d", strtotime($data['date'])),
-                            'type_source' => 'RET',
-                            'loc_source' => 'detail',
-                            'id_source' => $dtl_id,
-                            'division' => $data['division'],
-                            'no_account' => $no_account,
-                            'type_amount' => $type_amount,
-                            'amount' => $amount,
-                            'note' => $dtl['product_code']." - ".$dtl['product_name'],
-                            'note_query' => 'calc=quantity*net_unit_price',
-                            "created_by" => $this->session->userdata('user_id'),
-                        ];
-                        $dataAcc[] = $acc;
-                        if($data['item_discount'] > 0){
-                            $no_account = "6190102";
-                            $type_amount = "credit";
-                            $amount = $data['item_discount'];
-
-                            $acc['no_account'] = $no_account;
-                            $acc['type_amount'] = $type_amount;
-                            $acc['amount'] = $amount;
-                            $acc['note_query'] = 'field=item_discount';
+                        $prod_details = $this->site->getProductByID($dtl->product_id);
+                        if($prod_details->cf2 == "gimmick"){
+                            $no_account = "1150200";
+                            $type_amount = "debit";
+                            $amount = $dtl['qty'] * $dtl['real_unit_price'];
+                            $division = $data['division'];
+                            $acc = [
+                                'no_source' => $data['reference_no'],
+                                'doc_date' => date("Y-m-d", strtotime($data['date'])),
+                                'type_source' => $type,
+                                'loc_source' => 'detail',
+                                'id_source' => $dtl_id,
+                                'division' => $division,
+                                'no_account' => $no_account,
+                                'type_amount' => $type_amount,
+                                'amount' => $amount,
+                                'note' => $dtl['product_code']." - ".$dtl['product_desc'],
+                                'note_query' => 'calc=qty*real_unit_cost',
+                                "created_by" => $this->session->userdata('user_id'),
+                            ];
+                            $dataAcc[] = $acc;
+                            // Diskon
+                            $acc['no_account'] = "4610300";
+                            $acc['type_amount'] = "debit";
+                            $acc['amount'] = $dtls['qty'] * $dtls['product_discount'];
                             $dataAcc[] = $acc;
                         }
+                        else{
+                            $product_base = $this->site->getHargaModal($dtl['product_id'], $dtl['product_batch']);
+                            $no_account = "1150100";
+                            $type_amount = "debit";
+                            $amount = $dtl["quantity"] * $product_base->real_unit_cost;
+                            $acc = [
+                                'no_source' => $data['reference_no'],
+                                'doc_date' => date("Y-m-d", strtotime($data['date'])),
+                                'type_source' => $type,
+                                'loc_source' => 'detail',
+                                'id_source' => $dtl_id,
+                                'division' => $data['division'],
+                                'no_account' => $no_account,
+                                'type_amount' => $type_amount,
+                                'amount' => $amount,
+                                'note' => $dtl['product_code']." - ".$dtl['product_name'],
+                                'note_query' => 'calc=quantity*real_unit_cost',
+                                "created_by" => $this->session->userdata('user_id'),
+                            ];
+                            $dataAcc[] = $acc;
+                            // Barang jadi
+                            $acc['no_account'] = "1150100";
+                            $acc['type_amount'] = "debit";
+                            $dataAcc[] = $acc;
+                        }
+                        // if($data['item_discount'] > 0){
+                        //     $no_account = "6190102";
+                        //     $type_amount = "credit";
+                        //     $amount = $data['item_discount'];
+
+                        //     $acc['no_account'] = $no_account;
+                        //     $acc['type_amount'] = $type_amount;
+                        //     $acc['amount'] = $amount;
+                        //     $acc['note_query'] = 'field=item_discount';
+                        //     $dataAcc[] = $acc;
+                        // }
                     }
                 }
 
+                // Retur Penjualan
+                $no_account = "4110100";
+                $type_amount = "debit";
+                $amount = $data['total'];
+                $division = $data['division'];
+                $acc = [
+                    'no_source' => $data['reference_no'],
+                    'doc_date' => date("Y-m-d", strtotime($data['date'])),
+                    'type_source' => $type,
+                    'loc_source' => 'header',
+                    'id_source' => $return_id,
+                    'division' => $division,
+                    'no_account' => $no_account,
+                    'type_amount' => $type_amount,
+                    'amount' => $amount,
+                    'note' => 'Retur Penjualan',
+                    'note_query' => 'calc=qty*real_unit_cost',
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $dataAcc[] = $acc;
+                if($data['total_tax'] > 0){
+                    $acc['no_account'] = "2180700";
+                    $acc['type_amount'] = "debit";
+                    $acc['amount'] = $data['total_tax'];
+                    $dataAcc[] = $acc;
+                }
+                $acc['no_account'] = "1130100";
+                $acc['type_amount'] = "credit";
+                $acc['amount'] = $data['grand_total'];
+                $dataAcc[] = $acc;
                 $this->site->postAccounting($dataAcc, false);
             }
 
@@ -136,8 +201,6 @@ class Returns_model extends CI_Model
             //     // }
             // }
             $this->sma->update_award_points($data['grand_total'], $data['customer_id'], $data['created_by'], true);
-
-            $type = 'RET';
             $this->site->updateReff($type, $data['date']);
         }
         else {

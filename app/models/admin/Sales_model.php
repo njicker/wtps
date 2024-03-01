@@ -47,26 +47,60 @@ class Sales_model extends CI_Model
                     "product_batch" => $dtls['product_batch']
                 ];
                 $sale = $this->getInvoiceByID($data['sale_id']);
-                // $product_base = $this->site->getHargaModal($dtl['product_id'], $dtl['product_batch']);
-                $no_account = "1159900";
-                $type_amount = "debit";
-                $amount = $dtls['qty'] * ($dtls['unit_price'] - $dtls['product_discount']);
-                $division = $sale->division;
-                $acc = [
-                    'no_source' => $data['do_reference_no'],
-                    'doc_date' => date("Y-m-d", strtotime($data['date'])),
-                    'type_source' => $type,
-                    'loc_source' => 'detail',
-                    'id_source' => $dtls['delivery_id']."-".$dtls['seq'],
-                    'division' => $division,
-                    'no_account' => $no_account,
-                    'type_amount' => $type_amount,
-                    'amount' => $amount,
-                    'note' => $dtls['product_code']." - ".$dtls['product_desc'],
-                    'note_query' => 'calc=qty*(unit_price-product_discount)',
-                    "created_by" => $this->session->userdata('user_id'),
-                ];
-                $dataAcc[] = $acc;
+                // cek jika barang gimmick
+                $prod_details = $this->site->getProductByID($dtls->product_id);
+                if($prod_details->cf2 == "gimmick"){
+                    $no_account = "1150200";
+                    $type_amount = "credit";
+                    $amount = $dtls['qty'] * $dtls['unit_price'];
+                    $division = $sale->division;
+                    $acc = [
+                        'no_source' => $data['do_reference_no'],
+                        'doc_date' => date("Y-m-d", strtotime($data['date'])),
+                        'type_source' => $type,
+                        'loc_source' => 'detail',
+                        'id_source' => $dtls['delivery_id']."-".$dtls['seq'],
+                        'division' => $division,
+                        'no_account' => $no_account,
+                        'type_amount' => $type_amount,
+                        'amount' => $amount,
+                        'note' => $dtls['product_code']." - ".$dtls['product_desc'],
+                        'note_query' => 'calc=qty*real_unit_cost',
+                        "created_by" => $this->session->userdata('user_id'),
+                    ];
+                    $dataAcc[] = $acc;
+                    // Diskon
+                    $acc['no_account'] = "4610300";
+                    $acc['type_amount'] = "debit";
+                    $acc['amount'] = $dtls['qty'] * $dtls['product_discount'];
+                    $dataAcc[] = $acc;
+                }
+                else {
+                    $product_base = $this->site->getHargaModal($dtls['product_id'], $dtls['product_batch']);
+                    $no_account = "5110000";
+                    $type_amount = "debit";
+                    $amount = $dtls['qty'] * $product_base->real_unit_cost;
+                    $division = $sale->division;
+                    $acc = [
+                        'no_source' => $data['do_reference_no'],
+                        'doc_date' => date("Y-m-d", strtotime($data['date'])),
+                        'type_source' => $type,
+                        'loc_source' => 'detail',
+                        'id_source' => $dtls['delivery_id']."-".$dtls['seq'],
+                        'division' => $division,
+                        'no_account' => $no_account,
+                        'type_amount' => $type_amount,
+                        'amount' => $amount,
+                        'note' => $dtls['product_code']." - ".$dtls['product_desc'],
+                        'note_query' => 'calc=qty*(unit_price-product_discount)',
+                        "created_by" => $this->session->userdata('user_id'),
+                    ];
+                    $dataAcc[] = $acc;
+                    // Barang jadi
+                    $acc['no_account'] = "1150100";
+                    $acc['type_amount'] = "credit";
+                    $dataAcc[] = $acc;
+                }
             }
             // Accounting
             $this->site->postAccounting($dataAcc, false);
@@ -278,8 +312,46 @@ class Sales_model extends CI_Model
 
     public function deleteDelivery($id)
     {
-        $this->site->log('Delivery', ['model' => $this->getDeliveryByID($id)]);
+        $this->db->trans_start();
+        $hdr = $this->getDeliveryByID($id);
+        $dtl = $this->getDeliveryItemByDelvID($id);
+        foreach($dtl as $item){
+            $pur = $this->site->getPurchasedItems($item->product_id, null, null, false, $item->product_batch);
+            if($pur){
+                $dtl_pur = $pur[0];
+                $dtl_pur->quantity_balance += $item->qty;
+
+                // Update stock
+                $this->db->update('purchase_items', ['quantity_balance' => $dtl_pur->quantity_balance], ['id' => $dtl_pur->id]);
+                $this->site->syncProductQty($item->product_id, $dtl_pur->warehouse_id, $item->product_batch);
+                // Update movement item
+                $this->db->update('item_movement', 
+                    ['flag_delete' => 'X'], 
+                    [
+                        'reff_no' => $hdr->do_reference_no,
+                        'product_id' => $item->product_id,
+                        'product_batch' => $item->product_batch,
+                    ]
+                );
+                // Save to log
+                $this->site->log('delivery_item', ['model' => $dtl]);
+                $this->db->delete('delivery_item', ['delivery_id' => $item->delivery_id, 'seq' => $item->seq]);
+            }
+        }
+        $this->site->log('Delivery', ['model' => $hdr]);
         if ($this->db->delete('deliveries', ['id' => $id])) {
+            // update accounting
+            $dataAcc = [];
+            $editAcc = [
+                'no_source' => $hdr->do_reference_no
+            ];
+            $this->site->postAccounting($dataAcc, $editAcc);
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === false) {
+                log_message('error', 'An errors has been occurred while adding the sale (Delete:Sales_model.php)');
+            } else {
+                return true;
+            }
             return true;
         }
         return false;
@@ -1213,47 +1285,47 @@ class Sales_model extends CI_Model
             foreach($delv_id as $id){
                 $this->db->update('deliveries', ['invoice_id' => $invoice_id], ['id' => $id]);
 
-                // detail
-                $delv = $this->getDeliveryByID($id);
-                $delvItem = $this->getDeliveryItemByDelvID($id);
-                foreach($delvItem as $item){
-                    // Barang jadi
-                    $no_account = "1150100";
-                    $type_amount = "credit";
-                    $amount = $item->qty * ($item->unit_price - $item->product_discount);
-                    $acc = [
-                        'no_source' => $delv->do_reference_no,
-                        'doc_date' => date("Y-m-d", strtotime($data['doc_date'])),
-                        'type_source' => 'SJ',
-                        'loc_source' => 'detail',
-                        'id_source' => $item->delivery_id."-".$item->seq,
-                        'division' => $sale->division,
-                        'no_account' => $no_account,
-                        'type_amount' => $type_amount,
-                        'amount' => $amount,
-                        'note' => $item->product_code." - ".$item->product_desc,
-                        'note_query' => 'calc=qty*(unit_price-product_discount)',
-                        "created_by" => $this->session->userdata('user_id'),
-                    ];
-                    $dataAcc[] = $acc;
-                    // Barang jadi dalam perjalanan
-                    $no_account = "1159900";
-                    $type_amount = "credit";
-                    $acc['no_account'] = $no_account;
-                    $acc['type_amount'] = $type_amount;
-                    $dataAcc[] = $acc;
-                    // Diskon
-                    if($item->product_discount > 0){
-                        $no_account = "6190102";
-                        $type_amount = "debit";
-                        $amount = $item->qty * $item->product_discount;
-                        $acc['no_account'] = $no_account;
-                        $acc['type_amount'] = $type_amount;
-                        $acc['amount'] = $amount;
-                        $acc['note_query'] = 'calc=qty*product_discount';
-                        $dataAcc[] = $acc;
-                    }
-                }
+                // // detail
+                // $delv = $this->getDeliveryByID($id);
+                // $delvItem = $this->getDeliveryItemByDelvID($id);
+                // foreach($delvItem as $item){
+                //     // Barang jadi
+                //     $no_account = "1150100";
+                //     $type_amount = "credit";
+                //     $amount = $item->qty * ($item->unit_price - $item->product_discount);
+                //     $acc = [
+                //         'no_source' => $delv->do_reference_no,
+                //         'doc_date' => date("Y-m-d", strtotime($data['doc_date'])),
+                //         'type_source' => 'SJ',
+                //         'loc_source' => 'detail',
+                //         'id_source' => $item->delivery_id."-".$item->seq,
+                //         'division' => $sale->division,
+                //         'no_account' => $no_account,
+                //         'type_amount' => $type_amount,
+                //         'amount' => $amount,
+                //         'note' => $item->product_code." - ".$item->product_desc,
+                //         'note_query' => 'calc=qty*(unit_price-product_discount)',
+                //         "created_by" => $this->session->userdata('user_id'),
+                //     ];
+                //     $dataAcc[] = $acc;
+                //     // Barang jadi dalam perjalanan
+                //     $no_account = "1159900";
+                //     $type_amount = "credit";
+                //     $acc['no_account'] = $no_account;
+                //     $acc['type_amount'] = $type_amount;
+                //     $dataAcc[] = $acc;
+                //     // Diskon
+                //     if($item->product_discount > 0){
+                //         $no_account = "6190102";
+                //         $type_amount = "debit";
+                //         $amount = $item->qty * $item->product_discount;
+                //         $acc['no_account'] = $no_account;
+                //         $acc['type_amount'] = $type_amount;
+                //         $acc['amount'] = $amount;
+                //         $acc['note_query'] = 'calc=qty*product_discount';
+                //         $dataAcc[] = $acc;
+                //     }
+                // }
             }
             $this->site->updateReff($type, $data['doc_date']);
             // Accounting
@@ -1277,33 +1349,33 @@ class Sales_model extends CI_Model
             ];
             $dataAcc[] = $acc;
             // Diskon
-            if($data['discount'] > 0){
-                $no_account = "6190103";
-                $type_amount = "debit";
-                $amount = $data['discount'];
+            // if($data['discount'] > 0){
+            //     $no_account = "6190103";
+            //     $type_amount = "debit";
+            //     $amount = $data['discount'];
 
-                $acc['no_account'] = $no_account;
-                $acc['type_amount'] = $type_amount;
-                $acc['amount'] = $amount;
-                $acc['note_query'] = 'field=discount';
-                $dataAcc[] = $acc;
-            }
-            // Shipping Amount
-            if($data['shipping_amount'] > 0){
-                $no_account = "4610400";
-                $type_amount = "debit";
-                $amount = $data['shipping_amount'];
+            //     $acc['no_account'] = $no_account;
+            //     $acc['type_amount'] = $type_amount;
+            //     $acc['amount'] = $amount;
+            //     $acc['note_query'] = 'field=discount';
+            //     $dataAcc[] = $acc;
+            // }
+            // // Shipping Amount
+            // if($data['shipping_amount'] > 0){
+            //     $no_account = "4610400";
+            //     $type_amount = "debit";
+            //     $amount = $data['shipping_amount'];
 
-                $acc['no_account'] = $no_account;
-                $acc['type_amount'] = $type_amount;
-                $acc['amount'] = $amount;
-                $acc['note_query'] = 'field=shipping_amount';
-                $dataAcc[] = $acc;
-            }
+            //     $acc['no_account'] = $no_account;
+            //     $acc['type_amount'] = $type_amount;
+            //     $acc['amount'] = $amount;
+            //     $acc['note_query'] = 'field=shipping_amount';
+            //     $dataAcc[] = $acc;
+            // }
             // Tax
             if($data['product_tax'] > 0){
                 $no_account = "2180700";
-                $type_amount = "debit";
+                $type_amount = "credit";
                 $amount = $data['product_tax'];
 
                 $acc['no_account'] = $no_account;
@@ -1313,6 +1385,16 @@ class Sales_model extends CI_Model
                 $dataAcc[] = $acc;
             }
             $this->site->postAccounting($dataAcc, false);
+            // Penjualan bruto
+            $no_account = "4110000";
+            $type_amount = "credit";
+            $amount = $data['total_amount'] - $data['product_tax'];
+
+            $acc['no_account'] = $no_account;
+            $acc['type_amount'] = $type_amount;
+            $acc['amount'] = $amount;
+            $acc['note_query'] = 'field=total_amount-product_tax';
+            $dataAcc[] = $acc;
 
             $this->db->trans_complete();
             if ($this->db->trans_status() === false) {
@@ -1380,6 +1462,12 @@ class Sales_model extends CI_Model
                 "created_by" => $this->session->userdata('user_id'),
             ];
             $dataAcc[] = $acc;
+            // Piutang Dagang
+            $acc['no_account'] = "1130100";
+            $acc['type'] = "INV";
+            $acc['amount'] = $amount;
+            $acc['type_amount'] = "debit";
+            $dataAcc[] = $acc;
             $this->site->postAccounting($dataAcc, false);
             return true;
         }
@@ -1403,9 +1491,10 @@ class Sales_model extends CI_Model
             }
 
             // Accounting
-            $edit['type_source'] = 'PAY';
-            $edit['loc_source'] = 'header';
-            $edit['id_source'] = $id;
+            // $edit['type_source'] = 'PAY';
+            // $edit['loc_source'] = 'header';
+            // $edit['id_source'] = $id;
+            $edit['note'] = $opay->reference_no;
             $dataAcc = array();
             $this->site->postAccounting($dataAcc, $edit);
 
