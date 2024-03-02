@@ -2013,4 +2013,18 @@ class Site extends CI_Model
         }
         return $data;
     }
+
+    public function getListUnits($param = []){
+        $data = [];
+
+        $this->db->where($param);
+        $q = $this->db->get("units");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[$row->id] = $row;
+            }
+        }
+        return $data;
+    }
 }

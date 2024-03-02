@@ -155,6 +155,9 @@ class Production extends MY_Controller
             admin_redirect('production');
         }
         else {
+            // $param['type'] = 'raw';
+            $this->data['products'] = $this->site->getListProducts();
+            $this->data['unit'] = $this->site->getListUnits();
             $this->data['error']      = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['warehouses'] = $this->site->getAllWarehouses();
             $this->data['title'] = 'Tambah Produksi';

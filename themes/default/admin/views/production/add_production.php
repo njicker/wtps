@@ -155,7 +155,68 @@
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tbody></tbody>
+                                    <tbody>
+                                    <?php
+                                        if(isset($_POST['product_id'])){
+                                            for($i = 0; $i < count($_POST['product_id']); $i++){
+                                                $prd = $products[$_POST['product_id'][$i]];
+                                    ?>
+                                                <tr>
+                                                    <td>
+                                                        <?=$_POST['product_code'][$i]?> - <?=$prd->name?>
+                                                        <input type='hidden' name='product_id[]' value='<?=$_POST['product_id'][$i]?>'>
+                                                        <input type='hidden' name='product_code[]' value='<?=$_POST['product_code'][$i]?>'>
+                                                        <input type='hidden' name='type_item[]' value='<?=$_POST['type_item'][$i]?>'>
+                                                    </td>
+                                                    <td>
+                                                        <input type='number' name='qty[]' class='form-control' value="<?=$_POST['qty'][$i]?>" required='required'>
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                            $selectunit = "";
+                                                            $selectbase = "";
+                                                            $arr_unit = explode(",", $_POST['unit'][$i]);
+                                                            if($arr_unit[0] == $unit[$prd->unit]->id){
+                                                                $selectunit = "selected";
+                                                            }
+                                                            else {
+                                                                $selectbase = "selected";
+                                                            }
+                                                        ?>
+                                                        <select class='form-control' name='unit[]' required='required'>
+                                                            <option value="<?=$unit[$prd->unit]->id?>,<?=$unit[$prd->unit]->code?>" <?=$selectunit?>><?=$unit[$prd->unit]->code?></option>
+                                                            <?php $base_unit = $unit[$prd->unit]->base_unit;
+                                                                if($base_unit){
+                                                            ?>
+                                                                    <option value="<?=$unit[$base_unit]->id?>,<?=$unit[$base_unit]->code?>" <?=$selectbase?>><?=$unit[$base_unit]->code?></option>
+                                                            <?php } ?>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type='text' name='product_batch[]' class='form-control' value="<?=$_POST['product_batch'][$i]?>">
+                                                    </td>
+                                                    <td>
+                                                        <select name="warehouse_id[]" class="form-control input-tip select">
+                                                        <?php
+                                                            foreach ($warehouses as $warehouse) {
+                                                                $select = "";
+                                                                if($warehouse->id == $_POST['warehouse_id'][$i]){
+                                                                    $select = "selected";
+                                                                }
+                                                                echo "<option value='" . $warehouse->id . "' ". $select .">" . $warehouse->name . "</option>";
+                                                            }
+                                                        ?>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <span class='fa fa-trash' style='cursor:pointer;' onclick='removeRowProduction(this)'></span>
+                                                    </td>
+                                                </tr>
+                                    <?php
+                                            }
+                                        }
+                                    ?>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
