@@ -3126,8 +3126,9 @@ class Reports extends MY_Controller
             $this->data['type'] = $this->input->post('type');
             $this->data['start_date'] = $this->input->post('start_date');
             $this->data['end_date'] = $this->input->post('end_date');
+            $this->data['division'] = $this->input->post('division');
             // var_dump($this->reports_model->getReportSales($start_date, $end_date));exit;
-            $this->data['pivot'] = json_encode($this->reports_model->getReportSales($start_date, $end_date));
+            $this->data['pivot'] = json_encode($this->reports_model->getReportSales($start_date, $end_date, $this->data['division']));
         }
         $bc                         = [['link' => base_url(), 'page' => lang('home')], ['link' => '#', 'page' => lang('reports')], ['link' => admin_url('reports/sales'), 'page' => lang('sales_report')]];
         $meta                       = ['page_title' => lang('reports'), 'bc' => $bc];
@@ -3151,7 +3152,8 @@ class Reports extends MY_Controller
             $this->data['type'] = $this->input->post('type');
             $this->data['start_date'] = $this->input->post('start_date');
             $this->data['end_date'] = $this->input->post('end_date');
-            $this->data['pivot'] = json_encode($this->reports_model->getReportPurchases($start_date, $end_date));
+            $this->data['division'] = $this->input->post('division');
+            $this->data['pivot'] = json_encode($this->reports_model->getReportPurchases($start_date, $end_date, $this->data['division']));
         }
         $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('purchases_report')]];
         $meta                     = ['page_title' => lang('purchases_report'), 'bc' => $bc];
@@ -3162,22 +3164,11 @@ class Reports extends MY_Controller
     {
         $this->sma->checkPermissions('accounting');
         $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
-        // if(isset($_POST['submit_report']))
-        // {
-        //     $start_date = $this->input->post('start_date');
-        //     $end_date = $this->input->post('end_date');
-        //     if($start_date != ""){
-        //         $start_date = $this->sma->fsd($start_date);
-        //     }
-        //     if($end_date != ""){
-        //         $end_date = $this->sma->fsd($end_date);
-        //     }
-        //     $this->data['type'] = $this->input->post('type');
-        //     $this->data['start_date'] = $this->input->post('start_date');
-        //     $this->data['end_date'] = $this->input->post('end_date');
-        //     $this->data['pivot'] = json_encode($this->reports_model->getReportPurchases($start_date, $end_date));
-        // }
-        $this->data['pivot'] = json_encode($this->reports_model->getReportAccounting());
+        if(isset($_POST['submit_report']))
+        {
+            $this->data['division'] = $this->input->post('division');
+            $this->data['pivot'] = json_encode($this->reports_model->getReportAccounting("","",$this->data['division']));
+        }
         $bc                       = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('reports'), 'page' => lang('reports')], ['link' => '#', 'page' => lang('accounting_report')]];
         $meta                     = ['page_title' => lang('accounting_report'), 'bc' => $bc];
         $this->page_construct('reports/accounting', $meta, $this->data);

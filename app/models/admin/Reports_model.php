@@ -681,7 +681,7 @@ class Reports_model extends CI_Model
         return false;
     }
 
-    public function getReportSales($start_date, $end_date)
+    public function getReportSales($start_date, $end_date, $division = "")
     {
         $this->db
             ->select('companies.company, sale_items.product_name, sale_items.product_code, sales.reference_no,
@@ -701,6 +701,9 @@ class Reports_model extends CI_Model
             else if($end_date != ""){
                 $this->db->where('date(deliveries.date)', $end_date);
             }
+            if($division != "") {
+                $this->db->where('sales.division', $division);
+            }
         $q = $this->db->get('deliveries');
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -716,7 +719,7 @@ class Reports_model extends CI_Model
         return false;
     }
 
-    public function getReportPurchases($start_date, $end_date)
+    public function getReportPurchases($start_date, $end_date, $division = "")
     {
         $this->db
             ->select('companies.company, purchase_items.product_name, purchase_items.product_code, purchases.reference_no,
@@ -732,6 +735,9 @@ class Reports_model extends CI_Model
             else if($end_date != ""){
                 $this->db->where('date(purchases.date)', $end_date);
             }
+            if($division != "") {
+                $this->db->where('purchases.division', $division);
+            }
         $this->db->where('purchases.supplier_id !=', 999);
         $q = $this->db->get('purchase_items');
         if ($q->num_rows() > 0) {
@@ -746,7 +752,7 @@ class Reports_model extends CI_Model
         return false;
     }
 
-    public function getReportAccounting($start_date = "", $end_date = "")
+    public function getReportAccounting($start_date = "", $end_date = "", $division = "")
     {
         $this->db
             ->select('accounting.no_account, account_journal.account_desc, group_account.id as grup_id, 
@@ -763,6 +769,9 @@ class Reports_model extends CI_Model
             }
             else if($end_date != ""){
                 $this->db->where('date(accounting.created_at)', $end_date);
+            }
+            if($division != "") {
+                $this->db->where('accounting.division', $division);
             }
         $this->db->order_by('sub_account.id, group_account.id');
         $q = $this->db->get('accounting');
@@ -831,28 +840,33 @@ class Reports_model extends CI_Model
         return false;
     }
 
-    public function getReportInvoices($status, $start_date, $end_date)
+    public function getReportInvoices($status, $start_date, $end_date, $division = "")
     {
+        $this->db->select("invoices.*");
+        $this->db->join('sales', 'sales.id = invoices.sale_id');
         if($status == 'outstanding'){
-            $this->db->where('status_payment !=', 'paid');
+            $this->db->where('invoices.status_payment !=', 'paid');
         }
         else if($status == 'paid'){
-            $this->db->where('status_payment', 'paid');
+            $this->db->where('invoices.status_payment', 'paid');
         }
         if($start_date != "" && $end_date != ""){
-            $this->db->where('doc_date >=', $start_date)->where('doc_date <=', $end_date);
+            $this->db->where('invoices.doc_date >=', $start_date)->where('invoices.doc_date <=', $end_date);
         }
         else if($start_date != ""){
-            $this->db->where('doc_date', $start_date);
+            $this->db->where('invoices.doc_date', $start_date);
         }
         else if($end_date != ""){
-            $this->db->where('doc_date', $end_date);
+            $this->db->where('invoices.doc_date', $end_date);
         }
         if($status == 'outstanding'){
-            $this->db->order_by('due_date, doc_date');
+            $this->db->order_by('invoices.due_date, invoices.doc_date');
         }
         else {
-            $this->db->order_by('doc_date');
+            $this->db->order_by('invoices.doc_date');
+        }
+        if($division != "") {
+            $this->db->where('sales.division', $division);
         }
         $q = $this->db->get('invoices');
         if ($q->num_rows() > 0) {

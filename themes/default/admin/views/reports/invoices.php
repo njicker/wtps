@@ -34,6 +34,16 @@
                                 <?php echo form_input('end_date', (isset($_POST['end_date']) ? $_POST['end_date'] : ''), 'class="form-control date" id="end_date"'); ?>
                             </div>
                         </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Divisi</label>
+                                <?php 
+                                    $div['mie'] = 'Mie';
+                                    $div['soun'] = 'Soun';
+                                    echo form_dropdown('division', $div, ($_POST['division'] ?? ''), 'id="sldivision" required="required" class="form-control input-tip select" style="width:100%;"');
+                                ?>
+                            </div>
+                        </div>
                         <div class="col-sm-12 col-xs-12">
                             <?php 
                                 $rad = array();

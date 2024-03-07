@@ -19,10 +19,10 @@
 
                 <p class="introtext"><?= lang('customize_report'); ?></p>
 
-                <!-- <div id="form">
-                    <?php echo admin_form_open('reports/purchases'); ?>
+                <div id="form">
+                    <?php echo admin_form_open('reports/accounting'); ?>
                     <div class="row">
-                        <div class="col-sm-4">
+                        <!-- <div class="col-sm-4">
                             <div class="form-group">
                                 <?= lang('start_date', 'start_date'); ?>
                                 <?php echo form_input('start_date', (isset($_POST['start_date']) ? $_POST['start_date'] : ''), 'class="form-control date" id="start_date"'); ?>
@@ -56,6 +56,16 @@
                                     <input type="radio" name="type" value="detail" <?=$rad['detail']?>> Detail Pembelian
                                 </span>
                             </div>
+                        </div> -->
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Divisi</label>
+                                <?php 
+                                    $div['mie'] = 'Mie';
+                                    $div['soun'] = 'Soun';
+                                    echo form_dropdown('division', $div, ($_POST['division'] ?? ''), 'id="sldivision" required="required" class="form-control input-tip select" style="width:100%;"');
+                                ?>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -65,7 +75,7 @@
                     <?php echo form_close(); ?>
 
                 </div>
-                <div class="clearfix"></div> -->
+                <div class="clearfix"></div>
 
                 <div class="col-sm-12 col-xs-12" id="show-data">
                     <div id="wdr-component"></div>
