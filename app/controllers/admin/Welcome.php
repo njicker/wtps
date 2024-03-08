@@ -100,7 +100,7 @@ class Welcome extends MY_Controller
         $this->data['products'] = array();
         if($products){
             foreach($products as $prod){
-                if($prod == "FG0001"){
+                if($prod->code == "FG0001"){
                     $product_id = $prod->id;
                 }
                 $this->data['products'][$prod->code] = $prod;
