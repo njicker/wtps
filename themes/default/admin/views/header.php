@@ -417,13 +417,13 @@
                                             <span class="text"> <?= lang('print_barcode_label'); ?></span>
                                         </a>
                                     </li>
-                                    <!-- <li id="products_quantity_adjustments">
+                                    <li id="products_quantity_adjustments">
                                         <a class="submenu" href="<?= admin_url('products/quantity_adjustments'); ?>">
                                             <i class="fa fa-filter"></i>
                                             <span class="text"> <?= lang('quantity_adjustments'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="products_add_adjustment">
+                                    <!-- <li id="products_add_adjustment">
                                         <a class="submenu" href="<?= admin_url('products/add_adjustment'); ?>">
                                             <i class="fa fa-filter"></i>
                                             <span class="text"> <?= lang('add_adjustment'); ?></span>
@@ -487,14 +487,14 @@
                             <li class="mm_production">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-industry"></i>
-                                    <span class="text"> Produksi </span>
+                                    <span class="text"> <?= lang('production') ?> </span>
                                     <span class="chevron closed"></span>
                                 </a>
                                 <ul>
                                     <li id="production_index">
                                         <a class="submenu" href="<?= admin_url('production'); ?>">
                                             <i class="fa fa-industry"></i>
-                                            <span class="text"> Produksi</span>
+                                            <span class="text"> <?= lang('production') ?></span>
                                         </a>
                                     </li>
                                 </ul>
@@ -1060,7 +1060,7 @@
                             }
                         } else {
                             if ($GP['products-index'] || $GP['products-add'] || $GP['products-barcode'] || $GP['products-adjustments'] || $GP['products-stock_count']) {
-                                ?>
+                            ?>
                             <li class="mm_products">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-barcode"></i>
@@ -1098,17 +1098,17 @@
                                             <i class="fa fa-filter"></i><span class="text"> <?= lang('quantity_adjustments'); ?></span>
                                         </a>
                                     </li>
-                                    <li id="products_add_adjustment">
+                                    <!-- <li id="products_add_adjustment">
                                         <a class="submenu" href="<?= admin_url('products/add_adjustment'); ?>">
                                             <i class="fa fa-filter"></i>
                                             <span class="text"> <?= lang('add_adjustment'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
                                 } ?>
                                     <?php if ($GP['products-stock_count']) {
                                     ?>
-                                    <li id="products_stock_counts">
+                                    <!-- <li id="products_stock_counts">
                                         <a class="submenu" href="<?= admin_url('products/stock_counts'); ?>">
                                             <i class="fa fa-list-ol"></i>
                                             <span class="text"> <?= lang('stock_counts'); ?></span>
@@ -1118,7 +1118,7 @@
                                         <a class="submenu" href="<?= admin_url('products/count_stock'); ?>">
                                             <i class="fa fa-plus-circle"></i>
                                             <span class="text"> <?= lang('count_stock'); ?></span>
-                                        </a>
+                                        </a> -->
                                     </li>
                                     <?php
                                 } ?>
@@ -1126,9 +1126,70 @@
                             </li>
                             <?php
                             } ?>
-
-                            <?php if ($GP['sales-index'] || $GP['sales-add'] || $GP['sales-deliveries'] || $GP['sales-gift_cards']) {
+                            <!-- Purchase -->
+                            <?php if ($GP['purchases-index'] || $GP['purchases-add'] || $GP['purchases-expenses']) {
                                 ?>
+                            <li class="mm_purchases">
+                                <a class="dropmenu" href="#">
+                                    <i class="fa fa-star"></i>
+                                    <span class="text"> <?= lang('purchases'); ?>
+                                    </span> <span class="chevron closed"></span>
+                                </a>
+                                <ul>
+                                    <li id="purchases_index">
+                                        <a class="submenu" href="<?= admin_url('purchases/index/ongoing'); ?>">
+                                            <i class="fa fa-star"></i><span class="text"> <?= lang('list_purchases'); ?></span>
+                                        </a>
+                                    </li>
+                                    <?php if ($GP['purchases-add']) {
+                                    ?>
+                                    <!-- <li id="purchases_add">
+                                        <a class="submenu" href="<?= admin_url('purchases/add'); ?>">
+                                            <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_purchase'); ?></span>
+                                        </a>
+                                    </li> -->
+                                    <?php
+                                    } ?>
+                                    <?php if ($GP['purchases-expenses']) {
+                                    ?>
+                                    <!-- <li id="purchases_expenses">
+                                        <a class="submenu" href="<?= admin_url('purchases/expenses'); ?>">
+                                            <i class="fa fa-dollar"></i><span class="text"> <?= lang('list_expenses'); ?></span>
+                                        </a>
+                                    </li>
+                                    <li id="purchases_add_expense">
+                                        <a class="submenu" href="<?= admin_url('purchases/add_expense'); ?>"
+                                            data-toggle="modal" data-target="#myModal">
+                                            <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_expense'); ?></span>
+                                        </a>
+                                    </li> -->
+                                    <?php
+                                } ?>
+                                </ul>
+                            </li>
+                            <?php
+                            } ?>
+                            <!-- Production -->
+                            <?php if ($GP['production-index']) {
+                            ?>
+                            <li class="mm_production">
+                                <a class="dropmenu" href="#">
+                                    <i class="fa fa-industry"></i>
+                                    <span class="text"> <?= lang('production') ?> </span>
+                                    <span class="chevron closed"></span>
+                                </a>
+                                <ul>
+                                    <li id="production_index">
+                                        <a class="submenu" href="<?= admin_url('production'); ?>">
+                                            <i class="fa fa-industry"></i>
+                                            <span class="text"> <?= lang('production') ?></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <?php } ?>
+                            <?php if ($GP['sales-index'] || $GP['sales-add'] || $GP['sales-deliveries'] || $GP['sales-gift_cards'] || $GP['sales-invoices']) {
+                            ?>
                             <li class="mm_sales <?= strtolower($this->router->fetch_method()) == 'sales' ? 'mm_pos' : '' ?>">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-heart"></i>
@@ -1143,22 +1204,22 @@
                                     </li>
                                     <?php if (POS && $GP['pos-index']) {
                                     ?>
-                                    <li id="pos_sales">
+                                    <!-- <li id="pos_sales">
                                         <a class="submenu" href="<?= admin_url('pos/sales'); ?>">
                                             <i class="fa fa-heart"></i><span class="text"> <?= lang('pos_sales'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
-                                } ?>
+                                    } ?>
                                     <?php if ($GP['sales-add']) {
                                     ?>
-                                    <li id="sales_add">
+                                    <!-- <li id="sales_add">
                                         <a class="submenu" href="<?= admin_url('sales/add'); ?>">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_sale'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
-                                }
+                                    }
                                 if ($GP['sales-deliveries']) {
                                     ?>
                                     <li id="sales_deliveries">
@@ -1170,21 +1231,29 @@
                                 }
                                 if ($GP['sales-gift_cards']) {
                                     ?>
-                                    <li id="sales_gift_cards">
+                                    <!-- <li id="sales_gift_cards">
                                         <a class="submenu" href="<?= admin_url('sales/gift_cards'); ?>">
                                             <i class="fa fa-gift"></i><span class="text"> <?= lang('gift_cards'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
-                                } ?>
+                                }
+                                if ($GP['sales-invoices']) { ?>
+                                    <li id="sales_invoices">
+                                        <a class="submenu" href="<?= admin_url('sales/invoices'); ?>">
+                                            <i class="fa fa-money"></i>
+                                            <span class="text"> Daftar Tagihan</span>
+                                        </a>
+                                    </li>
                                 </ul>
+                                <?php } ?>
                             </li>
                             <?php
                             } ?>
 
                             <?php if ($GP['quotes-index'] || $GP['quotes-add']) {
                                 ?>
-                            <li class="mm_quotes">
+                            <!-- <li class="mm_quotes">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-heart-o"></i>
                                     <span class="text"> <?= lang('quotes'); ?> </span>
@@ -1206,50 +1275,7 @@
                                     <?php
                                 } ?>
                                 </ul>
-                            </li>
-                            <?php
-                            } ?>
-
-                            <?php if ($GP['purchases-index'] || $GP['purchases-add'] || $GP['purchases-expenses']) {
-                                ?>
-                            <li class="mm_purchases">
-                                <a class="dropmenu" href="#">
-                                    <i class="fa fa-star"></i>
-                                    <span class="text"> <?= lang('purchases'); ?>
-                                    </span> <span class="chevron closed"></span>
-                                </a>
-                                <ul>
-                                    <li id="purchases_index">
-                                        <a class="submenu" href="<?= admin_url('purchases/index/ongoing'); ?>">
-                                            <i class="fa fa-star"></i><span class="text"> <?= lang('list_purchases'); ?></span>
-                                        </a>
-                                    </li>
-                                    <?php if ($GP['purchases-add']) {
-                                    ?>
-                                    <li id="purchases_add">
-                                        <a class="submenu" href="<?= admin_url('purchases/add'); ?>">
-                                            <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_purchase'); ?></span>
-                                        </a>
-                                    </li>
-                                    <?php
-                                } ?>
-                                    <?php if ($GP['purchases-expenses']) {
-                                    ?>
-                                    <li id="purchases_expenses">
-                                        <a class="submenu" href="<?= admin_url('purchases/expenses'); ?>">
-                                            <i class="fa fa-dollar"></i><span class="text"> <?= lang('list_expenses'); ?></span>
-                                        </a>
-                                    </li>
-                                    <li id="purchases_add_expense">
-                                        <a class="submenu" href="<?= admin_url('purchases/add_expense'); ?>"
-                                            data-toggle="modal" data-target="#myModal">
-                                            <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_expense'); ?></span>
-                                        </a>
-                                    </li>
-                                    <?php
-                                } ?>
-                                </ul>
-                            </li>
+                            </li> -->
                             <?php
                             } ?>
 
@@ -1359,7 +1385,7 @@
                             <?php
                             } ?>
 
-                            <?php if ($GP['reports-quantity_alerts'] || $GP['reports-expiry_alerts'] || $GP['reports-products'] || $GP['reports-monthly_sales'] || $GP['reports-sales'] || $GP['reports-payments'] || $GP['reports-purchases'] || $GP['reports-customers'] || $GP['reports-suppliers'] || $GP['reports-staff'] || $GP['reports-expenses']) {
+                            <?php if ($GP['reports-quantity_alerts'] || $GP['reports-expiry_alerts'] || $GP['reports-products'] || $GP['reports-monthly_sales'] || $GP['reports-sales'] || $GP['reports-payments'] || $GP['reports-purchases'] || $GP['reports-customers'] || $GP['reports-suppliers'] || $GP['reports-staff'] || $GP['reports-expenses'] || $GP['reports-accounting'] || $GP['reports-hpp'] || $GP['reports-invoices']) {
                                 ?>
                             <li class="mm_reports">
                                 <a class="dropmenu" href="#">
@@ -1522,6 +1548,27 @@
                                     </li>
                                     <?php
                                 } ?>
+                                <?php if ($GP['reports-accounting']) { ?>
+                                    <li id="reports_accounting">
+                                        <a href="<?= admin_url('reports/accounting') ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?= lang('accounting_report'); ?></span>
+                                        </a>
+                                    </li>
+                                <?php } ?>
+                                <?php if ($GP['reports-hpp']) { ?>
+                                    <li id="reports_chart_hpp">
+                                        <a href="<?= admin_url('reports/chart_hpp') ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?= lang('chart_hpp_report'); ?></span>
+                                        </a>
+                                    </li>
+                                <?php } ?>
+                                <?php if ($GP['reports-invoices']) { ?>
+                                    <li id="reports_invoices">
+                                        <a href="<?= admin_url('reports/invoices') ?>">
+                                            <i class="fa fa-money"></i><span class="text"> <?= lang('invoices_report'); ?></span>
+                                        </a>
+                                    </li>
+                                <?php } ?>
                                 </ul>
                             </li>
                             <?php

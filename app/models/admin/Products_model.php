@@ -32,17 +32,84 @@ class Products_model extends CI_Model
 
     public function addAdjustment($data, $products)
     {
+        $this->db->trans_start();
+        $type = 'ADJ';
         if ($this->db->insert('adjustments', $data)) {
+            $dataAcc = array();
             $adjustment_id = $this->db->insert_id();
             foreach ($products as $product) {
                 $product['adjustment_id'] = $adjustment_id;
                 $this->db->insert('adjustment_items', $product);
                 $this->syncAdjustment($product);
+
+                $prod_items = $this->getProductByID($product['product_id']);
+                $prod_units = $this->site->getUnitByID($prod_items->unit);
+                $clause = array(
+                    'product_id' => $product['product_id'],
+                    'product_batch' => $product['product_batch'],
+                );
+                $pur_dtl = $this->site->getPurchasedItem($clause);
+                // Item movement
+                $item_movement = [
+                    "warehouse_id" => $data['warehouse_id'],
+                    "product_id" => $product['product_id'],
+                    "product_code" => $prod_items->code,
+                    "product_desc" => $prod_items->name,
+                    "quantity" => $product['quantity'] * ($product['type'] == 'subtraction' ? -1 : 1),
+                    "unit_code" => $prod_units->code,
+                    "movement_type" => $data['subtraction'] == 'returned' ? 'out' : 'in',
+                    "product_batch" => $product['product_batch'],
+                    "movement_status" => 'good',
+                    "reff_type" => 'adjustment',
+                    "reff_no" => $data['reference_no'],
+                    "stock_date" => date("Y-m-d", strtotime($data['date'])),
+                    "created_by" => $this->session->userdata('user_id'),
+                    "supporting_reff_doc" => '',
+                    "attachment" => '',
+                ];
+                $this->site->submitMovementItem($item_movement, false);
+
+                // Accounting
+                $no_account = "5110000";
+                $type_amount = ($product['type'] == 'subtraction' ? "debit" : "credit");
+                $amount = $product['quantity'] * $pur_dtl->real_unit_cost;
+                $note_query = 'calc=quantity*real_unit_cost';
+                $note = $prod_items->code." - ".$prod_items->name;
+
+                $acc = [
+                    'no_source' => $data['reference_no'],
+                    'doc_date' => date("Y-m-d", strtotime($data['date'])),
+                    'type_source' => $type,
+                    'loc_source' => 'detail',
+                    'id_source' => $adjustment_id,
+                    'division' => $data['division'],
+                    'no_account' => $no_account,
+                    'type_amount' => $type_amount,
+                    'amount' => $amount,
+                    'note' => $note,
+                    'note_query' => $note_query,
+                    "created_by" => $this->session->userdata('user_id'),
+                ];
+                $dataAcc[] = $acc;
+
+                $acc['no_account'] = "1150100";
+                $acc['type_amount'] = ($product['type'] == 'subtraction' ? "credit" : "debit");
+                $dataAcc[] = $acc;
             }
-            if ($this->site->getReference('qa') == $data['reference_no']) {
-                $this->site->updateReference('qa');
+
+            // if ($this->site->getReference('qa') == $data['reference_no']) {
+            //     $this->site->updateReference('qa');
+            // }
+            $this->site->updateReff($type, $data['date']);
+            
+            // Accounting
+            $this->site->postAccounting($dataAcc, false);
+            $this->db->trans_complete();
+            if ($this->db->trans_status() === false) {
+                log_message('error', 'An errors has been occurred while adding the sale (Add:Purchases_model.php)');
+            } else {
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -679,7 +746,7 @@ class Products_model extends CI_Model
     public function getQASuggestions($term, $limit = 5)
     {
         $this->db->select('' . $this->db->dbprefix('products') . '.id, code, ' . $this->db->dbprefix('products') . '.name as name')
-            ->where("type != 'combos' AND "
+            ->where("type = 'combo' AND "
                 . '(' . $this->db->dbprefix('products') . ".name LIKE '%" . $term . "%' OR code LIKE '%" . $term . "%' OR
                 concat(" . $this->db->dbprefix('products') . ".name, ' (', code, ')') LIKE '%" . $term . "%')")
             ->limit($limit);
@@ -970,11 +1037,11 @@ class Products_model extends CI_Model
     public function syncAdjustment($data = [])
     {
         if (!empty($data)) {
-            $clause = ['product_id' => $data['product_id'], 'option_id' => $data['option_id'], 'warehouse_id' => $data['warehouse_id'], 'status' => 'received'];
+            $clause = ['product_id' => $data['product_id'], 'option_id' => $data['option_id'], 'warehouse_id' => $data['warehouse_id'], 'status' => 'received', 'product_batch' => $data['product_batch']];
             $qty    = $data['type'] == 'subtraction' ? 0 - $data['quantity'] : 0 + $data['quantity'];
             $this->site->setPurchaseItem($clause, $qty);
 
-            $this->site->syncProductQty($data['product_id'], $data['warehouse_id']);
+            $this->site->syncProductQty($data['product_id'], $data['warehouse_id'], $data['product_batch']);
             if ($data['option_id']) {
                 $this->site->syncVariantQty($data['option_id'], $data['warehouse_id'], $data['product_id']);
             }

@@ -129,7 +129,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= lang('reference_no', 'qaref'); ?>
-                                <?php echo form_input('reference_no', (isset($_POST['reference_no']) ? $_POST['reference_no'] : ''), 'class="form-control input-tip" id="qaref"'); ?>
+                                <?php echo form_input('reference_no', (isset($_POST['reference_no']) ? $_POST['reference_no'] : 'XXXX/ADJ/WTPS/[Bulan]/[Tahun]'), 'class="form-control input-tip" id="qaref" readonly'); ?>
                             </div>
                         </div>
                         <?= form_hidden('count_id', $count_id); ?>
@@ -166,6 +166,18 @@
                             </div>
                         </div>
 
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <?= lang('division', 'division'); ?>
+                                <?php
+                                // $dv['All'] = 'All';
+                                $dv['mie'] = 'Mie';
+                                $dv['soun'] = 'Soun';
+                                echo form_dropdown('division', $dv, (isset($_POST['division']) ? $_POST['division'] : ''), 'id="division" class="form-control input-tip select" style="width:100%;" required="required"');
+                                ?>
+                            </div>
+                        </div>
+
                         <div class="clearfix"></div>
 
 
@@ -191,8 +203,9 @@
                                         <thead>
                                         <tr>
                                             <th><?= lang('product_name') . ' (' . lang('product_code') . ')'; ?></th>
-                                            <th class="col-md-2"><?= lang('variant'); ?></th>
+                                            <!-- <th class="col-md-2"><?= lang('variant'); ?></th> -->
                                             <th class="col-md-1"><?= lang('type'); ?></th>
+                                            <th class="col-md-2">Batch Produk</th>
                                             <th class="col-md-1"><?= lang('quantity'); ?></th>
                                             <?php
                                             if ($Settings->product_serial) {

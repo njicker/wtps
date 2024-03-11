@@ -90,24 +90,24 @@
                                 <i class="fa fa-plus-circle"></i> <?= lang('add_adjustment') ?>
                             </a>
                         </li>
-                        <li>
+                        <!-- <li>
                             <a href="<?= admin_url('products/add_adjustment_by_csv') ?>">
                                 <i class="fa fa-plus-circle"></i> <?= lang('add_adjustment_by_csv') ?>
                             </a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="#" id="excel" data-action="export_excel">
                                 <i class="fa fa-file-excel-o"></i> <?= lang('export_to_excel') ?>
                             </a>
                         </li>
-                        <li class="divider"></li>
+                        <!-- <li class="divider"></li>
                         <li>
                             <a href="#" class="bpo" title="<b><?= $this->lang->line('delete_products') ?></b>"
                                 data-content="<p><?= lang('r_u_sure') ?></p><button type='button' class='btn btn-danger' id='delete' data-action='delete'><?= lang('i_m_sure') ?></a> <button class='btn bpo-close'><?= lang('no') ?></button>"
                                 data-html="true" data-placement="left">
                             <i class="fa fa-trash-o"></i> <?= lang('delete_products') ?>
                              </a>
-                         </li>
+                         </li> -->
                     </ul>
                 </li>
                 <?php if (!empty($warehouses)) {

@@ -14,6 +14,7 @@ class Products extends MY_Controller
         $this->lang->admin_load('products', $this->Settings->user_language);
         $this->load->library('form_validation');
         $this->load->admin_model('products_model');
+        $this->load->helper('reference_helper');
         $this->digital_upload_path = 'files/';
         $this->upload_path         = 'assets/uploads/';
         $this->thumbs_path         = 'assets/uploads/thumbs/';
@@ -354,6 +355,7 @@ class Products extends MY_Controller
     {
         $this->sma->checkPermissions('adjustments', true);
         $this->form_validation->set_rules('warehouse', lang('warehouse'), 'required');
+        $this->form_validation->set_rules('division', lang('division'), 'required');
 
         if ($this->form_validation->run() == true) {
             if ($this->Owner || $this->Admin) {
@@ -362,7 +364,14 @@ class Products extends MY_Controller
                 $date = date('Y-m-d H:s:i');
             }
 
-            $reference_no = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('qa');
+            // $reference_no = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('qa');
+            $type = 'ADJ';
+            $no_urut = $this->site->getCountForReff($type, $date);
+            $no_urut = 10000 + $no_urut + 1;
+            $no_urut = substr($no_urut, 1, 4);
+            // Genarete reff with helper
+            $reference_no = generate_ref($no_urut, $type, $date);
+
             $warehouse_id = $this->input->post('warehouse');
             $note         = $this->sma->clear_tags($this->input->post('note'));
 
@@ -371,7 +380,8 @@ class Products extends MY_Controller
                 $product_id = $_POST['product_id'][$r];
                 $type       = $_POST['type'][$r];
                 $quantity   = $_POST['quantity'][$r];
-                $serial     = $_POST['serial'][$r];
+                $serial     = "";
+                $product_batch     = $_POST['product_batch'][$r];
                 $variant    = isset($_POST['variant'][$r]) && !empty($_POST['variant'][$r]) ? $_POST['variant'][$r] : null;
 
                 if (!$this->Settings->overselling && $type == 'subtraction' && !$count_id) {
@@ -404,6 +414,7 @@ class Products extends MY_Controller
                     'warehouse_id' => $warehouse_id,
                     'option_id'    => $variant,
                     'serial_no'    => $serial,
+                    'product_batch' => $product_batch,
                 ];
             }
 
@@ -420,6 +431,7 @@ class Products extends MY_Controller
                 'note'         => $note,
                 'created_by'   => $this->session->userdata('user_id'),
                 'count_id'     => $this->input->post('count_id') ? $this->input->post('count_id') : null,
+                'division'     => $this->input->post('division'),
             ];
 
             if ($_FILES['document']['size'] > 0) {
@@ -1490,7 +1502,8 @@ class Products extends MY_Controller
         if ($warehouse_id) {
             $this->datatables->where('adjustments.warehouse_id', $warehouse_id);
         }
-        $this->datatables->add_column('Actions', "<div class='text-center'><a href='" . admin_url('products/edit_adjustment/$1') . "' class='tip' title='" . lang('edit_adjustment') . "'><i class='fa fa-edit'></i></a> " . $delete_link . '</div>', 'id');
+        // $this->datatables->add_column('Actions', "<div class='text-center'><a href='" . admin_url('products/edit_adjustment/$1') . "' class='tip' title='" . lang('edit_adjustment') . "'><i class='fa fa-edit'></i></a> " . $delete_link . '</div>', 'id');
+        $this->datatables->add_column('Actions', '');
 
         echo $this->datatables->generate();
     }

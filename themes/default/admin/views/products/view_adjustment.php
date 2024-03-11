@@ -8,15 +8,16 @@
             <button type="button" class="btn btn-xs btn-default no-print pull-right" style="margin-right:15px;" onclick="window.print();">
                 <i class="fa fa-print"></i> <?= lang('print'); ?>
             </button>
-            <div class="text-center" style="margin-bottom:20px;">
+            <!-- <div class="text-center" style="margin-bottom:20px;">
                 <img src="<?= base_url() . 'assets/uploads/logos/' . $Settings->logo; ?>" alt="<?= $Settings->site_name; ?>">
-            </div>
+            </div> -->
             <div class="well well-sm">
                 <div class="row bold">
                     <div class="col-xs-5">
                     <p class="bold">
                         <?= lang('date'); ?>: <?= $this->sma->hrld($inv->date); ?><br>
                         <?= lang('ref'); ?>: <?= $inv->reference_no; ?><br>
+                        Divisi: <?= $inv->division; ?><br>
                     </p>
                     </div>
                     <div class="col-xs-7 text-right order_barcodes">
@@ -36,8 +37,8 @@
                     <tr>
                         <th><?= lang('no'); ?></th>
                         <th><?= lang('description'); ?></th>
-                        <th><?= lang('variant'); ?></th>
                         <th><?= lang('type'); ?></th>
+                        <th>Batch Produk</th>
                         <th><?= lang('quantity'); ?></th>
                     </tr>
 
@@ -54,8 +55,8 @@
                                 <?= $row->product_code . ' - ' . $row->product_name . ($row->variant ? ' (' . $row->variant . ')' : ''); ?>
                                 <?= $row->serial_no ? '<br>' . $row->serial_no : ''; ?>
                             </td>
-                            <th><?= $row->variant; ?></th>
                             <th><?= lang($row->type); ?></th>
+                            <th><?= $row->product_batch; ?></th>
                             <td style="width: 80px; text-align:center; vertical-align:middle;"><?= $this->sma->formatQuantity($row->quantity); ?></td>
                         </tr>
                         <?php

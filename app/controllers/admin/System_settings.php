@@ -2379,6 +2379,16 @@ class system_settings extends MY_Controller
                 'returns-email'              => $this->input->post('returns-email'),
                 'returns-pdf'                => $this->input->post('returns-pdf'),
                 'reports-tax'                => $this->input->post('reports-tax'),
+                'sales-invoices'             => $this->input->post('sales-invoices'),
+                'sales-add_invoice'          => $this->input->post('sales-add_invoice'),
+                'sales-delete_invoice'       => $this->input->post('sales-delete_invoice'),
+                'production-index'             => $this->input->post('production-index'),
+                'production-add_production'          => $this->input->post('production-add_production'),
+                'production-finish_production'       => $this->input->post('production-finish_production'),
+                'production-reject_production'             => $this->input->post('production-reject_production'),
+                'reports-accounting'    => $this->input->post('reports-accounting'),
+                'reports-hpp'      => $this->input->post('reports-hpp'),
+                'reports-invoices'           => $this->input->post('reports-invoices'),
             ];
 
             if (POS) {

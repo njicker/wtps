@@ -63,7 +63,7 @@ class Production extends MY_Controller
     }
 
     public function get_production(){
-        $this->sma->checkPermissions("production");
+        $this->sma->checkPermissions("index");
         $this->load->library('datatables');
 
         $this->datatables

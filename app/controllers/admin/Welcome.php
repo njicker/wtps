@@ -108,7 +108,7 @@ class Welcome extends MY_Controller
         }
         $start_date = date("Y-m-d", strtotime("-30 days"));
         $end_date = date("Y-m-d", strtotime("+1 days"));
-        $this->data['chart']['FG0001']     = json_encode($this->reports_model->getChartHPP($product_id, $start_date, $end_date));
+        // $this->data['chart']['FG0001']     = json_encode($this->reports_model->getChartHPP($product_id, $start_date, $end_date));
         $this->data['delivery']  = json_encode($this->db_model->getLatestDelivery($start_date, $end_date));
         $lmsdate                 = date('Y-m-d', strtotime('first day of last month')) . ' 00:00:00';
         $lmedate                 = date('Y-m-d', strtotime('last day of last month')) . ' 23:59:59';

@@ -643,3 +643,6 @@ $lang['accounting_report']                        = 'Laporan Accounting';
 $lang['chart_hpp_report']                        = 'Grafik Harga Pokok Produksi';
 $lang['invoices_report']                        = 'Laporan Tagihan';
 $lang['group_account']                        = 'Grup Akun';
+$lang['production']                        = 'Produksi';
+$lang['invoices']                        = 'Daftar Tagihan';
+$lang['hpp']                        = 'Harga Pokok Produksi';

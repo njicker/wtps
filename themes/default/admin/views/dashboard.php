@@ -58,7 +58,7 @@ function row_status($x)
         </div>
     </div>
 
-    <div class="box" style="margin-bottom: 15px;">
+    <!-- <div class="box" style="margin-bottom: 15px;">
         <div class="box-header">
             <h2 class="blue"><i class="fa-fw fa fa-bar-chart-o"></i>Grafik HPP 30 hari terakhir</h2>
         </div>
@@ -72,7 +72,7 @@ function row_status($x)
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 <?php
 } ?>
 <?php if ($Owner || $Admin) {
@@ -644,67 +644,67 @@ function row_status($x)
                 };
             });
 
-            let showData = <?= $chart['FG0001'] ? 1 : 0 ?>;
-            if(showData){
-                let chart = JSON.parse('<?= $chart['FG0001'] ?>');
-                $('#ov-chart-FG0001').highcharts({
-                    chart: {},
-                    credits: {enabled: false},
-                    title: {text: ''},
-                    xAxis: {categories: chart.day},
-                    yAxis: {min: chart.min, max: chart.max, title: ""},
-                    tooltip: {
-                        shared: true,
-                        followPointer: true,
-                        formatter: function () {
-                            // console.log(this);
-                            if (this.key) {
-                                return '<div class="tooltip-inner hc-tip" style="margin-bottom:0;">' + this.key + '<br><strong>' + currencyFormat(this.y) + '</strong> (' + formatNumber(this.percentage) + '%)';
-                            } else {
-                                var s = '<div class="well well-sm hc-tip" style="margin-bottom:0;"><h2 style="margin-top:0;">' + this.x + '</h2><table class="table table-striped"  style="margin-bottom:0;">';
-                                $.each(this.points, function () {
-                                    s += '<tr><td style="color:{series.color};padding:0">' + this.series.name + ': </td><td style="color:{series.color};padding-lefy:80px;text-align:right;"> <b>' +
-                                    currencyFormat(this.y) + '</b></td></tr>';
-                                });
-                                s += '</table></div>';
-                                return s;
-                            }
-                        },
-                        useHTML: true, borderWidth: 0, shadow: false, valueDecimals: 0,
-                        style: {fontSize: '14px', padding: '0', color: '#000000'}
-                    },
-                    series: [
-                        {
-                            type: 'spline',
-                            name: 'Harga Pokok Produksi',
-                            data: chart.cost,
-                            marker: {
-                                lineWidth: 2,
-                                states: {
-                                    hover: {
-                                        lineWidth: 4
-                                    }
-                                },
-                                lineColor: Highcharts.getOptions().colors[7],
-                                fillColor: 'white'
-                            }
-                        },
-                        {
-                            type: 'spline',
-                            name: 'Rata-rata',
-                            data: chart.avg,
-                            color: Highcharts.getOptions().colors[3],
-                            marker: {
-                                lineWidth: 1,
-                            },
-                            lineColor: 'orange',
-                        }
-                    ]
-                });
-            }
-            else {
-                // hide ov-chart-product
-            }
+            // let showData = <?= 0//$chart['FG0001'] ? 1 : 0 ?>;
+            // if(showData){
+            //     let chart = JSON.parse('<?= 0//$chart['FG0001'] ?>');
+            //     $('#ov-chart-FG0001').highcharts({
+            //         chart: {},
+            //         credits: {enabled: false},
+            //         title: {text: ''},
+            //         xAxis: {categories: chart.day},
+            //         yAxis: {min: chart.min, max: chart.max, title: ""},
+            //         tooltip: {
+            //             shared: true,
+            //             followPointer: true,
+            //             formatter: function () {
+            //                 // console.log(this);
+            //                 if (this.key) {
+            //                     return '<div class="tooltip-inner hc-tip" style="margin-bottom:0;">' + this.key + '<br><strong>' + currencyFormat(this.y) + '</strong> (' + formatNumber(this.percentage) + '%)';
+            //                 } else {
+            //                     var s = '<div class="well well-sm hc-tip" style="margin-bottom:0;"><h2 style="margin-top:0;">' + this.x + '</h2><table class="table table-striped"  style="margin-bottom:0;">';
+            //                     $.each(this.points, function () {
+            //                         s += '<tr><td style="color:{series.color};padding:0">' + this.series.name + ': </td><td style="color:{series.color};padding-lefy:80px;text-align:right;"> <b>' +
+            //                         currencyFormat(this.y) + '</b></td></tr>';
+            //                     });
+            //                     s += '</table></div>';
+            //                     return s;
+            //                 }
+            //             },
+            //             useHTML: true, borderWidth: 0, shadow: false, valueDecimals: 0,
+            //             style: {fontSize: '14px', padding: '0', color: '#000000'}
+            //         },
+            //         series: [
+            //             {
+            //                 type: 'spline',
+            //                 name: 'Harga Pokok Produksi',
+            //                 data: chart.cost,
+            //                 marker: {
+            //                     lineWidth: 2,
+            //                     states: {
+            //                         hover: {
+            //                             lineWidth: 4
+            //                         }
+            //                     },
+            //                     lineColor: Highcharts.getOptions().colors[7],
+            //                     fillColor: 'white'
+            //                 }
+            //             },
+            //             {
+            //                 type: 'spline',
+            //                 name: 'Rata-rata',
+            //                 data: chart.avg,
+            //                 color: Highcharts.getOptions().colors[3],
+            //                 marker: {
+            //                     lineWidth: 1,
+            //                 },
+            //                 lineColor: 'orange',
+            //             }
+            //         ]
+            //     });
+            // }
+            // else {
+            //     // hide ov-chart-product
+            // }
 
             let allProducts = JSON.parse('<?=json_encode($products)?>');
             let showDataDelv = <?= $delivery ? 1 : 0 ?>;

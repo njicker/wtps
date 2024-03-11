@@ -2885,7 +2885,7 @@ class Sales extends MY_Controller
     }
 
     public function add_invoice($id = null){
-        $this->sma->checkPermissions('invoices');
+        $this->sma->checkPermissions();
 
         $this->form_validation->set_rules('reff_doc', 'Reff doc', 'required');
         $this->form_validation->set_rules('total_amount', lang('amount'), 'trim|integer|required');
@@ -3091,7 +3091,7 @@ class Sales extends MY_Controller
 
     public function modal_view_invoice($id = null)
     {
-        $this->sma->checkPermissions('index', true);
+        $this->sma->checkPermissions('invoices', true);
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');

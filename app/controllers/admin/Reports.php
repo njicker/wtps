@@ -3176,7 +3176,7 @@ class Reports extends MY_Controller
 
     public function chart_hpp()
     {
-        $this->sma->checkPermissions('accounting');
+        $this->sma->checkPermissions('hpp');
         $this->data['error']      = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         if(isset($_POST['submit_report']))
         {
