@@ -12,10 +12,10 @@ class Billers extends MY_Controller
             $this->session->set_userdata('requested_page', $this->uri->uri_string());
             $this->sma->md('login');
         }
-        if (!$this->Owner) {
-            $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER['HTTP_REFERER']);
-        }
+        // if (!$this->Owner) {
+        //     $this->session->set_flashdata('warning', lang('access_denied'));
+        //     redirect($_SERVER['HTTP_REFERER']);
+        // }
         $this->lang->admin_load('billers', $this->Settings->user_language);
         $this->load->library('form_validation');
         $this->load->admin_model('companies_model');
@@ -23,7 +23,7 @@ class Billers extends MY_Controller
 
     public function add()
     {
-        $this->sma->checkPermissions(false, true);
+        $this->sma->checkPermissions("add", true, "suppliers");
 
         // $this->form_validation->set_rules('email', $this->lang->line('email_address'), 'is_unique[companies.email]');
 
@@ -134,7 +134,7 @@ class Billers extends MY_Controller
 
     public function delete($id = null)
     {
-        $this->sma->checkPermissions(null, true);
+        $this->sma->checkPermissions("delete", true, "suppliers");
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -149,7 +149,7 @@ class Billers extends MY_Controller
 
     public function edit($id = null)
     {
-        $this->sma->checkPermissions(false, true);
+        $this->sma->checkPermissions("edit", true, "suppliers");
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -203,7 +203,7 @@ class Billers extends MY_Controller
 
     public function getBiller($id = null)
     {
-        $this->sma->checkPermissions('index');
+        $this->sma->checkPermissions("index", false, "suppliers");
 
         $row = $this->companies_model->getCompanyByID($id);
         $this->sma->send_json([['id' => $row->id, 'text' => $row->company]]);
@@ -211,7 +211,7 @@ class Billers extends MY_Controller
 
     public function getBillers()
     {
-        $this->sma->checkPermissions('index');
+        $this->sma->checkPermissions("index", false, "suppliers");
 
         $this->load->library('datatables');
         $this->datatables
@@ -245,7 +245,7 @@ class Billers extends MY_Controller
 
     public function index($action = null)
     {
-        $this->sma->checkPermissions();
+        $this->sma->checkPermissions("index", false, "suppliers");
 
         $this->data['error']  = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $this->data['action'] = $action;
@@ -256,7 +256,7 @@ class Billers extends MY_Controller
 
     public function suggestions($term = null, $limit = null)
     {
-        $this->sma->checkPermissions('index');
+        $this->sma->checkPermissions("index", true, "suppliers");
 
         if ($this->input->get('term')) {
             $term = $this->input->get('term', true);

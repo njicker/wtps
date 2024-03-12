@@ -39,7 +39,7 @@ class Sma
             $action = $this->v;
         }
         //$gp = $this->site->checkPermissions();
-        // var_dump($this->GP, $action);exit;
+        // var_dump($module . '-' . $action);exit;
         if ($this->GP[$module . '-' . $action] == 1) {
             return true;
         }

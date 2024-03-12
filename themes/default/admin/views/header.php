@@ -1245,8 +1245,8 @@
                                             <span class="text"> Daftar Tagihan</span>
                                         </a>
                                     </li>
-                                </ul>
                                 <?php } ?>
+                                </ul>
                             </li>
                             <?php
                             } ?>
@@ -1340,7 +1340,7 @@
                             <li class="mm_auth mm_customers mm_suppliers mm_billers">
                                 <a class="dropmenu" href="#">
                                     <i class="fa fa-users"></i>
-                                    <span class="text"> <?= lang('people'); ?> </span>
+                                    <span class="text"> Master Data</span>
                                     <span class="chevron closed"></span>
                                 </a>
                                 <ul>
@@ -1355,11 +1355,11 @@
                                 }
                                 if ($GP['customers-add']) {
                                     ?>
-                                    <li id="customers_index">
+                                    <!-- <li id="customers_index">
                                         <a class="submenu" href="<?= admin_url('customers/add'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_customer'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
                                 }
                                 if ($GP['suppliers-index']) {
@@ -1369,15 +1369,20 @@
                                             <i class="fa fa-users"></i><span class="text"> <?= lang('list_suppliers'); ?></span>
                                         </a>
                                     </li>
+                                    <li id="billers_index">
+                                        <a class="submenu" href="<?= admin_url('billers'); ?>">
+                                            <i class="fa fa-users"></i><span class="text"> Bill To</span>
+                                        </a>
+                                    </li>
                                     <?php
                                 }
                                 if ($GP['suppliers-add']) {
                                     ?>
-                                    <li id="suppliers_index">
+                                    <!-- <li id="suppliers_index">
                                         <a class="submenu" href="<?= admin_url('suppliers/add'); ?>" data-toggle="modal" data-target="#myModal">
                                             <i class="fa fa-plus-circle"></i><span class="text"> <?= lang('add_supplier'); ?></span>
                                         </a>
-                                    </li>
+                                    </li> -->
                                     <?php
                                 } ?>
                                 </ul>
