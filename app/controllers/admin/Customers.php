@@ -180,7 +180,7 @@ class Customers extends MY_Controller
         }
         $company = $this->companies_model->getCompanyByID($company_id);
 
-        $this->form_validation->set_rules('email', lang('email_address'), 'is_unique[users.email]');
+        // $this->form_validation->set_rules('email', lang('email_address'), 'is_unique[users.email]');
         $this->form_validation->set_rules('password', lang('password'), 'required|min_length[8]|max_length[20]|matches[password_confirm]');
         $this->form_validation->set_rules('password_confirm', lang('confirm_password'), 'required');
 
