@@ -81,7 +81,7 @@ if (!empty($variants)) {
 
                     <div class="form-group" style="display:none;">
                         <b>Quantity</b>
-                        <?= form_input('quantity', (isset($_POST['quantity']) ? $_POST['quantity'] : ($product ? $product->quantity : '0')), 'class="form-control" id="quantity"  required="required"') ?>
+                        <?= form_input('quantity', (isset($_POST['quantity']) ? $_POST['quantity'] : ($product ? $product->quantity : '0')), 'class="form-control" id="quantity"') ?>
                         <span class="help-block"></span>
                     </div>
 
