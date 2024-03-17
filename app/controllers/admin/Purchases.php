@@ -507,7 +507,7 @@ class Purchases extends MY_Controller
         $isErr = false;
         $msg = "";
         $pur                 = $this->purchases_model->getPurchaseByID($id);
-        if($pur->status != ""){
+        if($pur->status == "partial" || $pur->status != "received"){
             $msg = 'Tidak bisa hapus pembelian karena sudah terima barang, mohon lakukan retur pembelian';
             $isErr = true;
         }
