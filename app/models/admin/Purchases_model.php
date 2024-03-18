@@ -770,7 +770,7 @@ class Purchases_model extends CI_Model
         $type = 'PO';
         $opurchase = $this->getPurchaseByID($id);
         $oitems    = $this->getAllPurchaseItems($id);
-        $tax_rate  = $this->getTaxRateByID($opurchase->order_tax_id);
+        $tax_rate  = $this->site->getTaxRateByID($opurchase->order_tax_id);
         $receive_date = $data['receive_date'];
         unset($data['receive_date']);
         $supporting_reff_doc = $data['supporting_reff_doc'];
