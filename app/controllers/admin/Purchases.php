@@ -2246,6 +2246,7 @@ class Purchases extends MY_Controller
                 unset($param);
                 $param['reff_no'] = $itm->reff_no;
                 $param['supporting_reff_doc'] = $itm->supporting_reff_doc;
+                $param['flag_delete'] = "";
                 $items = $this->site->getItemsMovement($param);
                 // echo json_encode($items);exit;
                 $rtn = $this->purchases_model->deleteReceived($purchase->id, $items);
