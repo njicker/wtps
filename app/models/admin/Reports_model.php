@@ -744,7 +744,7 @@ class Reports_model extends CI_Model
             foreach (($q->result()) as $row) {
                 // var_dump($row);exit;
                 $row->product_full = $row->product_code." - ".$row->product_name;
-                $row->net_unit_cost = number_format($row->net_unit_cost, 0, ",", ".");
+                $row->net_unit_cost = number_format($row->net_unit_cost, 0, ".", ",");
                 $data[] = $row;
             }
             return $data;
