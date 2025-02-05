@@ -273,7 +273,7 @@
                                 <label>Divisi</label>
                                 <?php 
                                     $div['mie'] = 'Mie';
-                                    $div['soun'] = 'Soun';
+                                    $div['kerupuk'] = 'Kerupuk';
                                     echo form_dropdown('division', $div, ($purchase->division ?? ''), 'id="sldivision" required="required" class="form-control input-tip select" style="width:100%;"');
                                 ?>
                             </div>

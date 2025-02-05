@@ -33,7 +33,7 @@
                     <?php
                     // $dv['All'] = 'All';
                     $dv['mie'] = 'Mie';
-                    $dv['soun'] = 'Soun';
+                    $dv['kerupuk'] = 'Kerupuk';
                     echo form_dropdown('division', $dv, (isset($_POST['division']) ? $_POST['division'] : ''), 'id="division" class="form-control input-tip select" style="width:100%;" required="required"');
                     ?>
                 </div>
