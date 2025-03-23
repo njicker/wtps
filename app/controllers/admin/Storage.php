@@ -207,6 +207,43 @@ class Storage extends MY_Controller
         
         echo json_encode($decode);
     }
+
+    public function stock_card($id = null){
+        $this->sma->checkPermissions();
+
+        $this->data["title"] = "Stock Card";
+        $this->data['id'] = $id;
+
+        $this->data['products'] = $this->storage_model->getListProducts();
+        $this->data['units'] = $this->storage_model->getListUnitsByCode();
+        $this->data['unitsId'] = $this->storage_model->getListUnits();
+        $this->data['warehouses'] = $this->storage_model->getListWarehouses();
+
+        $bc                 = [['link' => base_url(), 'page' => lang('home')], ['link' => admin_url('storage'), 'page' => 'Gudang'], ['link' => '#', 'page' => $this->data['title']]];
+        $meta               = ['page_title' => $this->data['title'], 'bc' => $bc];
+
+        if($id != null){
+            $param = [
+                "product_id" => $id,
+                "flag_delete" => ""
+            ];
+            $stock = $this->storage_model->getStockCard($param);
+            $this->data['stock'] = $stock;
+
+            $this->page_construct('storage/stock_card_detail', $meta, $this->data);
+        }
+        else {
+            $param = array(
+                "quantity >" => "0"
+            );
+            $group = [
+                "warehouse_id",
+                "product_id"
+            ];
+            $this->data['header'] = $this->storage_model->getListWarehousesProductsGroupingSum($param, $group);
+            $this->page_construct('storage/stock_card', $meta, $this->data);
+        }
+    }
 }
 
 ?>

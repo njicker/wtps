@@ -65,10 +65,43 @@ class Storage_model extends CI_Model
         return $data;
     }
 
+    public function getListUnitsByCode($param = []){
+        $data = [];
+
+        $this->db->where($param);
+        $q = $this->db->get("units");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[$row->code] = $row;
+            }
+        }
+        return $data;
+    }
+
     public function getListWarehousesProductsGrouping($param = [], $group_by = []){
         $data = [];
 
         $this->db->where($param);
+        $this->db->group_by($group_by);
+        $q = $this->db->get("warehouses_products");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+        }
+        return $data;
+    }
+
+    public function getListWarehousesProductsGroupingSum($param = [], $group_by = []){
+        $data = [];
+
+        $this->db->select('SUM(quantity) as quantity,
+            product_id,
+            warehouse_id');
+        $this->db->where($param);
+        $this->db->order_by('warehouse_id', 'ASC');
         $this->db->group_by($group_by);
         $q = $this->db->get("warehouses_products");
 
@@ -136,6 +169,22 @@ class Storage_model extends CI_Model
 
         $this->db->where($param);
         $q = $this->db->get("damage_items");
+
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+        }
+        return $data;
+    }
+
+    public function getStockCard($param = []){
+        $data = [];
+
+        $this->db->where($param);
+        $this->db->order_by('stock_date', 'ASC');
+        $this->db->order_by('id', 'ASC');
+        $q = $this->db->get("item_movement");
 
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {

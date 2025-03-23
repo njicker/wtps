@@ -62,12 +62,12 @@ class Accounting extends MY_Controller
         $this->load->library('datatables');
         if ($status) {
             $this->datatables
-                ->select("doc_date, no_journal, type_reff, no_reff, division, total_debit, total_credit, doc_status, id")
+                ->select("doc_date, no_journal, type_reff, note, division, total_debit, total_credit, doc_status, id")
                 ->from('journal')
                 ->where('doc_status', $doc_status);
         } else {
             $this->datatables
-                ->select("doc_date, no_journal, type_reff, no_reff, division, total_debit, total_credit, doc_status, id")
+                ->select("doc_date, no_journal, type_reff, note, division, total_debit, total_credit, doc_status, id")
                 ->from('journal');
         }
         $this->datatables->edit_column('id', $action, 'id');

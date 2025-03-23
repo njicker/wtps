@@ -570,6 +570,13 @@
                                         </a>
                                     </li>
 
+                                    <li id="storage_stock_card">
+                                        <a class="submenu" href="<?= admin_url('storage/stock_card'); ?>">
+                                            <i class="fa fa-building-o"></i>
+                                            <span class="text"> Kartu Stock</span>
+                                        </a>
+                                    </li>
+
                                     <!-- <li id="storage_damage">
                                         <a class="submenu" href="<?= admin_url('storage/damage'); ?>">
                                             <i class="fa fa-trash"></i>

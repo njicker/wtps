@@ -29,7 +29,7 @@
             {column_number: 0, filter_default_label: "[<?=lang('date');?> (yyyy-mm-dd)]", filter_type: "text", data: []},
             {column_number: 1, filter_default_label: "[<?=lang('no_journal');?>]", filter_type: "text", data: []},
             {column_number: 2, filter_default_label: "[<?=lang('type_reff');?>]", filter_type: "text", data: []},
-            {column_number: 3, filter_default_label: "[<?=lang('no_reff');?>]", filter_type: "text", data: []},
+            {column_number: 3, filter_default_label: "[<?=lang('note');?>]", filter_type: "text", data: []},
             {column_number: 4, filter_default_label: "[<?=lang('division');?>]", filter_type: "text", data: []},
             {column_number: 7, filter_default_label: "[<?=lang('doc_status');?>]", filter_type: "text", data: []},
         ], "footer");
@@ -75,7 +75,7 @@
                             <th><?= lang('doc_date'); ?></th>
                             <th><?= lang('no_journal'); ?></th>
                             <th><?= lang('type_reff'); ?></th>
-                            <th><?= lang('no_reff'); ?></th>
+                            <th><?= lang('note'); ?></th>
                             <th><?= lang('division'); ?></th>
                             <th><?= lang('total_debit'); ?></th>
                             <th><?= lang('total_credit'); ?></th>
